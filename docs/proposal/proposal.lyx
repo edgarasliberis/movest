@@ -38,10 +38,12 @@ block/.style={
 line/.style={->,>=latex'}
 }
 %\usepackage{flafter}
+
+\usepackage{gillius2}
 \usepackage{fancyhdr}
 
 \fancyhf[HLE,HRO]{\nouppercase{\leftmark}}
-\fancyhf[HC]{DRAFT}
+\fancyhf[HC]{\textsc{Draft Project Proposal}}
 \fancyhf[HLO,HRE]{\thepage}
 \fancyhf[FC]{}
 \end_preamble
@@ -58,7 +60,7 @@ figs-within-sections
 \inputencoding auto
 \fontencoding global
 \font_roman TeX Gyre Pagella
-\font_sans default
+\font_sans Gillius ADF No2
 \font_typewriter default
 \font_math auto
 \font_default_family default
@@ -207,16 +209,71 @@ Overseers
 Introduction and Description of the Work
 \end_layout
 
+\begin_layout Standard
+Steganography investigates methods of concealing information within seemingly
+ innocent carrier data (covers), which are wildly used for covert communication.
+ 
+\end_layout
+
+\begin_layout Standard
+What is steganography
+\end_layout
+
+\begin_layout Standard
+Use of digital media to embed data - why so
+\end_layout
+
+\begin_layout Standard
+Use of video files, why (popular, highly available, insuspicious), recent
+ work on motion vectors.
+\end_layout
+
+\begin_layout Standard
+What is a motion vector, where embedding can be done.
+\end_layout
+
+\begin_layout Standard
+Investigate LSB embedding tactics, naively applied to motion vectors, encryption
+ requirement
+\end_layout
+
+\begin_layout Standard
+Investigate research advances for embedding specifically 
+\end_layout
+
+\begin_layout Standard
+Methods of detecting naive LSB
+\end_layout
+
+\begin_layout Standard
+Methods of detecting motion vector embedding
+\end_layout
+
 \begin_layout Section*
 Resources Required
+\end_layout
+
+\begin_layout Standard
+C++, Matlab or Python for tools.
+ Own laptop for convenience.
 \end_layout
 
 \begin_layout Section*
 Starting Point
 \end_layout
 
+\begin_layout Standard
+Security course, introductory texts to steganography and relevant papers
+\end_layout
+
 \begin_layout Section*
 Substance and Structure of the Project
+\end_layout
+
+\begin_layout Standard
+Parse or transcode videos to get motion vectors, port over naive LSB embedding
+ techniques, provide tools and analysis that breaks them, implement research
+ embedding schemes, provide tools and analysis that breaks those too.
 \end_layout
 
 \begin_layout Section*
@@ -227,8 +284,64 @@ Success Criteria
 Extensions
 \end_layout
 
+\begin_layout Standard
+SVM-based methods, training set.
+ Survive social network transcoding / compression.
+\end_layout
+
 \begin_layout Section*
-Timetable
+Timetable and Milestones
+\end_layout
+
+\begin_layout Subsection*
+Weeks 1 & 2 (Oct 22 -- Nov 5)
+\end_layout
+
+\begin_layout Standard
+Research of the H.264 codec and implementing access and modification of MVs
+ in a H.264 video file.
+\end_layout
+
+\begin_layout Subsection*
+Week 3 (Nov 5 -- Nov 12)
+\end_layout
+
+\begin_layout Standard
+Background reading on steganography, including relevant book chapters and
+ academic papers.
+\end_layout
+
+\begin_layout Subsection*
+Weeks 4 -- 6 (Nov 12 -- Dec 3) 
+\end_layout
+
+\begin_layout Standard
+Investigating popular (image steganography) LSB embedding methods and their
+ applicability to MV steganography; implementation thereof.
+ Creation of tools that allow to carry out statistical attacks on these
+ methods and their evaluation.
+\end_layout
+
+\begin_layout Subsection*
+Weeks 6 -- 8 (Dec 3 -- Dec 31)
+\end_layout
+
+\begin_layout Standard
+Research and implementation of both Zhang's et.
+ al.
+ and Fang's et.
+ al.
+ methods of video watermarking.
+ Christmas vacation is also planned within this period.
+\end_layout
+
+\begin_layout Subsection*
+Weeks 8 -- 10 (Dec 31 -- Jan 14)
+\end_layout
+
+\begin_layout Standard
+Research and implementation of advanced steganalysis methods.
+ Evaluation of created tools against all implemented embedding algorithms.
 \end_layout
 
 \end_body
