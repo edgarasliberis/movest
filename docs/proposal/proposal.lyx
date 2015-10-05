@@ -210,21 +210,35 @@ Introduction and Description of the Work
 \end_layout
 
 \begin_layout Standard
-Steganography investigates methods of concealing information within seemingly
- innocent carrier data (covers), which are wildly used for covert communication.
+Steganography is a branch of Computer Science that investigates methods
+ of concealing information within seemingly innocent carrier data (covers).
+ Advances in this field are wildly used for enabling communications, where
+ clear evidence of presence of the (encrypted) messages would attract unwanted
+ attention, and similarly for detecting such covert communications taking
+ place.
+\end_layout
+
+\begin_layout Standard
+Steganographic methods operate on cover objects (covers) -- data into which
+ a secret message will be embedded.
+ We prefer covers that are nowadays ubiquitous and hence will not raise
+ any suspicion, which makes digital media (photographs, videos, music files)
+ a perfect candidate for the purposes of concealing information within them.
+ Various methods exploit many redudancies of the formats the covers are
+ presented in, which gave rise to three popular subbranches -- image, audio
+ and video steganography.
+ This project explores video steganography.
+\end_layout
+
+\begin_layout Standard
+Videos typically exhibit temporal correlation -- each frame a video file
+ is similar to a previous one, with only H.264 is currently the most-used
+ video codec in the world, which makes it worthy exploring.
  
 \end_layout
 
 \begin_layout Standard
-What is steganography
-\end_layout
-
-\begin_layout Standard
-Use of digital media to embed data - why so
-\end_layout
-
-\begin_layout Standard
-Use of video files, why (popular, highly available, insuspicious), recent
+Use of video files, why (popular, highly available, unsuspicious), recent
  work on motion vectors.
 \end_layout
 
@@ -323,7 +337,7 @@ Investigating popular (image steganography) LSB embedding methods and their
 \end_layout
 
 \begin_layout Subsection*
-Weeks 6 -- 8 (Dec 3 -- Dec 31)
+Weeks 7 -- 8 (Dec 3 -- Dec 31)
 \end_layout
 
 \begin_layout Standard
@@ -332,16 +346,58 @@ Research and implementation of both Zhang's et.
  and Fang's et.
  al.
  methods of video watermarking.
- Christmas vacation is also planned within this period.
+ Christmas vacation and catch-up (if required) are also planned within this
+ period.
 \end_layout
 
 \begin_layout Subsection*
-Weeks 8 -- 10 (Dec 31 -- Jan 14)
+Weeks 9 -- 11 (Dec 31 -- Jan 21)
 \end_layout
 
 \begin_layout Standard
-Research and implementation of advanced steganalysis methods.
+Research and implementation of advanced steganalysis methods, exploiting
+ the fact that embedding a message changes certain statistical properties
+ of the video.
  Evaluation of created tools against all implemented embedding algorithms.
+\end_layout
+
+\begin_layout Subsection*
+Week 12 (Jan 21 -- Jan 28)
+\end_layout
+
+\begin_layout Standard
+Finishing and polishing the project, catch-up (if required), writing progress
+ report and preparing for the preccsentation.
+\end_layout
+
+\begin_layout Subsection*
+Weeks 13 -- 15 (Jan 28 -- Feb 18)
+\end_layout
+
+\begin_layout Standard
+Evaluation of the project and implementation of extension tasks, incl.
+ experiments on human participants.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Weeks 16 -- 21 (Feb 18 -- Mar 31) 
+\end_layout
+
+\begin_layout Standard
+Dissertation write-up.
+ Possibly more extensive evaluation and extension implementation, if time
+ permits.
+\end_layout
+
+\begin_layout Subsection*
+Weeks 20 -- 23 (Mar 31 -- Apr 21)
+\end_layout
+
+\begin_layout Standard
+Revision of the dissertation, reflecting on comments from supervisor and
+ other advisors.
+ 
 \end_layout
 
 \end_body
