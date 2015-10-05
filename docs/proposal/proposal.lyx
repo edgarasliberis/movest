@@ -223,32 +223,60 @@ Steganographic methods operate on cover objects (covers) -- data into which
  a secret message will be embedded.
  We prefer covers that are nowadays ubiquitous and hence will not raise
  any suspicion, which makes digital media (photographs, videos, music files)
- a perfect candidate for the purposes of concealing information within them.
- Various methods exploit many redudancies of the formats the covers are
- presented in, which gave rise to three popular subbranches -- image, audio
- and video steganography.
+ a perfect candidate for this role.
+ Various methods exploit many redundancies of the formats the covers are
+ presented in, which gave rise to three popular subbranches of this field
+ -- image, audio and video steganography.
  This project explores video steganography.
 \end_layout
 
 \begin_layout Standard
-Videos typically exhibit temporal correlation -- each frame a video file
- is similar to a previous one, with only H.264 is currently the most-used
- video codec in the world, which makes it worthy exploring.
+Videos typically exhibit temporal correlation.
+ Each two consecutive video frames are similar and the only difference between
+ them is the movement of pixels in a certain region of the frame.
+ Modern video codecs use this property to achieve a high level of video
+ compression, as a video frame could be recorded more compactly by recording
+ movement of certain blocks of pixels compared to the previous frame, as
+ opposed to recording the whole frame independently.
+ Frames encoded in this compact manner are called P- or B- frames, and the
+ data representing such frame consists of a list of blocks of pixels, that
+ have moved since the previous frame (macroblocks) and the direction of
+ the movement (motion vector).
+ Computing motion vectors is a tradeoff between accuracy and computation
+ time, so codecs typically don't look for an optimal MV, instead settling
+ for an approximation.
+ MVs are encoded losslessly, and, because of the accuracy tradeoff, minor
+ changes in MVs go unnoticed.
+ H.264, currently the most-used video codec in the world, uses a concept
+ of MVs as well.
+ Aforementioned points make MVs a promising candidate for data embedding
+ and therefore a focus of this project.
  
 \end_layout
 
 \begin_layout Standard
-Use of video files, why (popular, highly available, unsuspicious), recent
- work on motion vectors.
+One common recommendation, that applies to all subbranches of steganography,
+ is to embed data into least-significant bits of encoded values, be it pixels
+ in the image or values of the motion vector, as this would introduce less
+ distortion to the cover object.
+ Tactics of embedding range from na
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+"
 \end_layout
 
-\begin_layout Standard
-What is a motion vector, where embedding can be done.
-\end_layout
+\end_inset
 
-\begin_layout Standard
-Investigate LSB embedding tactics, naively applied to motion vectors, encryption
- requirement
+ively changing each LSB to match the corresponding one from a message to
+ cleverly selecting bits to change, for example, either using PRNG or so
+ that regions with low variance are avoided; more clever tactics make embedding
+ harder to discover.
+ 
 \end_layout
 
 \begin_layout Standard
