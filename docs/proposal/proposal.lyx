@@ -461,17 +461,17 @@ The second objective will require substantial further research of steganalysis
 
 \begin_layout Standard
 The dissertation shall consider the embedding techniques, evaluating their
- applicability, detectability, embedding capacity and effectiveness by compariso
-n and using developed steganalysis methods.
+ relative applicability, detectability, embedding capacity, speed, effectiveness
+, and resistance to attacks by developed steganalysis methods.
  Detectability will also by evaluated by conducting a study with human participa
 nts, asking them to distinguish between a modified and an unmodified video.
- Effectiveness of steganalysis methods will be evaluated by comparison and
- success of attacking implemented methods on a dataset of videos
+ Effectiveness of steganalysis methods will be evaluated by comparing their
+ success in attacking implemented methods on a dataset of videos
 \begin_inset Foot
 status open
 
 \begin_layout Plain Layout
-Yet to be obtained, but that should not pose any problems
+Yet to be obtained, but that should not pose any problems.
 \end_layout
 
 \end_inset
@@ -480,8 +480,164 @@ Yet to be obtained, but that should not pose any problems
  
 \end_layout
 
+\begin_layout Standard
+The steganography application will be manually and automatically tested
+ to ensure it works as reliably as expected.
+ Individual modules will be tested using unit tests and application as a
+ whole using integration tests.
+ Development will follow the iterative (spiral) model, continuously adding
+ embedding techniques and steganalysis methods, and 
+\family typewriter
+gitflow
+\family default
+ workflow.
+\end_layout
+
 \begin_layout Section*
 Success Criteria
+\end_layout
+
+\begin_layout Standard
+Project shall be considered successful if steganography application, steganalysi
+s tools and/or accompanying disseration (as appropriate) satisfy the following
+ requirements (prioritised using the 
+\shape italic
+MoSCoW
+\shape default
+ rule):
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(M)
+\shape default
+ Ability to modify motion vectors of a H.264 video file.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(M) 
+\shape default
+Multiple LSB and non-LSB MV embedding techniques.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(M)
+\shape default
+ Multiple steganalysis methods.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(S)
+\shape default
+ Encryption of the secret message prior to embedding.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(M)
+\shape default
+ Explanation and justification of changes to or inapplicability of some
+ techniques, if required.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(S)
+\shape default
+ Compatibility with existing scientific computation packages (
+\shape italic
+Matlab
+\shape default
+ or Python-based packages)
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(M)
+\shape default
+ Evaluation of the following properties of techniques:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\shape italic
+(M)
+\shape default
+ Applicability to MV steganography.
+\end_layout
+
+\begin_layout Itemize
+(M) Resistance to attacks.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(C)
+\shape default
+ Embedding capacity.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(C)
+\shape default
+ Speed of processing videos.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(S)
+\shape default
+ Detectability by a human.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\shape italic
+(M)
+\shape default
+ Evaluation of the following properties of methods:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\shape italic
+(M)
+\shape default
+ Effectiveness against implemented embedding techniques.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+(S) 
+\shape default
+Usefulness (verbosity, amount of information provided) to the steganalyst.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\shape italic
+(M)
+\shape default
+ Introduction of the underlying theoretical background.
 \end_layout
 
 \begin_layout Section*
