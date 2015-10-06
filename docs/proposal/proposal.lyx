@@ -227,96 +227,98 @@ Introduction and Description of the Work
 \end_layout
 
 \begin_layout Standard
-Steganography is a branch of Computer Science that investigates methods
- of concealing information within seemingly innocent carrier data (covers).
- Advances in this field are wildly used for enabling communications, where
- clear evidence of presence of the (encrypted) messages would attract unwanted
- attention, and similarly for detecting such covert communications taking
- place.
+Steganography refers to a set of techniques for concealing information within
+ seemingly innocent carrier data (covers), and for detecting such hidden
+ information.
+ This is widely used for enabling communication where the detection of the
+ existence of the message would attract unwanted attention.
 \end_layout
 
 \begin_layout Standard
-Steganographic methods operate on cover objects (covers) -- data into which
- a secret message will be embedded.
- We prefer covers that are nowadays ubiquitous and hence will not raise
- any suspicion, which makes digital media (photographs, videos, music files)
- a perfect candidate for this role.
- Various methods exploit many redundancies of the formats the covers are
- presented in, which gave rise to three popular subbranches of this field
- -- image, audio and video steganography.
- This project explores video steganography.
+Files with commonly-found data formats are less likely to raise suspicion
+ as covers, and redundancy in the structure of the data provides opportunities
+ to hide data.
+ Digital media tends to have both of these properties, contributing to their
+ widespread use as covers in earlier work.
+ This project will be investigating the use of motion vectors in video steganogr
+aphy.
 \end_layout
 
 \begin_layout Standard
-Videos typically exhibit temporal correlation.
- Each two consecutive video frames are similar and the only difference between
- them is the movement of pixels in a certain region of the frame.
- Modern video codecs use this property to achieve a high level of video
- compression -- video frame could be recorded more compactly by recording
- movement of certain blocks of pixels compared to the previous frame, as
- opposed to recording the whole frame independently.
- Frames encoded in this compact manner are called P- or B- frames, and the
- data representing such frame consists of a list of blocks of pixels, that
- have moved since the previous frame (macroblocks) and the direction of
- the movement (motion vector).
- Computing motion vectors is a tradeoff between accuracy and computation
- time, so codecs typically don't look for an optimal MV, but settle for
- an approximation instead.
- MVs are encoded losslessly, and, because of the accuracy tradeoff, minor
- changes in them go unnoticed.
- H.264, currently the most-used video codec in the world, uses a concept
- of MVs as well.
- Aforementioned points make MVs a promising candidate for data embedding
- and therefore a focus of this project.
- 
-\end_layout
+Successive frames in a video often only differ by the movement of pixels
+ in some regions of the frame.
+ This 
+\begin_inset Quotes eld
+\end_inset
 
-\begin_layout Standard
-Main deliverable of this project would be a steganography tool that would
- allow end user to embed custom data into H.264-encoded videos, using clever
- embedding tactics.
- One common recommendation, that applies to all subbranches of steganography,
- is to modify the least-significant bits of encoded values to encode the
- message, be it LSBs of pixels in the image or values of the motion vector,
- as this would introduce less distortion to the cover object.
- Tactics of embedding range from na
-\begin_inset ERT
+temporal correlation
+\begin_inset Quotes erd
+\end_inset
+
+ is exploited by modern video codecs, notably H.264, to improve compression
+ ratios by storing only the motion data since the last frame, where doing
+ so is cheaper than storing the whole frame
+\begin_inset Foot
 status open
 
 \begin_layout Plain Layout
-
-
-\backslash
-"
+Complete frames are sometimes encoded for other reasons, blah de blah, might
+ want to talk about that briefly here to try and convince them you know
+ what you're talking about.
 \end_layout
 
 \end_inset
 
-ively changing each LSB to match the message to more clever ones, for example,
- selecting LSBs using PRNG or avoiding regions with low variance.
- These clever methods significantly complicate detecting presence of a secret
- message.
- Methods that specifically target motion vectors have been proposed by Zhang's
+.
+ Frames stored in this way are called P- or B- frames and are represented
+ by a list of blocks of pixels that have moved since the previous frame
+ (
+\shape italic
+macroblocks
+\shape default
+), and the direction of the movement (
+\shape italic
+motion vector
+\shape default
+).
+ Computing motion vectors is a tradeoff between accuracy and computation
+ time, so codecs typically settle for an approximation instead of an optimal
+ MV.
+ While MVs are encoded losslessly, this accuracy tradeoff allows minor changes
+ to them go unnoticed: a property essential to the steganographic techniques
+ underlying this project.
+\end_layout
+
+\begin_layout Standard
+The main deliverable of this project will be a steganography tool for embedding
+ arbitrary data into H.264-encoded videos, using a variety of motion-vector-relat
+ed techniques.
+ A common trick for reducing distortion of the cover data is to modify the
+ least-significant bits of encoded values, be they LSBs of pixels in an
+ image or values of a motion vector.
+ As well as naively embedding the message in LSBs, there are some more intellige
+nt approaches for making messages harder to detect, such as selecting target
+ LSBs using a PRNG or avoiding regions with low variance.
+ Methods that specifically target motion vectors have been proposed by Zhang
  et.
  al.
- and Fang's et.
+ and Fang et.
  al., which make use of length, phase and inaccuracies of a motion vector.
  
 \end_layout
 
 \begin_layout Standard
-Main goal of steganography is to prevent embedding from being detected.
- A branch of steganography that develops ways of attacking embedding schemes
+The branch of steganography concerning the detection of embedded messages
  is called steganalysis.
  Another deliverable of this project is to provide a toolkit to perform
- video steganalysis, that would neatly integrate with existing scientific
- computing packages (Matlab, Python-based libraries).
- One popular approach in steganalysis is to look at statistical differences
+ video steganalysis that neatly integrates with existing scientific computing
+ packages (Matlab, Python-based libraries).
+ A popular approach in steganalysis is to look at statistical differences
  of modified and unmodified values, as selectively modifying certain values
  may make them stand out from the rest.
- General approaches use histograms, Chi-Squared attacks and ones, specifically
- targeting motion vectors (Deng et al.), exploit correlations seen in neighbourho
-ods of MVs and other statistical metrics.
+ General approaches use histograms, Chi-Squared attacks, and motion-vector-speci
+fic attacks (Deng et al.), exploit correlations seen in neighbourhoods of
+ MVs and other statistical metrics.
  
 \end_layout
 
@@ -325,16 +327,26 @@ I propose a project, consisting of two main deliverables:
 \end_layout
 
 \begin_layout Itemize
-Development of an application, that allows end user to encrypt and embed
- their secret message into H.264 video files, using embedding algorithms
- introduced above.
+Development of an application that allows end user to encrypt
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Since properly encrypted data is indistinguishable from random noise encrypting
+ the secret message thwarts many statistical attacks which would otherwise
+ detect patterns in the data.
+\end_layout
+
+\end_inset
+
+ and embed their secret message into H.264 video files, using embedding algorithm
+s introduced above.
  
 \end_layout
 
 \begin_layout Itemize
-Development of a compherensive steganalysis suite, that implements some
- of the recent research advances and integrates into scientific computation
- packages.
+Development of a steganalysis suite that implements some of the recent research
+ advances and integrates into scientific computation packages.
 \end_layout
 
 \begin_layout Section*
@@ -343,18 +355,17 @@ Resources Required
 
 \begin_layout Standard
 I will be using C++ as a main language for developing the steganographic
- tool, primarily due to my experience with it, speed and ease of interfacing
- with codecs, which will be required for manipulating motion vectors.
- Steganalysis tools will be developed either using Matlab or Python, as
- both have extensive support for scientific computation and are popular
- within the community.
+ tool, primarily due to my experience with it and the speed and ease of
+ interfacing with codecs: necessary for manipulating motion vectors.
+ Steganalysis tools will be developed using Matlab or Python, as both have
+ extensive support for scientific computation and are popular within the
+ community.
  
 \end_layout
 
 \begin_layout Standard
 I will be using my own computer, running Ubuntu 15.04, for convenience.
- if in an unfortunate case it becomes unusable, the project can be continued
- on MCS machines.
+ The project can be continued on MCS machines should it become unusable.
  I accept full responsibility for this machine and I have made contingency
  plans to protect myself against hardware and/or software failure.
 \end_layout
@@ -365,16 +376,11 @@ No other special resources are required.
 \family typewriter
 Dropbox
 \family default
-.
- Additionally all materials will be hosted on 
+, and the code will be hosted on 
 \family typewriter
 GitHub
 \family default
- and 
-\family typewriter
-git
-\family default
- will be used for version control.
+ (with git version control).
 \end_layout
 
 \begin_layout Section*
@@ -391,6 +397,23 @@ Security I
  I have familiarised myself with general concepts of steganography and LSB
  embedding though some introductory texts and relevant papers, and briefly
  looked at H.264 codec format.
+ 
+\end_layout
+
+\begin_layout Standard
+The project may also benefit from material in Part II courses 
+\shape italic
+Information Theory
+\shape default
+, 
+\shape italic
+Digital Signal Processing
+\shape default
+ and 
+\shape italic
+Security II
+\shape default
+.
 \end_layout
 
 \begin_layout Section*
@@ -398,8 +421,8 @@ Substance and Structure of the Project
 \end_layout
 
 \begin_layout Standard
-The aim of this project is to (a) develop a steganography tool, as described
- earlier, and (b) develop a steganalysis suite.
+The aim of this project is to (a) develop a steganography tool, and (b)
+ develop a steganalysis suite, as described in the first section.
  
 \end_layout
 
@@ -415,32 +438,46 @@ Both aims will require further research into H.264 codec and ability to modify
 ffmpeg
 \family default
 , to achieve this.
- This also suggests to use C++ for development, as codecs are typically
- written using it.
+ As codecs are typically written in C++, it is a natural choice for this
+ task.
 \end_layout
 
 \begin_layout Standard
-Modifying MV values would require further research into embedding algorithms,
- as well as implementation and adaptation of these algorithms for use in
+Modifying MV requires further research into steganographic techniques, as
+ well as the implementation and adaptation of these algorithms for use in
  a codec.
- Application should also be able to take user data and perform encryption
+ The application should also be able to take user data and perform encryption
  prior to embedding, which would require using a relevant cryptography library.
  
 \end_layout
 
 \begin_layout Standard
-Second aim would also require further research into steganalysis methods
- described in recent academic papers.
+The second objective will require substantial further research of steganalysis
+ methods described in recent academic papers, as well as an investigation
+ of how to use and integrate scientific packages for implementing these
+ methods.
+ 
 \end_layout
 
 \begin_layout Standard
+The dissertation shall consider the embedding techniques, evaluating their
+ applicability, detectability, embedding capacity and effectiveness by compariso
+n and using developed steganalysis methods.
+ Detectability will also by evaluated by conducting a study with human participa
+nts, asking them to distinguish between a modified and an unmodified video.
+ Effectiveness of steganalysis methods will be evaluated by comparison and
+ success of attacking implemented methods on a dataset of videos
+\begin_inset Foot
+status open
 
+\begin_layout Plain Layout
+Yet to be obtained, but that should not pose any problems
 \end_layout
 
-\begin_layout Standard
-Parse or transcode videos to get motion vectors, port over naive LSB embedding
- techniques, provide tools and analysis that breaks them, implement research
- embedding schemes, provide tools and analysis that breaks those too.
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Section*
@@ -453,20 +490,19 @@ Extensions
 
 \begin_layout Itemize
 Deng et al.
- propose to use various statistical differences between videos with and
- without embedded messages as features for a classifier.
- Using this, and other features proposed in similar works, goals of the
- project can be stretched to accommodate a classifier trained using machine
- learning.
- 
+ propose using statistical differences between videos with and without embedded
+ messages as features for a classifier.
+ Using this and other features proposed in similar works, a classifier trained
+ using machine learning could be produced.
 \end_layout
 
 \begin_layout Itemize
-Currently social networks, like YouTube, Facebook and Tumblr transcode (convert
- between formats) user-uploaded videos before presenting them to other users.
- This results in MVs being recomputed and overwritten, and hence the secret
- message is lost.
- This extension would explore more aggressive embedding, possibly using
+Currently, social networks such as YouTube, Facebook and Tumblr transcode
+ (convert between formats) user-uploaded videos before presenting them to
+ other users.
+ This results in MVs being recomputed and overwritten, destroying the hidden
+ message.
+ More aggressive embedding techniques could be developed, possibly using
  some control data and error-correction codes, to withstand such transcoding.
  
 \end_layout
@@ -479,93 +515,109 @@ Timetable and Milestones
 Weeks 1 & 2 (Oct 22 -- Nov 5)
 \end_layout
 
-\begin_layout Standard
-Research of the H.264 codec and implementing access and modification of MVs
- in a H.264 video file.
+\begin_layout Itemize
+Research and implementation of access and modification of MVs in a H.264
+ video file.
 \end_layout
 
 \begin_layout Subsection*
 Week 3 (Nov 5 -- Nov 12)
 \end_layout
 
-\begin_layout Standard
-Background reading on steganography, including relevant book chapters and
- academic papers.
+\begin_layout Itemize
+Background reading on steganography.
 \end_layout
 
 \begin_layout Subsection*
-Weeks 4 -- 6 (Nov 12 -- Dec 3) 
+Weeks 4 -- 6 (Nov 12 -- Dec 3)
 \end_layout
 
-\begin_layout Standard
-Investigating popular (image steganography) LSB embedding methods and their
- applicability to MV steganography; implementation thereof.
- Creation of tools that allow to carry out statistical attacks on these
- methods and their evaluation.
+\begin_layout Itemize
+Investigation and implementation of popular image steganography techniques,
+ including LSB embedding, and evaluation of their relevance to MV steganography.
+\end_layout
+
+\begin_layout Itemize
+Creation of tools that allow to carry out statistical attacks on these methods
+ and their evaluation.
 \end_layout
 
 \begin_layout Subsection*
 Weeks 7 -- 8 (Dec 3 -- Dec 31)
 \end_layout
 
-\begin_layout Standard
-Research and implementation of both Zhang's et.
+\begin_layout Itemize
+Research and implementation of the methods of video watermarking proposed
+ by Zhang et.
  al.
- and Fang's et.
+ and Fang et.
  al.
- methods of video watermarking.
- Christmas vacation and catch-up (if required) are also planned within this
- period.
+ 
+\end_layout
+
+\begin_layout Itemize
+Christmas vacation and catch-up (if required).
 \end_layout
 
 \begin_layout Subsection*
 Weeks 9 -- 11 (Dec 31 -- Jan 21)
 \end_layout
 
-\begin_layout Standard
-Research and implementation of advanced steganalysis methods, exploiting
- the fact that embedding a message changes certain statistical properties
- of the video.
- Evaluation of created tools against all implemented embedding algorithms.
+\begin_layout Itemize
+Research and implementation of statistical steganalysis methods.
+\end_layout
+
+\begin_layout Itemize
+Evaluation of created tools against all implemented embedding algorithms.
 \end_layout
 
 \begin_layout Subsection*
 Week 12 (Jan 21 -- Jan 28)
 \end_layout
 
-\begin_layout Standard
-Finishing and polishing the project, catch-up (if required), writing progress
- report and preparing for the presentation.
+\begin_layout Itemize
+Finishing any remaining implementation.
+\end_layout
+
+\begin_layout Itemize
+Writing progress report and preparing for the presentation.
 \end_layout
 
 \begin_layout Subsection*
 Weeks 13 -- 15 (Jan 28 -- Feb 18)
 \end_layout
 
-\begin_layout Standard
-Evaluation of the project and implementation of extension tasks, incl.
- experiments on human participants.
- 
+\begin_layout Itemize
+Evaluation of the indistinguishability of videos with hidden messages and
+ ordinary videos using human test subjects.
+\end_layout
+
+\begin_layout Itemize
+Remaining evaluation tasks.
+\end_layout
+
+\begin_layout Itemize
+Implement extension tasks, if time permits.
 \end_layout
 
 \begin_layout Subsection*
 Weeks 16 -- 21 (Feb 18 -- Mar 31) 
 \end_layout
 
-\begin_layout Standard
-Dissertation write-up.
- Possibly more extensive evaluation and extension implementation, if time
- permits.
+\begin_layout Itemize
+Commence writing dissertation
+\end_layout
+
+\begin_layout Itemize
+Ongoing evaluation tasks and exploration of extension goals.
 \end_layout
 
 \begin_layout Subsection*
 Weeks 20 -- 23 (Mar 31 -- Apr 21)
 \end_layout
 
-\begin_layout Standard
-Revision of the dissertation, reflecting on comments from supervisor and
- other advisors.
- 
+\begin_layout Itemize
+Get feedback on dissertation draft from supervisors, iterate upon it.
 \end_layout
 
 \end_body
