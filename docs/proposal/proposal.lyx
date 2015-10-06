@@ -10,13 +10,14 @@
 %\widowpenalty1000%
 
 \addtolength{\oddsidemargin}{6mm}       % adjust margins
-\addtolength{\evensidemargin}{-8mm}
+\addtolength{\evensidemargin}{-6mm}
 
 \usepackage{titlesec}
-\titleformat{\paragraph}
-{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
-\titlespacing*{\paragraph}
-{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\titlespacing\section{0pt}{5pt plus 4pt minus 2pt}{1.5pt plus 0.5pt minus 0.5pt}
+\titlespacing\subsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
+
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{0pt}
 
 \usepackage{enumitem}
 \setlist{nolistsep}
@@ -46,6 +47,19 @@ line/.style={->,>=latex'}
 \fancyhf[HC]{\textsc{Draft Project Proposal}}
 \fancyhf[HLO,HRE]{\thepage}
 \fancyhf[FC]{}
+
+\let\oldenumerate=\enumerate
+\def\enumerate{
+\oldenumerate
+\setlength{\itemsep}{3pt}
+\setlength{\parsep}{0pt}
+}
+\let\olditemize=\itemize
+\def\itemize{
+\olditemize
+\setlength{\itemsep}{3pt}
+\setlength{\parsep}{0pt}
+}
 \end_preamble
 \options usenames,dvipsnames,hypens,final
 \use_default_options true
@@ -187,7 +201,8 @@ of
 \begin_inset space ~
 \end_inset
 
-studies: Dr Bogdan Roman
+studies: Dr.
+ Bogdan Roman
 \end_layout
 
 \begin_layout Description
@@ -195,7 +210,9 @@ studies: Dr Bogdan Roman
 \series bold
 Overseers
 \series default
-: X, Y
+: Dr.
+ D J Greaves, Prof.
+ J Daugman
 \end_layout
 
 \begin_layout Standard
@@ -235,7 +252,7 @@ Videos typically exhibit temporal correlation.
  Each two consecutive video frames are similar and the only difference between
  them is the movement of pixels in a certain region of the frame.
  Modern video codecs use this property to achieve a high level of video
- compression, as a video frame could be recorded more compactly by recording
+ compression -- video frame could be recorded more compactly by recording
  movement of certain blocks of pixels compared to the previous frame, as
  opposed to recording the whole frame independently.
  Frames encoded in this compact manner are called P- or B- frames, and the
@@ -243,10 +260,10 @@ Videos typically exhibit temporal correlation.
  have moved since the previous frame (macroblocks) and the direction of
  the movement (motion vector).
  Computing motion vectors is a tradeoff between accuracy and computation
- time, so codecs typically don't look for an optimal MV, instead settling
- for an approximation.
+ time, so codecs typically don't look for an optimal MV, but settle for
+ an approximation instead.
  MVs are encoded losslessly, and, because of the accuracy tradeoff, minor
- changes in MVs go unnoticed.
+ changes in them go unnoticed.
  H.264, currently the most-used video codec in the world, uses a concept
  of MVs as well.
  Aforementioned points make MVs a promising candidate for data embedding
@@ -255,10 +272,13 @@ Videos typically exhibit temporal correlation.
 \end_layout
 
 \begin_layout Standard
-One common recommendation, that applies to all subbranches of steganography,
- is to embed data into least-significant bits of encoded values, be it pixels
- in the image or values of the motion vector, as this would introduce less
- distortion to the cover object.
+Main deliverable of this project would be a steganography tool that would
+ allow end user to embed custom data into videos, using clever embedding
+ tactics.
+ One common recommendation, that applies to all subbranches of steganography,
+ is to modify the least-significant bits of encoded values to encode the
+ message, be it LSBs of pixels in the image or values of the motion vector,
+ as this would introduce less distortion to the cover object.
  Tactics of embedding range from na
 \begin_inset ERT
 status open
@@ -272,23 +292,49 @@ status open
 
 \end_inset
 
-ively changing each LSB to match the corresponding one from a message to
- cleverly selecting bits to change, for example, either using PRNG or so
- that regions with low variance are avoided; more clever tactics make embedding
- harder to discover.
+ively changing each LSB to match the message to more clever ones, for example,
+ selecting LSBs using PRNG or avoiding regions with low variance.
+ These clever methods significantly complicate detecting presence of a secret
+ message.
+ Methods that specifically target motion vectors have been proposed by Zhang's
+ et.
+ al.
+ and Fang's et.
+ al., which make use of length, phase and inaccuracies of a motion vector.
  
 \end_layout
 
 \begin_layout Standard
-Investigate research advances for embedding specifically 
+Main goal of steganography is to prevent embedding from being detected.
+ A branch of steganography that develops ways of attacking embedding schemes
+ is called steganalysis.
+ Another deliverable of this project is to provide a toolkit to perform
+ video steganalysis, that would neatly integrate with existing scientific
+ computing packages (Matlab, Python-based libraries).
+ One popular approach in steganalysis is to look at statistical differences
+ of modified and unmodified values, as selectively modifying certain values
+ may make them stand out from the rest.
+ General approaches use histograms, Chi-Squared attacks and ones, specifically
+ targeting motion vectors (Deng et al.), exploit correlations seen in neighbourho
+ods of MVs and other statistical metrics.
+ 
 \end_layout
 
 \begin_layout Standard
-Methods of detecting naive LSB
+I propose a project, consisting of two main deliverables:
 \end_layout
 
-\begin_layout Standard
-Methods of detecting motion vector embedding
+\begin_layout Itemize
+Development of an application, that allows end user to encrypt and embed
+ their secret message into video files, using embedding algorithms introduced
+ above.
+ 
+\end_layout
+
+\begin_layout Itemize
+Development of a compherensive steganalysis suite, that implements some
+ of the recent research advances and integrates into scientific computation
+ packages.
 \end_layout
 
 \begin_layout Section*
@@ -296,8 +342,39 @@ Resources Required
 \end_layout
 
 \begin_layout Standard
-C++, Matlab or Python for tools.
- Own laptop for convenience.
+I will be using C++ as a main language for developing the steganographic
+ tool, primarily due to my experience with it, speed and ease of interfacing
+ with codecs, which will be required for manipulating motion vectors.
+ Steganalysis tools will be developed either using Matlab or Python, as
+ both have extensive support for scientific computation and are popular
+ within the community.
+ 
+\end_layout
+
+\begin_layout Standard
+I will be using my own computer, running Ubuntu 15.04, for convenience.
+ if in an unfortunate case it becomes unusable, the project can be continued
+ on MCS machines.
+ I accept full responsibility for this machine and I have made contingency
+ plans to protect myself against hardware and/or software failure.
+\end_layout
+
+\begin_layout Standard
+No other special resources are required.
+ Nightly backups will be made to a removable storage and 
+\family typewriter
+Dropbox
+\family default
+.
+ Additionally all materials will be hosted on 
+\family typewriter
+GitHub
+\family default
+ and 
+\family typewriter
+git
+\family default
+ will be used for version control.
 \end_layout
 
 \begin_layout Section*
@@ -305,7 +382,15 @@ Starting Point
 \end_layout
 
 \begin_layout Standard
-Security course, introductory texts to steganography and relevant papers
+This project uses some of the cryptography concepts introduced in Part IB
+ 
+\shape italic
+Security I
+\shape default
+ course.
+ I have familiarised myself with general concepts of steganography and LSB
+ embedding though some introductory texts and relevant papers, and briefly
+ looked at H.264 codec format.
 \end_layout
 
 \begin_layout Section*
@@ -326,9 +411,24 @@ Success Criteria
 Extensions
 \end_layout
 
-\begin_layout Standard
-SVM-based methods, training set.
- Survive social network transcoding / compression.
+\begin_layout Itemize
+Deng et al.
+ propose to use various statistical differences between videos with and
+ without embedded messages as features for a classifier.
+ Using this, and other features proposed in similar works, goals of the
+ project can be stretched to accommodate a classifier trained using machine
+ learning.
+ 
+\end_layout
+
+\begin_layout Itemize
+Currently social networks, like YouTube, Facebook and Tumblr transcode (convert
+ between formats) user-uploaded videos before presenting them to other users.
+ This results in MVs being recomputed and overwritten, and hence the secret
+ message is lost.
+ This extension would explore more aggressive embedding, possibly using
+ some control data and error-correction codes, to withstand such transcoding.
+ 
 \end_layout
 
 \begin_layout Section*
@@ -395,7 +495,7 @@ Week 12 (Jan 21 -- Jan 28)
 
 \begin_layout Standard
 Finishing and polishing the project, catch-up (if required), writing progress
- report and preparing for the preccsentation.
+ report and preparing for the presentation.
 \end_layout
 
 \begin_layout Subsection*
