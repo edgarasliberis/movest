@@ -273,8 +273,8 @@ Videos typically exhibit temporal correlation.
 
 \begin_layout Standard
 Main deliverable of this project would be a steganography tool that would
- allow end user to embed custom data into videos, using clever embedding
- tactics.
+ allow end user to embed custom data into H.264-encoded videos, using clever
+ embedding tactics.
  One common recommendation, that applies to all subbranches of steganography,
  is to modify the least-significant bits of encoded values to encode the
  message, be it LSBs of pixels in the image or values of the motion vector,
@@ -326,8 +326,8 @@ I propose a project, consisting of two main deliverables:
 
 \begin_layout Itemize
 Development of an application, that allows end user to encrypt and embed
- their secret message into video files, using embedding algorithms introduced
- above.
+ their secret message into H.264 video files, using embedding algorithms
+ introduced above.
  
 \end_layout
 
@@ -395,6 +395,46 @@ Security I
 
 \begin_layout Section*
 Substance and Structure of the Project
+\end_layout
+
+\begin_layout Standard
+The aim of this project is to (a) develop a steganography tool, as described
+ earlier, and (b) develop a steganalysis suite.
+ 
+\end_layout
+
+\begin_layout Standard
+Both aims will require further research into H.264 codec and ability to modify
+ MVs of a H.264-encoded video file, which would in turn require parsing the
+ format of the codec, modifying motion vector values, and repackaging the
+ data back into a playable video file.
+ As developing a H.264 codec does not relate to steganography and is potentially
+ error prone, I plan to leverage existing libraries and/or tools, such as
+ 
+\family typewriter
+ffmpeg
+\family default
+, to achieve this.
+ This also suggests to use C++ for development, as codecs are typically
+ written using it.
+\end_layout
+
+\begin_layout Standard
+Modifying MV values would require further research into embedding algorithms,
+ as well as implementation and adaptation of these algorithms for use in
+ a codec.
+ Application should also be able to take user data and perform encryption
+ prior to embedding, which would require using a relevant cryptography library.
+ 
+\end_layout
+
+\begin_layout Standard
+Second aim would also require further research into steganalysis methods
+ described in recent academic papers.
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \begin_layout Standard
