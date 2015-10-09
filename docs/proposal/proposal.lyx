@@ -262,9 +262,10 @@ temporal correlation
 status open
 
 \begin_layout Plain Layout
-Complete frames are sometimes encoded for other reasons, blah de blah, might
- want to talk about that briefly here to try and convince them you know
- what you're talking about.
+Codec periodically inserts individually encoded frames (I-frames) whenever
+ picture changes significantly and at regular intervals (to recover if a
+ streaming error occurs).
+ 
 \end_layout
 
 \end_inset
@@ -296,9 +297,22 @@ ed techniques.
  A common trick for reducing distortion of the cover data is to modify the
  least-significant bits of encoded values, be they LSBs of pixels in an
  image or values of a motion vector.
- As well as naively embedding the message in LSBs, there are some more intellige
-nt approaches for making messages harder to detect, such as selecting target
- LSBs using a PRNG or avoiding regions with low variance.
+ As well as na
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+"
+\end_layout
+
+\end_inset
+
+ively embedding the message in LSBs, there are some more intelligent approaches
+ for making messages harder to detect, such as selecting target LSBs using
+ a PRNG or avoiding regions with low variance.
  Methods that specifically target motion vectors have been proposed by Zhang
  et.
  al.
@@ -380,7 +394,11 @@ Dropbox
 \family typewriter
 GitHub
 \family default
- (with git version control).
+ (with 
+\family typewriter
+git
+\family default
+ version control).
 \end_layout
 
 \begin_layout Section*
@@ -407,7 +425,21 @@ Information Theory
 \shape default
 , 
 \shape italic
-Digital Signal Processing
+Digital Signal Processing, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+\shape italic
+
+\backslash
+LaTeX
+\end_layout
+
+\end_inset
+
+ and Matlab
 \shape default
  and 
 \shape italic
@@ -498,9 +530,9 @@ Success Criteria
 \end_layout
 
 \begin_layout Standard
-Project shall be considered successful if steganography application, steganalysi
-s tools and/or accompanying disseration (as appropriate) satisfy the following
- requirements (prioritised using the 
+The project shall be considered successful if steganography application,
+ steganalysis tools and/or accompanying disseration (as appropriate) satisfy
+ the following requirements (prioritised using the 
 \shape italic
 MoSCoW
 \shape default
@@ -578,7 +610,11 @@ Matlab
 \end_layout
 
 \begin_layout Itemize
-(M) Resistance to attacks.
+
+\shape italic
+(M)
+\shape default
+ Resistance to attacks.
 \end_layout
 
 \begin_layout Itemize
