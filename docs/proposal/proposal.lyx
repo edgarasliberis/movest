@@ -60,6 +60,8 @@ line/.style={->,>=latex'}
 \setlength{\itemsep}{3pt}
 \setlength{\parsep}{0pt}
 }
+
+\date{ }
 \end_preamble
 \options usenames,dvipsnames,hypens,final
 \use_default_options true
@@ -152,6 +154,22 @@ figs-within-sections
 
 \begin_body
 
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+bibliographystyle{plain}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subject
 
 \shape smallcaps
@@ -168,7 +186,31 @@ E.
 \begin_inset Newline newline
 \end_inset
 
-Originator: E.
+
+\family typewriter
+\size small
+el398@cam.ac.uk
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+today
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Project originator: E.
  Liberis
 \end_layout
 
@@ -231,7 +273,14 @@ Steganography refers to a set of techniques for concealing information within
  seemingly innocent carrier data (covers), and for detecting such hidden
  information.
  This is widely used for enabling communication where the detection of the
- existence of the message would attract unwanted attention.
+ existence of the message would attract unwanted attention
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Government Policies"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -239,7 +288,14 @@ Files with commonly-found data formats are less likely to raise suspicion
  as covers, and redundancy in the structure of the data provides opportunities
  to hide data.
  Digital media tends to have both of these properties, contributing to their
- widespread use as covers in earlier work.
+ widespread use as covers in earlier work
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Image Steg,MV LSB,MV Phase,MV Steg"
+
+\end_inset
+
+.
  This project will be investigating the use of motion vectors in video steganogr
 aphy.
 \end_layout
@@ -281,13 +337,27 @@ macroblocks
 \shape italic
 motion vector
 \shape default
-).
+)
+\begin_inset CommandInset citation
+LatexCommand cite
+key "H.264 Spec"
+
+\end_inset
+
+.
  Computing motion vectors is a tradeoff between accuracy and computation
  time, so codecs typically settle for an approximation instead of an optimal
  MV.
  While MVs are encoded losslessly, this accuracy tradeoff allows minor changes
- to them go unnoticed: a property essential to the steganographic techniques
- underlying this project.
+ to them go unnoticed
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MV Phase"
+
+\end_inset
+
+: a property essential to the steganographic techniques underlying this
+ project.
 \end_layout
 
 \begin_layout Standard
@@ -312,12 +382,32 @@ status open
 
 ively embedding the message in LSBs, there are some more intelligent approaches
  for making messages harder to detect, such as selecting target LSBs using
- a PRNG or avoiding regions with low variance.
+ a PRNG or avoiding regions with low variance
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Image Steg"
+
+\end_inset
+
+.
  Methods that specifically target motion vectors have been proposed by Zhang
  et.
  al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MV LSB"
+
+\end_inset
+
  and Fang et.
- al., which make use of length, phase and inaccuracies of a motion vector.
+ al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MV Phase"
+
+\end_inset
+
+, which make use of length, phase and inaccuracies of a motion vector.
  
 \end_layout
 
@@ -330,9 +420,23 @@ The branch of steganography concerning the detection of embedded messages
  A popular approach in steganalysis is to look at statistical differences
  of modified and unmodified values, as selectively modifying certain values
  may make them stand out from the rest.
- General approaches use histograms, Chi-Squared attacks, and motion-vector-speci
-fic attacks (Deng et al.), exploit correlations seen in neighbourhoods of
- MVs and other statistical metrics.
+ General approaches use histograms, Chi-Squared attacks
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Image Steg"
+
+\end_inset
+
+, and motion-vector-specific attacks (Deng et al.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MV Steg"
+
+\end_inset
+
+), exploit correlations seen in neighbourhoods of MVs and other statistical
+ metrics.
  
 \end_layout
 
@@ -382,10 +486,6 @@ I will be using my own computer, running Ubuntu 15.04, for convenience.
  The project can be continued on MCS machines should it become unusable.
  I accept full responsibility for this machine and I have made contingency
  plans to protect myself against hardware and/or software failure.
-\end_layout
-
-\begin_layout Standard
-No other special resources are required.
  Nightly backups will be made to a removable storage and 
 \family typewriter
 Dropbox
@@ -399,6 +499,11 @@ GitHub
 git
 \family default
  version control).
+\end_layout
+
+\begin_layout Standard
+No other special resources are required.
+ 
 \end_layout
 
 \begin_layout Section*
@@ -431,10 +536,9 @@ status open
 
 \begin_layout Plain Layout
 
-\shape italic
 
 \backslash
-LaTeX
+LaTeX~
 \end_layout
 
 \end_inset
@@ -495,7 +599,7 @@ The second objective will require substantial further research of steganalysis
 The dissertation shall consider the embedding techniques, evaluating their
  relative applicability, detectability, embedding capacity, speed, effectiveness
 , and resistance to attacks by developed steganalysis methods.
- Detectability will also by evaluated by conducting a study with human participa
+ Detectability will also be evaluated by conducting a study with human participa
 nts, asking them to distinguish between a modified and an unmodified video.
  Effectiveness of steganalysis methods will be evaluated by comparing their
  success in attacking implemented methods on a dataset of videos
@@ -682,6 +786,12 @@ Extensions
 
 \begin_layout Itemize
 Deng et al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MV Steg"
+
+\end_inset
+
  propose using statistical differences between videos with and without embedded
  messages as features for a classifier.
  Using this and other features proposed in similar works, a classifier trained
@@ -704,7 +814,7 @@ Timetable and Milestones
 \end_layout
 
 \begin_layout Subsection*
-Weeks 1 & 2 (Oct 22 -- Nov 5)
+Weeks 1 -- 2 (Oct 22 -- Nov 5)
 \end_layout
 
 \begin_layout Itemize
@@ -713,15 +823,15 @@ Research and implementation of access and modification of MVs in a H.264
 \end_layout
 
 \begin_layout Subsection*
-Week 3 (Nov 5 -- Nov 12)
+Weeks 3 -- 4 (Nov 5 -- Nov 19)
 \end_layout
 
 \begin_layout Itemize
-Background reading on steganography.
+Background reading on steganography and other relevant preparation.
 \end_layout
 
 \begin_layout Subsection*
-Weeks 4 -- 6 (Nov 12 -- Dec 3)
+Weeks 5 -- 6 (Nov 19 -- Dec 3)
 \end_layout
 
 \begin_layout Itemize
@@ -729,22 +839,42 @@ Investigation and implementation of popular image steganography techniques,
  including LSB embedding, and evaluation of their relevance to MV steganography.
 \end_layout
 
-\begin_layout Itemize
-Creation of tools that allow to carry out statistical attacks on these methods
- and their evaluation.
+\begin_layout Subsection*
+Weeks 7 -- 8 (Dec 3 -- Dec 17)
 \end_layout
 
-\begin_layout Subsection*
-Weeks 7 -- 8 (Dec 3 -- Dec 31)
+\begin_layout Itemize
+Creation of tools that allow to carry out statistical attacks on aforementioned
+ methods and their evaluation.
 \end_layout
 
 \begin_layout Itemize
 Research and implementation of the methods of video watermarking proposed
  by Zhang et.
  al.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MV LSB"
+
+\end_inset
+
  and Fang et.
  al.
- 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MV Phase"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Weeks 9 -- 10 (Dec 17 -- Dec 31)
+\end_layout
+
+\begin_layout Itemize
+Finishing implementation of aforementioned methods.
 \end_layout
 
 \begin_layout Itemize
@@ -752,7 +882,7 @@ Christmas vacation and catch-up (if required).
 \end_layout
 
 \begin_layout Subsection*
-Weeks 9 -- 11 (Dec 31 -- Jan 21)
+Weeks 11 -- 12 (Dec 31 -- Jan 14)
 \end_layout
 
 \begin_layout Itemize
@@ -764,7 +894,7 @@ Evaluation of created tools against all implemented embedding algorithms.
 \end_layout
 
 \begin_layout Subsection*
-Week 12 (Jan 21 -- Jan 28)
+Weeks 13 -- 14 (Jan 14 -- Jan 28)
 \end_layout
 
 \begin_layout Itemize
@@ -776,7 +906,7 @@ Writing progress report and preparing for the presentation.
 \end_layout
 
 \begin_layout Subsection*
-Weeks 13 -- 15 (Jan 28 -- Feb 18)
+Weeks 15 -- 16 (Jan 28 -- Feb 11)
 \end_layout
 
 \begin_layout Itemize
@@ -788,28 +918,353 @@ Evaluation of the indistinguishability of videos with hidden messages and
 Remaining evaluation tasks.
 \end_layout
 
+\begin_layout Subsection*
+Weeks 17 -- 18 (Feb 11 -- Feb 25)
+\end_layout
+
+\begin_layout Itemize
+Any remaining catch-up work.
+\end_layout
+
 \begin_layout Itemize
 Implement extension tasks, if time permits.
 \end_layout
 
 \begin_layout Subsection*
-Weeks 16 -- 21 (Feb 18 -- Mar 31) 
+Weeks 19 -- 20 (Feb 25 -- Mar 10) 
 \end_layout
 
 \begin_layout Itemize
-Commence writing dissertation
+Commence writing dissertation.
 \end_layout
 
 \begin_layout Itemize
-Ongoing evaluation tasks and exploration of extension goals.
+Ongoing evaluation tasks and further exploration of extension goals.
 \end_layout
 
 \begin_layout Subsection*
-Weeks 20 -- 23 (Mar 31 -- Apr 21)
+Weeks 21 -- 22 (Mar 10 -- Mar 24)
 \end_layout
 
 \begin_layout Itemize
-Get feedback on dissertation draft from supervisors, iterate upon it.
+Write 
+\begin_inset Quotes eld
+\end_inset
+
+Introduction
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Preparation
+\begin_inset Quotes erd
+\end_inset
+
+ chapters.
+\end_layout
+
+\begin_layout Itemize
+Request supervisors' feedback and iterate upon it.
+\end_layout
+
+\begin_layout Subsection*
+Weeks 23 -- 24 (Mar 24 -- Apr 7)
+\end_layout
+
+\begin_layout Itemize
+Write 
+\begin_inset Quotes eld
+\end_inset
+
+Implementation
+\begin_inset Quotes erd
+\end_inset
+
+ chapter.
+\end_layout
+
+\begin_layout Itemize
+Request supervisors' feedback and iterate upon it.
+\end_layout
+
+\begin_layout Subsection*
+Weeks 25 -- 26 (Apr 7 -- Apr 21)
+\end_layout
+
+\begin_layout Itemize
+Write 
+\begin_inset Quotes eld
+\end_inset
+
+Evaluation
+\begin_inset Quotes erd
+\end_inset
+
+ chapter.
+\end_layout
+
+\begin_layout Itemize
+Request supervisors' feedback and iterate upon it.
+\end_layout
+
+\begin_layout Subsection*
+Weeks 27 -- 28 (Apr 7 -- Apr 21)
+\end_layout
+
+\begin_layout Itemize
+Finish remaining parts of the disseration.
+\end_layout
+
+\begin_layout Itemize
+Polish and incorporate final feedback.
+\end_layout
+
+\begin_layout Subsection*
+Week 29 (Apr 21 -- Apr 28)
+\end_layout
+
+\begin_layout Itemize
+Make any final polishing changes to the code and/or the dissertation and
+ submit the project.
+ 
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Government Policies"
+
+\end_inset
+
+ Omar J.
+ Pahati 
+\shape italic
+
+\begin_inset Quotes eld
+\end_inset
+
+Confounding Carnivore: How to Protect Your Online Privacy,
+\begin_inset Quotes erd
+\end_inset
+
+
+\shape default
+ AlterNet, Nov 28, 2001 (retrieved Oct 2015)
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.alternet.org/story/11986/confounding_carnivore%3A_how_to_protect_your_o
+nline_privacy
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Image Steg"
+
+\end_inset
+
+Philip Bateman 
+\shape italic
+
+\begin_inset Quotes eld
+\end_inset
+
+Image Steganography and Steganalysis,
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\shape default
+2008
+\shape italic
+
+\begin_inset Newline newline
+\end_inset
+
+
+\shape default
+
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://chemistry47.com/PDFs/Cryptography/Steganography/Image%20Steganography%20an
+d%20Steganalysis.pdf
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "MV Phase"
+
+\end_inset
+
+Ding-Yu Fang; Long-Wen Chang, 
+\shape italic
+
+\begin_inset Quotes eld
+\end_inset
+
+Data hiding for digital video with phase of motion vector
+\shape default
+,
+\begin_inset Quotes erd
+\end_inset
+
+ in Circuits and Systems, 2006.
+ ISCAS 2006.
+ Proceedings.
+ 2006 IEEE International Symposium on , vol., no., pp.4 pp.-, 21-24 May 2006
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1692862&isnumber=35661
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "MV Steg"
+
+\end_inset
+
+Yu Deng, Yunjie Wu, Linna Zhou, 
+\shape italic
+
+\begin_inset Quotes eld
+\end_inset
+
+Digital video steganalysis using motion vector recovery-based features,
+\begin_inset Quotes erd
+\end_inset
+
+
+\shape default
+ Appl.
+ Opt.
+ 51, 4667-4677 (2012)
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.ncbi.nlm.nih.gov/pubmed/22781241
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "MV LSB"
+
+\end_inset
+
+Jun Zhang; Jiegu Li; Ling Zhang, 
+\shape italic
+
+\begin_inset Quotes eld
+\end_inset
+
+Video watermark technique in motion vector,
+\begin_inset Quotes erd
+\end_inset
+
+
+\shape default
+ in Computer Graphics and Image Processing, 2001 Proceedings of XIV Brazilian
+ Symposium on , vol., no., pp.179-182, Oct 2001
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=963053&isnumber=20786
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "H.264 Spec"
+
+\end_inset
+
+International Telecommunication Union (ITU), 
+\shape italic
+
+\begin_inset Quotes eld
+\end_inset
+
+H.264: Advanced video coding for generic audiovisual services,
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\shape default
+Feb 2014 (specification of the H.264 video codec)
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://www.itu.int/rec/T-REC-H.264-201402-I/en
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body
