@@ -4,3 +4,6 @@
 [submodule "movest-app/libs/ffmpeg"]
 	path = movest-app/libs/ffmpeg
 	url = git://source.ffmpeg.org/ffmpeg.git
+[submodule "movest-app/libs/x264"]
+	path = movest-app/libs/x264
+	url = git://git.videolan.org/x264.git
