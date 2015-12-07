@@ -2,14 +2,16 @@
 // Created by el398 on 06/12/15.
 //
 
-#ifndef MOVEST_ENCODER_CONNECTOR_H
-#define MOVEST_ENCODER_CONNECTOR_H
+#ifndef MOVEST_CONNECTOR_H
+#define MOVEST_CONNECTOR_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct
+struct MovestState {
+    const char *file;
+};
 
 void movest_encode(int width, int height);
 void movest_decode(int width, int height);
@@ -18,6 +20,4 @@ void movest_decode(int width, int height);
 }
 #endif
 
-
-
-#endif //MOVEST_ENCODER_CONNECTOR_H
+#endif //MOVEST_CONNECTOR_H

@@ -5,10 +5,6 @@
 #ifndef MOVEST_DECODER_H
 #define MOVEST_DECODER_H
 
-
-class decoder {
-
-};
-
+#include "movest_connector.h"
 
 #endif //MOVEST_DECODER_H
