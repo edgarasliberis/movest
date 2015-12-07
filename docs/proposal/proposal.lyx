@@ -44,7 +44,7 @@ line/.style={->,>=latex'}
 \usepackage{fancyhdr}
 
 \fancyhf[HLE,HRO]{\nouppercase{\leftmark}}
-\fancyhf[HC]{\textsc{Draft Project Proposal}}
+\fancyhf[HC]{\textsc{Part II Project Proposal}}
 \fancyhf[HLO,HRE]{\thepage}
 \fancyhf[FC]{}
 
@@ -144,7 +144,6 @@ figs-within-sections
 \papercolumns 1
 \papersides 2
 \paperpagestyle fancy
-\listings_params "basicstyle={\footnotesize\ttfamily},belowcaptionskip={1\baselineskip},breaklines=true,commentstyle={\itshape\color{commentColour}},frame=L,identifierstyle={\color{black}},keywordstyle={\color{blue}},language=Java,showstringspaces=false,stringstyle={\color{orange}},xleftmargin={\parindent}"
 \tracking_changes false
 \output_changes false
 \html_math_output 0
@@ -517,10 +516,21 @@ This project uses some of the cryptography concepts introduced in Part IB
 Security I
 \shape default
  course.
- I have familiarised myself with general concepts of steganography and LSB
- embedding though some introductory texts and relevant papers, and briefly
+ I have familiarised myself with the general concepts of steganography and
+ LSB embedding though some introductory texts and relevant papers, and briefly
  looked at H.264 codec format.
  
+\end_layout
+
+\begin_layout Standard
+Implementing my own H.264 codec is out of scope for this project, so a possibly
+ modified version of a library (provisionally 
+\family typewriter
+libx264
+\family default
+) will be used to gain access to the motion vectors.
+ Steganography tools may also rely on some inbuilt routines of scientific
+ computing packages (plotting, histogram, matrices handling, etc.).
 \end_layout
 
 \begin_layout Standard
@@ -1015,7 +1025,7 @@ Weeks 27 -- 28 (Apr 7 -- Apr 21)
 \end_layout
 
 \begin_layout Itemize
-Finish remaining parts of the disseration.
+Finish remaining parts of the dissertation.
 \end_layout
 
 \begin_layout Itemize
@@ -1091,16 +1101,8 @@ Image Steganography and Steganalysis,
  
 \shape default
 2008
-\shape italic
-
-\begin_inset Newline newline
-\end_inset
-
-
-\shape default
-
 \begin_inset Flex URL
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
@@ -1265,6 +1267,124 @@ https://www.itu.int/rec/T-REC-H.264-201402-I/en
 \end_inset
 
 
+\end_layout
+
+\begin_layout Part*
+\begin_inset Newpage newpage
+\end_inset
+
+Study involving Human Participants
+\end_layout
+
+\begin_layout Subsection*
+Description of the study
+\end_layout
+
+\begin_layout Standard
+The aim of this study is to determine whether using steganographic methods
+ to hide data in video files results in visible changes to the video.
+ The experiment will be conducted as follows.
+ 
+\end_layout
+
+\begin_layout Standard
+In each trial, participants will be shown pairs of ostensibly identical
+ videos, positioned side-by-side, one of which has been modified to contain
+ a hidden payload.
+ They will choose the video which they think was modified, after which the
+ true answer will be revealed.
+\end_layout
+
+\begin_layout Standard
+The experiment will feature 7-10 pairs of videos, each up to 30 seconds
+ long, taking up to 20 minutes per participant.
+ Which video is the modified one will be randomised, to avoid positional
+ bias.
+ Since the steganographic methods rely on motion data encoded in the videos,
+ videos containing a wide range of movement, from almost still to highly
+ dynamic, will be used.
+\end_layout
+
+\begin_layout Standard
+We hypothesise that human participants will not be able to distinguish between
+ modified and an unmodified video.
+ To test this, we will determine if the data support the opposite claim
+ to a statistically significant level -- that humans 
+\shape italic
+are
+\shape default
+ able to tell the videos apart.
+ We will look into the numbers of times the participants were right or wrong
+ in their choice and test whether there is a statistically significant skew
+ in either direction.
+\end_layout
+
+\begin_layout Subsection*
+Precautions to be taken to avoid any risk
+\end_layout
+
+\begin_layout Standard
+No personal data about the participants will be collected and all results
+ will be recorded anonymously.
+ Videos shown to the participants will be free from flashing images, emotionally
+ neutral, and free from distressful, disturbing, offensive or otherwise
+ unsettling images.
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part*
+Resources Declaration
+\end_layout
+
+\begin_layout Standard
+The project does not require any special resources except own laptop, for
+ convenience.
+\end_layout
+
+\begin_layout Standard
+Specifications:
+\end_layout
+
+\begin_layout Itemize
+Intel(R) Core(TM) i5-3210M CPU @ 2.50GHz
+\end_layout
+
+\begin_layout Itemize
+nVidia Geforce GT 630M 2GB
+\end_layout
+
+\begin_layout Itemize
+500GB HDD
+\end_layout
+
+\begin_layout Itemize
+4GB RAM 
+\end_layout
+
+\begin_layout Standard
+I accept full responsibility for this machine and I have made contingency
+ plans to protect myself against hardware and/or software failure.
+\end_layout
+
+\begin_layout Standard
+The project can be continued on MCS machines should the laptop become unusable.
+ Nightly backups of the project files will be made to a removable storage
+ and 
+\family typewriter
+Dropbox
+\family default
+, and the code will be hosted on 
+\family typewriter
+GitHub
+\family default
+ (with 
+\family typewriter
+git
+\family default
+ version control).
 \end_layout
 
 \end_body
