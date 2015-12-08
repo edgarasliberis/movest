@@ -5,40 +5,42 @@ include(ExternalProject)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -fPIC")
 
-file(GLOB_RECURSE SOURCE_FILES
-    "src/*.c"
-    "src/*.h"
-    "src/*.cpp"
+add_executable(movest_enc src/encoder.c)
+add_executable(movest_dec src/decoder.c)
+
+set(MOVESTLIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/movestlib)
+ExternalProject_Add(movestlib
+        SOURCE_DIR src/movestlib
+        URL src/movestlib
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MOVESTLIB_DIR}/installed
 )
 
-add_library(movest SHARED ${SOURCE_FILES})
-
-install(FILES src/movest_connector.h DESTINATION include/movest)
-install(TARGETS movest DESTINATION lib)
-
-#set(FFMPEG_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/ffmpeg)
 #set(FFMS2_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/ffms2)
-
-#ExternalProject_Add(
-#        ffmpeg_proj
-#        BINARY_DIR ${FFMPEG_DIR}
-#        SOURCE_DIR ${FFMPEG_DIR}
-#        URL libs/ffmpeg
-#        CONFIGURE_COMMAND <SOURCE_DIR>/configure
-#            --prefix=<BINARY_DIR>
-#            --extra-cflags=-I<BINARY_DIR>/include
-#            --extra-ldflags="-L<BINARY_DIR>/lib"
-#            --enable-gpl
-#            --enable-nonfree
-#            --enable-libfdk-aac
-#            --disable-doc
-#            --disable-pthreads
-#            --enable-shared
-#            --enable-static
-#            --enable-runtime-cpudetect
-#        BUILD_COMMAND make -j3
-#        INSTALL_COMMAND make install
-#)
+set(FFMPEG_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/ffmpeg)
+ExternalProject_Add(ffmpeg_proj DEPENDS movestlib
+        BINARY_DIR ${FFMPEG_DIR}
+        SOURCE_DIR ${FFMPEG_DIR}
+        URL libs/ffmpeg
+        CONFIGURE_COMMAND
+            # Install step is very unreliable otherwise
+            cp -r ${MOVESTLIB_DIR}/installed/include ${FFMPEG_DIR} &&
+            cp -r ${MOVESTLIB_DIR}/installed/lib ${FFMPEG_DIR} &&
+            <SOURCE_DIR>/configure
+            --prefix=<BINARY_DIR>
+            --extra-cflags=-I<BINARY_DIR>/include
+            --extra-ldflags=-L<BINARY_DIR>/lib
+            --extra-libs=-lmovestlib
+            --enable-gpl
+            --enable-nonfree
+            --enable-libfdk-aac
+            --disable-doc
+            --disable-pthreads
+            --enable-shared
+            --enable-static
+            --enable-runtime-cpudetect
+        BUILD_COMMAND make -j3
+        INSTALL_COMMAND make install
+)
 
 #ExternalProject_Add(
 #        ffms2_proj
@@ -49,7 +51,6 @@ install(TARGETS movest DESTINATION lib)
 #        BUILD_COMMAND make
 #        INSTALL_COMMAND make install
 #)
-
 
 #set(X264_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/x264)
 #
@@ -67,45 +68,54 @@ install(TARGETS movest DESTINATION lib)
 #        INSTALL_COMMAND make install
 #)
 
-#add_library(libavcodec SHARED IMPORTED)
-#add_library(libavformat SHARED IMPORTED)
-#add_library(libavfilter SHARED IMPORTED)
-#add_library(libavutil SHARED IMPORTED)
+add_library(libavcodec SHARED IMPORTED)
+add_library(libavformat SHARED IMPORTED)
+add_library(libavfilter SHARED IMPORTED)
+add_library(libavutil SHARED IMPORTED)
 #add_library(libx264 SHARED IMPORTED)
 
-#ExternalProject_Get_Property(ffmpeg_proj BINARY_DIR)
-#set_property(TARGET libavcodec PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavcodec.so)
-#set_property(TARGET libavformat PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavformat.so)
-#set_property(TARGET libavfilter PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavfilter.so)
-#set_property(TARGET libavutil PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavutil.so)
+ExternalProject_Get_Property(ffmpeg_proj BINARY_DIR)
+set_property(TARGET libavcodec PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavcodec.so)
+set_property(TARGET libavformat PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavformat.so)
+set_property(TARGET libavfilter PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavfilter.so)
+set_property(TARGET libavutil PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavutil.so)
 #ExternalProject_Get_Property(libx264_proj BINARY_DIR)
 #set_property(TARGET libx264 PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libx264.so)
 
-#add_dependencies(libavcodec ffmpeg_proj)
-#add_dependencies(libavformat ffmpeg_proj)
-#add_dependencies(libavfilter ffmpeg_proj)
-#add_dependencies(libavutil ffmpeg_proj)
+add_dependencies(libavcodec ffmpeg_proj)
+add_dependencies(libavformat ffmpeg_proj)
+add_dependencies(libavfilter ffmpeg_proj)
+add_dependencies(libavutil ffmpeg_proj)
 #add_dependencies(ffmpeg_proj libx264)
 
 #add_dependencies(ffms2_proj ffmpeg_proj)
 #add_dependencies(libx264_proj ffms2_proj)
 #add_dependencies(libx264 libx264_proj)
 
-#add_dependencies(movest libavcodec)
-#add_dependencies(movest libavformat)
-#add_dependencies(movest libavfilter)
-#add_dependencies(movest libavutil)
+add_dependencies(movest_enc libavcodec)
+add_dependencies(movest_enc libavformat)
+add_dependencies(movest_enc libavfilter)
+add_dependencies(movest_enc libavutil)
+add_dependencies(movest_dec libavcodec)
+add_dependencies(movest_dec libavformat)
+add_dependencies(movest_dec libavfilter)
+add_dependencies(movest_dec libavutil)
 #add_dependencies(movest libx264)
 
-#ExternalProject_Get_Property(ffmpeg_proj SOURCE_DIR)
-#include_directories(movest ${SOURCE_DIR})
+ExternalProject_Get_Property(ffmpeg_proj SOURCE_DIR)
+include_directories(movest_enc ${SOURCE_DIR})
+include_directories(movest_dec ${SOURCE_DIR})
 #ExternalProject_Get_Property(libx264_proj SOURCE_DIR)
 #include_directories(movest ${SOURCE_DIR})
 
-#target_link_libraries(movest libavcodec)
-#target_link_libraries(movest libavformat)
-#target_link_libraries(movest libavfilter)
-#target_link_libraries(movest libavutil)
+target_link_libraries(movest_enc libavcodec)
+target_link_libraries(movest_enc libavformat)
+target_link_libraries(movest_enc libavfilter)
+target_link_libraries(movest_enc libavutil)
+target_link_libraries(movest_dec libavcodec)
+target_link_libraries(movest_dec libavformat)
+target_link_libraries(movest_dec libavfilter)
+target_link_libraries(movest_dec libavutil)
 #target_link_libraries(movest libx264)
 #target_link_libraries(movest m)
 #target_link_libraries(movest gpac)
