@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 project(movest)
 include(ExternalProject)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03 -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -fPIC")
 
 file(GLOB_RECURSE SOURCE_FILES
@@ -13,12 +13,10 @@ file(GLOB_RECURSE SOURCE_FILES
 
 add_library(movest SHARED ${SOURCE_FILES})
 
-set(FFMPEG_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/ffmpeg)
-install(DIRECTORY src/ DESTINATION ${FFMPEG_DIR}/include/movest
-        FILES_MATCHING PATTERN "*.h")
+install(FILES src/movest_connector.h DESTINATION include/movest)
+install(TARGETS movest DESTINATION lib)
 
-install(TARGETS movest DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/libs/ffmpeg/lib)
-
+#set(FFMPEG_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/ffmpeg)
 #set(FFMS2_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/ffms2)
 
 #ExternalProject_Add(
