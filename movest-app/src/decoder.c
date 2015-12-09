@@ -27,6 +27,7 @@
 
 #include <libavutil/motion_vector.h>
 #include <libavformat/avformat.h>
+#include "movestlib/movest_connector.h"
 
 static AVFormatContext *fmt_ctx = NULL;
 static AVCodecContext *video_dec_ctx = NULL;
@@ -116,10 +117,14 @@ int main(int argc, char **argv)
 {
     int ret = 0, got_frame;
 
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <video>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <video> <datafile>\n", argv[0]);
         exit(1);
     }
+
+    movest_init_algorithm("hidenseek");
+    movest_init_decoder(argv[2]);
+
     src_filename = argv[1];
 
     av_register_all();

@@ -9,11 +9,8 @@ add_executable(movest_enc src/encoder.c)
 add_executable(movest_dec src/decoder.c)
 
 set(MOVESTLIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/movestlib)
-ExternalProject_Add(movestlib
-        SOURCE_DIR src/movestlib
-        URL src/movestlib
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MOVESTLIB_DIR}/installed
-)
+set(MOVESTLIBSRC_DIR ${CMAKE_SOURCE_DIR}/src/movestlib)
+add_subdirectory(src/movestlib)
 
 #set(FFMS2_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/ffms2)
 set(FFMPEG_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/ffmpeg)
@@ -23,8 +20,10 @@ ExternalProject_Add(ffmpeg_proj DEPENDS movestlib
         URL libs/ffmpeg
         CONFIGURE_COMMAND
             # Install step is very unreliable otherwise
-            cp -r ${MOVESTLIB_DIR}/installed/include ${FFMPEG_DIR} &&
-            cp -r ${MOVESTLIB_DIR}/installed/lib ${FFMPEG_DIR} &&
+            mkdir -p ${FFMPEG_DIR}/include/movest &&
+            mkdir -p ${FFMPEG_DIR}/lib &&
+            cp ${MOVESTLIBSRC_DIR}/movest_connector.h ${FFMPEG_DIR}/include/movest &&
+            cp ${MOVESTLIB_DIR}/libmovestlib.so ${FFMPEG_DIR}/lib &&
             <SOURCE_DIR>/configure
             --prefix=<BINARY_DIR>
             --extra-cflags=-I<BINARY_DIR>/include
@@ -72,6 +71,7 @@ add_library(libavcodec SHARED IMPORTED)
 add_library(libavformat SHARED IMPORTED)
 add_library(libavfilter SHARED IMPORTED)
 add_library(libavutil SHARED IMPORTED)
+add_library(libmovestlib SHARED IMPORTED)
 #add_library(libx264 SHARED IMPORTED)
 
 ExternalProject_Get_Property(ffmpeg_proj BINARY_DIR)
@@ -79,6 +79,7 @@ set_property(TARGET libavcodec PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/liba
 set_property(TARGET libavformat PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavformat.so)
 set_property(TARGET libavfilter PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavfilter.so)
 set_property(TARGET libavutil PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libavutil.so)
+set_property(TARGET libmovestlib PROPERTY IMPORTED_LOCATION ${MOVESTLIB_DIR}/libmovestlib.so)
 #ExternalProject_Get_Property(libx264_proj BINARY_DIR)
 #set_property(TARGET libx264 PROPERTY IMPORTED_LOCATION ${BINARY_DIR}/lib/libx264.so)
 
@@ -96,10 +97,12 @@ add_dependencies(movest_enc libavcodec)
 add_dependencies(movest_enc libavformat)
 add_dependencies(movest_enc libavfilter)
 add_dependencies(movest_enc libavutil)
+add_dependencies(movest_enc libmovestlib)
 add_dependencies(movest_dec libavcodec)
 add_dependencies(movest_dec libavformat)
 add_dependencies(movest_dec libavfilter)
 add_dependencies(movest_dec libavutil)
+add_dependencies(movest_dec libmovestlib)
 #add_dependencies(movest libx264)
 
 ExternalProject_Get_Property(ffmpeg_proj SOURCE_DIR)
@@ -112,10 +115,12 @@ target_link_libraries(movest_enc libavcodec)
 target_link_libraries(movest_enc libavformat)
 target_link_libraries(movest_enc libavfilter)
 target_link_libraries(movest_enc libavutil)
+target_link_libraries(movest_enc libmovestlib)
 target_link_libraries(movest_dec libavcodec)
 target_link_libraries(movest_dec libavformat)
 target_link_libraries(movest_dec libavfilter)
 target_link_libraries(movest_dec libavutil)
+target_link_libraries(movest_dec libmovestlib)
 #target_link_libraries(movest libx264)
 #target_link_libraries(movest m)
 #target_link_libraries(movest gpac)

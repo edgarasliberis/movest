@@ -9,13 +9,13 @@
 
 class HideSeek : public Algorithm {
 public:
-    HideSeek() {}
+    HideSeek();
     void encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride);
     void decode(int16_t (*mvs[2])[2], int mv_sample_log2, int mb_width, int mb_height, int mv_stride);
+    void initAsEncoder(const char *filename);
+    void initAsDecoder(const char *filename);
 
 private:
-    const char msg[9] = "itworks!";
-    int len = 8;
     int index = 0;
     char symb = 0;
 

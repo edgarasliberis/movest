@@ -40,6 +40,8 @@
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 
+#include "movestlib/movest_connector.h"
+
 static AVFormatContext *ifmt_ctx;
 static AVFormatContext *ofmt_ctx;
 typedef struct FilteringContext {
@@ -377,7 +379,7 @@ static int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
     if (!got_frame)
         got_frame = &got_frame_local;
 
-    av_log(NULL, AV_LOG_INFO, "Encoding frame\n");
+    //av_log(NULL, AV_LOG_INFO, "Encoding frame\n");
     /* encode filtered frame */
     enc_pkt.data = NULL;
     enc_pkt.size = 0;
@@ -407,7 +409,7 @@ static int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index)
     int ret;
     AVFrame *filt_frame;
 
-    av_log(NULL, AV_LOG_INFO, "Pushing decoded frame to filters\n");
+    //av_log(NULL, AV_LOG_INFO, "Pushing decoded frame to filters\n");
     /* push the decoded frame into the filtergraph */
     ret = av_buffersrc_add_frame_flags(filter_ctx[stream_index].buffersrc_ctx,
                                        frame, 0);
@@ -423,7 +425,7 @@ static int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index)
             ret = AVERROR(ENOMEM);
             break;
         }
-        av_log(NULL, AV_LOG_INFO, "Pulling filtered frame from filters\n");
+        //av_log(NULL, AV_LOG_INFO, "Pulling filtered frame from filters\n");
         ret = av_buffersink_get_frame(filter_ctx[stream_index].buffersink_ctx,
                                       filt_frame);
         if (ret < 0) {
@@ -477,17 +479,20 @@ int main(int argc, char **argv)
     int got_frame;
     int (*dec_func)(AVCodecContext *, AVFrame *, int *, const AVPacket *);
 
-    if (argc != 3) {
-        av_log(NULL, AV_LOG_ERROR, "Usage: %s <input file> <output file>\n", argv[0]);
+    if (argc != 4) {
+        av_log(NULL, AV_LOG_ERROR, "Usage: %s <input file> <datafile> <output file>\n", argv[0]);
         return 1;
     }
+
+    movest_init_algorithm("hidenseek");
+    movest_init_encoder(argv[2]);
 
     av_register_all();
     avfilter_register_all();
 
     if ((ret = open_input_file(argv[1])) < 0)
         goto end;
-    if ((ret = open_output_file(argv[2])) < 0)
+    if ((ret = open_output_file(argv[3])) < 0)
         goto end;
     if ((ret = init_filters()) < 0)
         goto end;
