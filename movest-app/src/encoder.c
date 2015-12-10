@@ -40,6 +40,8 @@
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 
+#include <sys/stat.h>
+
 #include "movestlib/movest_connector.h"
 
 static AVFormatContext *ifmt_ctx;
@@ -468,24 +470,15 @@ static int flush_encoder(unsigned int stream_index)
     return ret;
 }
 
-int main(int argc, char **argv)
-{
+int run_embedding(char** argv) {
     int ret;
     AVPacket packet = { .data = NULL, .size = 0 };
     AVFrame *frame = NULL;
     enum AVMediaType type;
-    unsigned int stream_index;
+    int stream_index;
     unsigned int i;
     int got_frame;
     int (*dec_func)(AVCodecContext *, AVFrame *, int *, const AVPacket *);
-
-    if (argc != 4) {
-        av_log(NULL, AV_LOG_ERROR, "Usage: %s <input file> <datafile> <output file>\n", argv[0]);
-        return 1;
-    }
-
-    movest_init_algorithm("hidenseek");
-    movest_init_encoder(argv[2]);
 
     av_register_all();
     avfilter_register_all();
@@ -588,4 +581,60 @@ int main(int argc, char **argv)
         av_log(NULL, AV_LOG_ERROR, "Error occurred: %s\n", av_err2str(ret));
 
     return ret ? 1 : 0;
+}
+
+int is_single_pass(const char* algorithm) {
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc != 4) {
+        av_log(NULL, AV_LOG_ERROR, "Usage: %s <input file> <datafile> <output file>\n", argv[0]);
+        return 1;
+    }
+
+    // Get some information about the file.
+    struct stat datafileinfo;
+    stat(argv[2], &datafileinfo);
+
+
+    const char* algorithm = "hidenseek";
+    int singlepass = is_single_pass(algorithm);
+    // Step 1. Run a dummy pass to determine embedding capacity, if the algorithm is two-pass.
+    if(!singlepass) {
+        movest_init_algorithm(algorithm);
+        movest_params p = {
+                argv[2], MOVEST_DUMMY_PASS, NULL
+        };
+        movest_init_encoder(&p);
+        av_log(NULL, AV_LOG_INFO, "Analysing the video for embedding capacity...\n");
+
+        int ret = run_embedding(argv);
+        if(ret != 0) return ret;
+
+        movest_result result = movest_finalise();
+        int fits = datafileinfo.st_size <= result.bytes_processed;
+        av_log(NULL, AV_LOG_INFO, "Analysed. Embedding capacity is %d byte(s)\n", result.bytes_processed);
+        if(!fits) {
+            av_log(NULL, AV_LOG_INFO, "File can't be embedded fully, video's capacity is %d byte(s) short"
+                    "this algorithm. Terminating.", (int)datafileinfo.st_size - result.bytes_processed);
+            return 1;
+        }
+    }
+
+    // Step 2. Do the actual embedding.
+    movest_init_algorithm(algorithm);
+    movest_params p = {
+            argv[2], MOVEST_NO_PARAMS, NULL
+    };
+    movest_init_encoder(&p);
+
+    av_log(NULL, AV_LOG_INFO, "Embedding...");
+
+    int ret = run_embedding(argv);
+    if(ret != 0) return ret;
+
+    av_log(NULL, AV_LOG_INFO, "Finished.");
+    return 0;
 }

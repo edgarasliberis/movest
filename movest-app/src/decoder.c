@@ -123,7 +123,10 @@ int main(int argc, char **argv)
     }
 
     movest_init_algorithm("hidenseek");
-    movest_init_decoder(argv[2]);
+    movest_params p = {
+            argv[2], MOVEST_NO_PARAMS, NULL
+    };
+    movest_init_decoder(&p);
 
     src_filename = argv[1];
 

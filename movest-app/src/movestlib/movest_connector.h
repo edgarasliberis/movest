@@ -11,9 +11,28 @@
 extern "C" {
 #endif
 
-void movest_init_encoder(const char* filename);
-void movest_init_decoder(const char* filename);
+typedef enum {
+    MOVEST_NO_PARAMS = 0,
+    MOVEST_DUMMY_PASS = 1,
+    MOVEST_EXTRACT_MVS = 1
+} movest_flags;
+
+typedef struct {
+    const char *filename;
+    movest_flags flags;
+    void *algParams;
+} movest_params;
+
+typedef struct {
+    int bytes_processed;
+    int error;
+    const char* errorMsg;
+} movest_result;
+
+void movest_init_encoder(movest_params *params);
+void movest_init_decoder(movest_params *params);
 void movest_init_algorithm(const char *algname);
+movest_result movest_finalise();
 void movest_encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride);
 void movest_decode(int16_t (*mvs[2])[2], int mv_sample_log2, int mb_width, int mb_height, int mv_stride);
 
