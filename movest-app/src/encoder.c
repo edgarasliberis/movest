@@ -139,6 +139,8 @@ static int open_output_file(const char *filename)
                 enc_ctx->pix_fmt = encoder->pix_fmts[0];
                 /* video time_base can be set to whatever is handy and supported by encoder */
                 enc_ctx->time_base = dec_ctx->time_base;
+                enc_ctx->flags |= AV_CODEC_FLAG_QSCALE;
+                enc_ctx->global_quality = FF_QP2LAMBDA * 1;
             } else {
                 enc_ctx->sample_rate = dec_ctx->sample_rate;
                 enc_ctx->channel_layout = dec_ctx->channel_layout;
