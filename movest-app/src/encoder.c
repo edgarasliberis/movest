@@ -591,17 +591,17 @@ int is_single_pass(const char* algorithm) {
 
 int main(int argc, char **argv)
 {
-    if (argc != 4) {
-        av_log(NULL, AV_LOG_ERROR, "Usage: %s <input file> <datafile> <output file>\n", argv[0]);
+    if (argc < 4) {
+        av_log(NULL, AV_LOG_ERROR, "Usage: %s <input file> <datafile> <output file> ...other params...\n", argv[0]);
         return 1;
     }
 
     // Get some information about the file.
     struct stat datafileinfo;
     stat(argv[2], &datafileinfo);
+    int capacity = 0;
 
-
-    const char* algorithm = "hidenseek";
+    const char* algorithm = "rand-hidenseek";
     int singlepass = is_single_pass(algorithm);
     // Step 1. Run a dummy pass to determine embedding capacity, if the algorithm is two-pass.
     if(!singlepass) {
@@ -623,12 +623,14 @@ int main(int argc, char **argv)
                     "this algorithm. Terminating.", (int)datafileinfo.st_size - result.bytes_processed);
             return 1;
         }
+        capacity = result.bytes_processed;
     }
 
     // Step 2. Do the actual embedding.
     movest_init_algorithm(algorithm);
+    int algparams[2] = { 0, capacity };
     movest_params p = {
-            argv[2], MOVEST_NO_PARAMS, NULL
+            argv[2], MOVEST_NO_PARAMS, algparams
     };
     movest_init_encoder(&p);
 
@@ -637,6 +639,7 @@ int main(int argc, char **argv)
     int ret = run_embedding(argv);
     if(ret != 0) return ret;
 
+    movest_result res = movest_finalise();
     av_log(NULL, AV_LOG_INFO, "Finished.");
-    return 0;
+    return res.error;
 }

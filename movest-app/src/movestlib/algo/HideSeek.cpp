@@ -3,7 +3,6 @@
 //
 
 #include "HideSeek.h"
-#include "../movest_connector.h"
 
 HideSeek::HideSeek() {}
 
@@ -61,6 +60,6 @@ void HideSeek::cond_embed(int16_t *mv, int bit) {
         if((bit & 1) && !(*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)++;
         if(!(bit & 1) && (*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)--;
         ++index;
-        ++bits_processed;
+        ++bitsProcessed;
     }
 }

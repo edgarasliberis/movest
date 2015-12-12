@@ -20,7 +20,8 @@ public:
 protected:
     std::fstream datafile;
     int flags = 0;
-    int bits_processed = 0;
+    ulong bitsProcessed = 0;
+    bool encoder;
 };
 
 static Algorithm *algorithm;

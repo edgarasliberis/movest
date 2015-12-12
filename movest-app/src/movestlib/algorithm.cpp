@@ -7,20 +7,24 @@
 
 #include "algorithm.h"
 #include "algo/HideSeek.h"
+#include "algo/RandomisedHideSeek.h"
 
 void Algorithm::initAsEncoder(movest_params *params) {
     datafile.open(params->filename, std::ios::in | std::ios::binary);
     flags = params->flags;
+    encoder = true;
 }
 
 void Algorithm::initAsDecoder(movest_params *params) {
     datafile.open(params->filename, std::ios::out | std::ios::binary);
     flags = params->flags;
+    encoder = false;
 }
 
 movest_result Algorithm::finalise() {
+    datafile.close();
     return movest_result {
-            bits_processed / 8,
+            uint(bitsProcessed / 8),
             0, NULL
     };
 }
@@ -40,6 +44,9 @@ void movest_init_algorithm(const char *algname) {
 
     if(std::strcmp(algname, "hidenseek") == 0) {
         algorithm = new HideSeek();
+    }
+    else if(std::strcmp(algname, "rand-hidenseek") == 0) {
+        algorithm = new RandomisedHideSeek();
     }
 }
 
