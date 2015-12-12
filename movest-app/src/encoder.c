@@ -586,7 +586,7 @@ int run_embedding(char** argv) {
 }
 
 int is_single_pass(const char* algorithm) {
-    return 1;
+    return 0;
 }
 
 int main(int argc, char **argv)

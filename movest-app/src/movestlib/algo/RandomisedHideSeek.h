@@ -6,32 +6,34 @@
 #define MOVEST_RANDOMISEDHIDESEEK_H
 
 #include "../algorithm.h"
+#include "HideSeek.h"
 #include <random>
 
+/**
+ * Pair structure to hold "data bit" to "MV number" mapping.
+ */
 struct Pair {
-    ulong f, s;
+    ulong bit, mv;
     bool operator<(const Pair &m) const {
-        return s < m.s;
+        return mv < m.mv;
     }
 };
 
-class RandomisedHideSeek : public Algorithm {
+class RandomisedHideSeek : public HideSeek {
 public:
-    RandomisedHideSeek();
-    void encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride);
-    void decode(int16_t (*mvs[2])[2], int mv_sample_log2, int mb_width, int mb_height, int mv_stride);
     void initAsEncoder(movest_params *params);
     void initAsDecoder(movest_params *params);
     movest_result finalise();
 
+protected:
+    void embedIntoMv(int16_t *mv);
+    void extractFromMv(int16_t val);
+
 private:
-    uint index = 0;
     uint fileSize;
     char *data;
     Pair *bitToMvMapping;
 
-    void embedIntoMv(int16_t *mv);
-    void extractFromMv(int16_t val);
     void initialiseMapping(const movest_params *params, int fileSize);
 };
 
