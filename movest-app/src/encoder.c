@@ -586,7 +586,7 @@ int run_embedding(char** argv) {
 }
 
 int is_single_pass(const char* algorithm) {
-    return 0;
+    return 1;
 }
 
 int main(int argc, char **argv)
@@ -620,7 +620,7 @@ int main(int argc, char **argv)
         av_log(NULL, AV_LOG_INFO, "Analysed. Embedding capacity is %d byte(s)\n", result.bytes_processed);
         if(!fits) {
             av_log(NULL, AV_LOG_INFO, "File can't be embedded fully, video's capacity is %d byte(s) short"
-                    "this algorithm. Terminating.", (int)datafileinfo.st_size - result.bytes_processed);
+                    " using this algorithm. Terminating.\n", (int)datafileinfo.st_size - result.bytes_processed);
             return 1;
         }
         capacity = result.bytes_processed;
@@ -634,7 +634,7 @@ int main(int argc, char **argv)
     };
     movest_init_encoder(&p);
 
-    av_log(NULL, AV_LOG_INFO, "Embedding...");
+    av_log(NULL, AV_LOG_INFO, "Embedding...\n ");
 
     int ret = run_embedding(argv);
     if(ret != 0) return ret;
