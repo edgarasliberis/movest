@@ -33,8 +33,7 @@ ExternalProject_Add(ffmpeg_proj DEPENDS movestlib
             --enable-nonfree
             --enable-libfdk-aac
             --disable-doc
-            --disable-programs
-#            --disable-pthreads
+            --disable-pthreads
             --enable-shared
             --enable-static
             --enable-runtime-cpudetect
