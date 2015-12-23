@@ -34,7 +34,7 @@ private:
     char *data;
     Pair *bitToMvMapping;
 
-    void initialiseMapping(const movest_params *params, int fileSize);
+    void initialiseMapping(const movest_params *params, uint fileSize);
 };
 
 

@@ -586,7 +586,8 @@ int run_embedding(char** argv) {
 }
 
 int is_single_pass(const char* algorithm) {
-    return 0;
+    if(strcmp(algorithm, "rand-hidenseek") == 0) return 0;
+    return 1;
 }
 
 int main(int argc, char **argv)
@@ -601,7 +602,7 @@ int main(int argc, char **argv)
     stat(argv[2], &datafileinfo);
     int capacity = 0;
 
-    const char* algorithm = "rand-hidenseek";
+    const char* algorithm = "hidenseek";
     int singlepass = is_single_pass(algorithm);
     // Step 1. Run a dummy pass to determine embedding capacity, if the algorithm is two-pass.
     if(!singlepass) {
