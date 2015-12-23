@@ -2,6 +2,7 @@
 // Created by el398 on 08/12/15.
 //
 
+#include <iostream>
 #include "HideSeek.h"
 
 void HideSeek::initAsEncoder(movest_params *params) {
@@ -16,13 +17,12 @@ void HideSeek::initAsDecoder(movest_params *params) {
 }
 
 void HideSeek::encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride) {
-    for (int mb_y = 1; mb_y < mb_height; ++mb_y) {
-        for (int mb_x = 1; mb_x < mb_width; ++mb_x) {
+    for (int mb_y = 0; mb_y < mb_height; ++mb_y) {
+        for (int mb_x = 0; mb_x < mb_width; ++mb_x) {
             int xy = mb_y * mv_stride + mb_x;
             if (mb_type[xy] != 1) {
-                for(int comp = 0; comp < 2; ++comp) {
-                    embedIntoMv(&mvs[xy][comp]);
-                }
+                embedIntoMv(&mvs[xy][0]);
+                embedIntoMv(&mvs[xy][1]);
             }
         }
     }
@@ -41,12 +41,14 @@ void HideSeek::embedIntoMv(int16_t *mv) {
     }
 }
 
-void HideSeek::decode(int16_t (*mvs[2])[2], int mv_sample_log2, int mb_width, int mb_height, int mv_stride){
-    for (int mb_y = 1; mb_y < mb_height; mb_y++) {
-        for (int mb_x = 1; mb_x < mb_width; mb_x++) {
+void HideSeek::decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_log2, int mb_width, int mb_height,
+                      int mv_stride, int mb_stride) {
+    for (int mb_y = 0; mb_y < mb_height; mb_y++) {
+        for (int mb_x = 0; mb_x < mb_width; mb_x++) {
             int xy = (mb_x + mb_y * mv_stride) << mv_sample_log2;
-            for(int comp = 0; comp < 2; ++comp) {
-                extractFromMv(mvs[0][xy][comp]);
+            if(mbtype_table[mb_x + mb_y * mb_stride] != 1) {
+                extractFromMv(mvs[0][xy][0]);
+                extractFromMv(mvs[0][xy][1]);
             }
         }
     }

@@ -22,10 +22,14 @@ void Algorithm::initAsDecoder(movest_params *params) {
 }
 
 movest_result Algorithm::finalise() {
+    int error = 0;
+
+    if(encoder && !datafile.eof()) {
+        error = 1;
+    }
     datafile.close();
     return movest_result {
-            uint(bitsProcessed / 8),
-            0, NULL
+            uint(bitsProcessed / 8), error
     };
 }
 
@@ -33,8 +37,9 @@ void movest_encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_he
     algorithm->encode(mvs, mb_type, mb_width, mb_height, mv_stride);
 }
 
-void movest_decode(int16_t (*mvs[2])[2], int mv_sample_log2, int mb_width, int mb_height, int mv_stride) {
-    algorithm->decode(mvs, mv_sample_log2, mb_width, mb_height, mv_stride);
+void movest_decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_log2, int mb_width, int mb_height, int mv_stride,
+                   int mb_stride) {
+    algorithm->decode(mvs, mbtype_table, mv_sample_log2, mb_width, mb_height, mv_stride, mb_stride);
 }
 
 void movest_init_algorithm(const char *algname) {

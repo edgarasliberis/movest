@@ -26,7 +26,6 @@ typedef struct {
 typedef struct {
     unsigned int bytes_processed;
     int error;
-    const char* errorMsg;
 } movest_result;
 
 void movest_init_encoder(movest_params *params);
@@ -34,7 +33,8 @@ void movest_init_decoder(movest_params *params);
 void movest_init_algorithm(const char *algname);
 movest_result movest_finalise();
 void movest_encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride);
-void movest_decode(int16_t (*mvs[2])[2], int mv_sample_log2, int mb_width, int mb_height, int mv_stride);
+void movest_decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_log2, int mb_width, int mb_height, int mv_stride,
+                   int mb_stride);
 
 #ifdef __cplusplus
 }
