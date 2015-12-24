@@ -122,8 +122,8 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    movest_init_algorithm("hidenseek");
-    int algparams[3] = {0, 172010, 501};
+    movest_init_algorithm("rand-hidenseek");
+    int algparams[3] = {0, 183559, 183559};
     movest_params p = {
             argv[2], MOVEST_NO_PARAMS, algparams
     };
