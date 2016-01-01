@@ -602,7 +602,7 @@ int main(int argc, char **argv)
     stat(argv[2], &datafileinfo);
     int capacity = 0;
 
-    const char* algorithm = "rand-hidenseek";
+    const char* algorithm = "hidenseek";
     int singlepass = is_single_pass(algorithm);
     // Step 1. Run a dummy pass to determine embedding capacity, if the algorithm is two-pass.
     if(!singlepass) {
@@ -641,6 +641,7 @@ int main(int argc, char **argv)
     if(ret != 0) return ret;
 
     movest_result res = movest_finalise();
+    av_log(NULL, AV_LOG_INFO, "Bytes processed: %d\n", res.bytes_processed);
     av_log(NULL, AV_LOG_INFO, "Finished.");
     return res.error;
 }
