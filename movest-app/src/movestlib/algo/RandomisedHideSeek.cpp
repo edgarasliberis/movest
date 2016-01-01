@@ -30,8 +30,8 @@ void RandomisedHideSeek::initAsDecoder(movest_params *params) {
     Algorithm::initAsDecoder(params);
     if(!(flags & MOVEST_DUMMY_PASS)) {
         fileSize = static_cast<uint*>(params->algParams)[2];
-        data = new char[fileSize]();
         initialiseMapping(params, fileSize);
+        data = new char[fileSize]();
     }
 }
 
@@ -66,12 +66,12 @@ void RandomisedHideSeek::initialiseMapping(const movest_params *params, uint fil
 
 void RandomisedHideSeek::embedIntoMv(int16_t *mv) {
     if(flags & MOVEST_DUMMY_PASS) {
-        if(*mv != 0 && *mv != 1) {
+        if(true /* *mv != 0 && *mv != 1*/) {
             bitsProcessed++;
         }
     } else {
         if(index >= 8*fileSize) return;
-        if(*mv != 0 && *mv != 1) {
+        if(true /* *mv != 0 && *mv != 1*/) {
             if (bitsProcessed == bitToMvMapping[index].mv) {
                 // We found a MV that's next on a list to be modified.
                 ulong dataBit = bitToMvMapping[index].bit;
@@ -82,14 +82,14 @@ void RandomisedHideSeek::embedIntoMv(int16_t *mv) {
 
                 index++;
             }
-            bitsProcessed++;
         }
+        bitsProcessed++;
     }
 }
 
 void RandomisedHideSeek::extractFromMv(int16_t val) {
     if(index >= 8*fileSize) return;
-    if (val != 0 && val != 1) {
+    if (true/* val != 0 && val != 1*/) {
         if (bitsProcessed == bitToMvMapping[index].mv) {
             // We found a MV that was next on a list to be modified.
             ulong dataBit = bitToMvMapping[index].bit;
