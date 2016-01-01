@@ -30,6 +30,7 @@ void HideSeek::encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb
 
 void HideSeek::embedIntoMv(int16_t *mv) {
     int bit = symb >> index;
+    // Equivalent to setting the LSB of '*mv' to the one of 'bit'.
     if((bit & 1) && !(*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)++;
     if(!(bit & 1) && (*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)--;
     ++index;

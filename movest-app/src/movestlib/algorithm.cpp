@@ -9,6 +9,7 @@
 #include "algo/HideSeek.h"
 #include "algo/RandomisedHideSeek.h"
 #include "algo/DumpMVs.h"
+#include "algo/MSteg.h"
 
 void Algorithm::initAsEncoder(movest_params *params) {
     datafile.open(params->filename, std::ios::in | std::ios::binary);
@@ -56,6 +57,9 @@ void movest_init_algorithm(const char *algname) {
     }
     else if(std::strcmp(algname, "dumpmvs") == 0) {
         algorithm = new DumpMVs();
+    }
+    else if(std::strcmp(algname, "msteg") == 0) {
+        algorithm = new MSteg();
     }
 }
 
