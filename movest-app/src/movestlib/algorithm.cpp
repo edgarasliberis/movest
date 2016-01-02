@@ -11,6 +11,7 @@
 #include "algo/DumpMVs.h"
 #include "algo/MSteg.h"
 #include "algo/F3.h"
+#include "algo/F4.h"
 
 void Algorithm::initAsEncoder(movest_params *params) {
     datafile.open(params->filename, std::ios::in | std::ios::binary);
@@ -64,6 +65,9 @@ void movest_init_algorithm(const char *algname) {
     }
     else if(std::strcmp(algname, "f3") == 0) {
         algorithm = new F3();
+    }
+    else if(std::strcmp(algname, "f4") == 0) {
+        algorithm = new F4();
     }
 }
 
