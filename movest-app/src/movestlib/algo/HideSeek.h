@@ -19,8 +19,6 @@ protected:
     virtual void extractFromMv(int16_t val);
     virtual void embedIntoMv(int16_t *mv);
     uint index = 0;
-
-private:
     char symb = 0;
 };
 
