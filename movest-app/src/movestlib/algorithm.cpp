@@ -13,6 +13,7 @@
 #include "algo/F3.h"
 #include "algo/F4.h"
 #include "algo/MVSteg.h"
+#include "algo/OutGuess1.h"
 
 void Algorithm::initAsEncoder(movest_params *params) {
     datafile.open(params->filename, std::ios::in | std::ios::binary);
@@ -72,6 +73,9 @@ void movest_init_algorithm(const char *algname) {
     }
     else if(std::strcmp(algname, "mvsteg") == 0) {
         algorithm = new MVSteg();
+    }
+    else if(std::strcmp(algname, "outguess1") == 0) {
+        algorithm = new OutGuess1();
     }
 }
 
