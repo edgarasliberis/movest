@@ -49,7 +49,7 @@ void HideSeek::decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sampl
     for (int mb_y = 0; mb_y < mb_height; mb_y++) {
         for (int mb_x = 0; mb_x < mb_width; mb_x++) {
             int xy = (mb_x + mb_y * mv_stride) << mv_sample_log2;
-            if(!(mbtype_table[mb_x + mb_y * mb_stride] & DEC_MB_TYPE_SKIP)) {
+            if(mbtype_table[mb_x + mb_y * mb_stride] != 1) {
                 extractFromMv(mvs[0][xy][0]);
                 extractFromMv(mvs[0][xy][1]);
             }
