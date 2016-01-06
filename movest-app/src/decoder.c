@@ -122,8 +122,8 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    movest_init_algorithm("dumpmvs");
-    int algparams[3] = {0, 183559, 183559};
+    movest_init_algorithm("rand-hidenseek");
+    int algparams[3] = {0, 2337555, 12000};
     movest_params p = {
             argv[2], MOVEST_NO_PARAMS, algparams
     };
@@ -196,6 +196,7 @@ int main(int argc, char **argv)
     if(ret < 0) return ret;
 
     movest_result res = movest_finalise();
+    fprintf(stderr, "Bytes processed: %d\n", res.bytes_processed);
 
     return res.error;
 }

@@ -30,11 +30,11 @@ protected:
     void extractFromMv(int16_t val);
 
 private:
-    uint fileSize;
-    char *data;
+    uint fileSize, dataSize;
+    unsigned char *data;
     Pair *bitToMvMapping;
 
-    void initialiseMapping(const movest_params *params, uint fileSize);
+    void initialiseMapping(const movest_params *params, uint dataSize);
 };
 
 
