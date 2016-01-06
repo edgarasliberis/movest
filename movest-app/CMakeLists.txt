@@ -43,10 +43,10 @@ ExternalProject_Add(ffmpeg_proj DEPENDS movestlib
         INSTALL_COMMAND make install
 )
 
-add_library(librscode SHARED IMPORTED)
-set_property(TARGET librscode PROPERTY IMPORTED_LOCATION ${EP_INSTALL}/lib/librscode.so)
-add_dependencies(movest_enc librscode)
-add_dependencies(movest_dec librscode)
+#add_library(librscode SHARED IMPORTED)
+#set_property(TARGET librscode PROPERTY IMPORTED_LOCATION ${EP_INSTALL}/lib/librscode.so)
+#add_dependencies(movest_enc librscode)
+#add_dependencies(movest_dec librscode)
 
 #set(FFMS2_DIR ${CMAKE_CURRENT_BINARY_DIR}/libs/ffms2)
 #ExternalProject_Add(
@@ -136,8 +136,8 @@ target_link_libraries(movest_dec libavfilter)
 target_link_libraries(movest_dec libavutil)
 target_link_libraries(movest_dec libmovestlib)
 
-target_link_libraries(movest_enc librscode)
-target_link_libraries(movest_dec librscode)
+#target_link_libraries(movest_enc librscode)
+#target_link_libraries(movest_dec librscode)
 
 #target_link_libraries(movest libx264)
 #target_link_libraries(movest m)
