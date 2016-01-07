@@ -2,3 +2,5 @@
 **/.idea
 *.iml
 
+movest-analysis/*.txt
+movest-analysis/*.m~
