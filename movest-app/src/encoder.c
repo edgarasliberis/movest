@@ -603,7 +603,7 @@ int main(int argc, char **argv)
     stat(argv[2], &datafileinfo);
     int capacity = 0;
 
-    const char* algorithm = "outguess1";
+    const char* algorithm = "mvsteg";
     int singlepass = is_single_pass(algorithm);
     // Step 1. Run a dummy pass to determine embedding capacity, if the algorithm is two-pass.
     if(!singlepass) {

@@ -6,10 +6,9 @@
 #include <iostream>
 #include "MVSteg.h"
 
-#define DEC_MB_TYPE_SKIP 0x0800
 // Chosen by a fair dice roll
 #define THRESH 5
-#define MAX_THRESH 32
+#define MAX_THRESH 31
 
 void MVSteg::initAsEncoder(movest_params *params) {
     Algorithm::initAsEncoder(params);
@@ -33,6 +32,20 @@ void MVSteg::encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_h
     }
 }
 
+void MVSteg::modifyMV(int16_t *mv) {
+    int bit = symb >> index;
+//    if((bit & 1) ^ (*mv & 1)) {
+//        if(!(flags & MOVEST_DUMMY_PASS)){
+//            if (*mv > 0) (*mv)--;
+//            else (*mv)++;
+//        }
+////        *mv &= ~1;
+////        *mv |= bit & 1;
+//    }
+    if((bit & 1) && !(*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)++;
+    if(!(bit & 1) && (*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)--;
+}
+
 void MVSteg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
     double mvValX = double(*mvX) / 2;
     double mvValY = double(*mvY) / 2;
@@ -40,16 +53,17 @@ void MVSteg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
 
     if(length < THRESH || abs(*mvX) > MAX_THRESH || abs(*mvY) > MAX_THRESH) return;
 
-    int16_t *mv = (abs(*mvX) > abs(*mvY))? mvX : mvY;
+    if (abs(*mvX) > abs(*mvY)) modifyMV(mvX);
+    else modifyMV(mvY);
 
-    int bit = symb >> index;
-    if((bit & 1) ^ (*mv & 1)) {
-        if(abs(*mv) == MAX_THRESH) return;
-        if(!(flags & MOVEST_DUMMY_PASS)){
-            if (*mv > 0) (*mv)++;
-            else (*mv)--;
-        }
-    }
+    if (abs(*mvX) > abs(*mvY)) modifyMV(mvX);
+    else modifyMV(mvY);
+
+    mvValX = double(*mvX) / 2;
+    mvValY = double(*mvY) / 2;
+    if(std::hypot(mvValX, mvValY) < THRESH
+       || abs(*mvX) > MAX_THRESH
+       || abs(*mvY) > MAX_THRESH) return;
 
     index++;
     bitsProcessed++;

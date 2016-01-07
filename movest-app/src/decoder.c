@@ -122,7 +122,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    movest_init_algorithm("outguess1");
+    movest_init_algorithm("mvsteg");
     int algparams[3] = {0, 183559, 12000};
     movest_params p = {
             argv[2], MOVEST_NO_PARAMS, algparams
