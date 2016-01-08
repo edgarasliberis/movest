@@ -15,7 +15,8 @@ void DumpMVs::decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample
     for (int mb_y = 0; mb_y < mb_height; mb_y++) {
         for (int mb_x = 0; mb_x < mb_width; mb_x++) {
             int xy = (mb_x + mb_y * mv_stride) << mv_sample_log2;
-            datafile << mvs[0][xy][0] << ", " << mvs[0][xy][1] << "; ";
+            datafile << mvs[0][xy][0] << ", " << mvs[0][xy][1] << ", "
+                     << int(mbtype_table[mb_x + mb_y * mb_stride] == 1) << "; ";
             bitsProcessed += 2;
         }
         datafile << std::endl;
