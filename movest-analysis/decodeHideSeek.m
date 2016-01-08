@@ -2,10 +2,7 @@ function bytes = decodeHideSeek(mvs, types)
 %DECODEHIDESEEK Groups LSBs of the input matrix into bytes, filtering
 %according to the 'types' parameter.
 
-mvsSeqorder = permute(lsbplane(mvs), [2, 1, 3]);
-typesSeqorder = permute(types, [2, 1, 3]);
-bitlist = mvsSeqorder(typesSeqorder == 0);
-
+bitlist = lsbplane(typedMvs(mvs, types));
 bitsToTake = size(bitlist, 1) - mod(size(bitlist, 1), 8);
 bitsMat = reshape(bitlist(1:bitsToTake), 8, []);
 
