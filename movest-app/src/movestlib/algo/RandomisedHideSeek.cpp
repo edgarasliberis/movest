@@ -64,12 +64,14 @@ void RandomisedHideSeek::initAsDecoder(movest_params *params) {
 
 void RandomisedHideSeek::initialiseMapping(const movest_params *params, uint dataSize) {
     // Build a mapping from a data bit to the particular MV
-    uint seed = static_cast<uint*>(params->algParams)[0];
-    uint capacity = static_cast<uint*>(params->algParams)[1];
+    AlgOptions *opt = static_cast<AlgOptions*>(params->algParams);
+    uint64_t capacity = opt->byteCapacity;
 
     assert(encoder || dataSize <= capacity);
 
+    std::seed_seq seed(opt->seed, opt->seedEnd);
     std::default_random_engine rng(seed);
+
     ulong bitCapacity = ((ulong) capacity) * 8;
     std::uniform_int_distribution<ulong> dist(0, bitCapacity);
     ulong bitDataSize = ((ulong) dataSize) * 8;

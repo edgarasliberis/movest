@@ -19,6 +19,11 @@ struct Pair {
     }
 };
 
+struct AlgOptions {
+    char *seed, *seedEnd;
+    uint32_t byteCapacity;
+};
+
 class RandomisedHideSeek : public HideSeek {
 public:
     void initAsEncoder(movest_params *params);
