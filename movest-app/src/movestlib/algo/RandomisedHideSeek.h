@@ -22,6 +22,7 @@ struct Pair {
 struct AlgOptions {
     char *seed, *seedEnd;
     uint32_t byteCapacity;
+    uint32_t fileSize; // Decoder only
 };
 
 class RandomisedHideSeek : public HideSeek {

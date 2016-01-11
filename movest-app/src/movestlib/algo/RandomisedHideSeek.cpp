@@ -49,7 +49,7 @@ void RandomisedHideSeek::initAsDecoder(movest_params *params) {
     Algorithm::initAsDecoder(params);
     if(!(flags & MOVEST_DUMMY_PASS)) {
         initialize_ecc();
-        fileSize = static_cast<uint*>(params->algParams)[2];
+        fileSize = static_cast<AlgOptions*>(params->algParams)->fileSize;
 
         // Total size of embedded data:
         // fileSize + NPAR parity bytes for every (BLOCKSIZE - NPAR) bytes of the file
