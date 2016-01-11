@@ -1,6 +1,8 @@
-//
-// Created by el398 on 08/12/15.
-//
+/*
+ * Copyright (c) 2016 Edgar Liberis
+ *
+ * Modified version of FFmpeg transcoding example to be used to start and drive the embedding process.
+ */
 
 /*
  * Copyright (c) 2010 Nicolas George
@@ -41,7 +43,9 @@
 #include <libavutil/pixdesc.h>
 
 #include <sys/stat.h>
+#include <getopt.h>
 
+#include <stdbool.h>
 #include "movestlib/movest_connector.h"
 
 static AVFormatContext *ifmt_ctx;
@@ -472,7 +476,7 @@ static int flush_encoder(unsigned int stream_index)
     return ret;
 }
 
-int run_embedding(char** argv) {
+int run_embedding(char *inputFile, char *outputFile) {
     int ret;
     AVPacket packet = { .data = NULL, .size = 0 };
     AVFrame *frame = NULL;
@@ -485,9 +489,9 @@ int run_embedding(char** argv) {
     av_register_all();
     avfilter_register_all();
 
-    if ((ret = open_input_file(argv[1])) < 0)
+    if ((ret = open_input_file(inputFile)) < 0)
         goto end;
-    if ((ret = open_output_file(argv[3])) < 0)
+    if ((ret = open_output_file(outputFile)) < 0)
         goto end;
     if ((ret = init_filters()) < 0)
         goto end;
@@ -585,36 +589,115 @@ int run_embedding(char** argv) {
     return ret ? 1 : 0;
 }
 
-int is_single_pass(const char* algorithm) {
-    if(strcmp(algorithm, "rand-hidenseek") == 0) return 0;
-    if(strcmp(algorithm, "outguess1") == 0) return 0;
-    return 1;
+bool is_supported_algorithm(const char *algname) {
+    return strcmp(algname, "hidenseek") == 0
+        || strcmp(algname, "rand-hidenseek") == 0
+        || strcmp(algname, "dummypass") == 0
+        || strcmp(algname, "msteg") == 0
+        || strcmp(algname, "f3") == 0
+        || strcmp(algname, "f4") == 0
+        || strcmp(algname, "mvsteg") == 0
+        || strcmp(algname, "outguess1") == 0;
+}
+
+bool is_single_pass(const char* algorithm) {
+    return strcmp(algorithm, "rand-hidenseek") != 0
+        && strcmp(algorithm, "outguess1") != 0;
 }
 
 int main(int argc, char **argv)
 {
-    if (argc < 4) {
-        av_log(NULL, AV_LOG_ERROR, "Usage: %s <input file> <datafile> <output file> ...other params...\n", argv[0]);
+    char* algorithm = NULL;
+    char* dataFile = NULL;
+    char* seed = "\0\0\0\0";
+    static struct option long_options[] =
+        {
+            {"algorithm", required_argument, 0, 'a'},
+            {"data", required_argument, 0, 'd'},
+            {"seed", required_argument, 0, 's'},
+            {"help", no_argument, 0, 'h'}
+        };
+
+    int option_index = -1, c;
+    while((c = getopt_long(argc, argv, "a:d:s:h", long_options, &option_index)) != -1) {
+        switch(c) {
+            case 'a':
+                if(!optarg || is_supported_algorithm(optarg) == 0) {
+                    av_log(NULL, AV_LOG_ERROR, "No or unsupported algorithm provided (%s).\n", optarg);
+                    return 1;
+                }
+                algorithm = optarg;
+                break;
+            case 'd':
+                if(!optarg) {
+                    av_log(NULL, AV_LOG_ERROR, "-d/--data requires a path to a payload file as an argument.\n");
+                    return 1;
+                }
+                dataFile = optarg;
+                break;
+            case 's':
+                if(!optarg) {
+                    av_log(NULL, AV_LOG_ERROR, "-s/--seed requires seed data (a string) as an argument.\n");
+                    return 1;
+                }
+                seed = optarg;
+                break;
+            case 'h':
+                // Print some useful help.
+                return 0;
+            default:
+                av_log(NULL, AV_LOG_ERROR, "Unknown option provided\n");
+                return 1;
+        }
+    }
+
+    char* inputFile = argv[optind++];
+    char* outputFile = argv[optind++];
+    if(optind != argc) {
+        av_log(NULL, AV_LOG_ERROR, "Incorrect number of arguments provided.\n"
+        "Usage:\n"
+        "%s [options] <input_video> <output_video>\n", argv[0]);
         return 1;
+    }
+
+    if(!algorithm) {
+        av_log(NULL, AV_LOG_INFO, "Algorithm not specified. Using 'mvsteg' as a default.\n");
+        algorithm = "mvsteg";
+    }
+
+    if(!dataFile && strcmp(algorithm, "dummypass") != 0) {
+        av_log(NULL, AV_LOG_ERROR,
+               "Algorithm requires a data file with payload data, that would get embedded. "
+               "Use --data <payload_file> to specify a data file.");
+    }
+
+    av_log(NULL, AV_LOG_INFO, "Input file: %s\n", inputFile);
+    av_log(NULL, AV_LOG_INFO, "Output file: %s\n", outputFile);
+    av_log(NULL, AV_LOG_INFO, "Algorithm: %s\n", algorithm);
+    if(dataFile) {
+        av_log(NULL, AV_LOG_INFO, "Data file: %s\n", dataFile);
+    }
+
+    bool singlePass = is_single_pass(algorithm);
+    if(!singlePass) {
+        av_log(NULL, AV_LOG_INFO, "Seed: %s\n", seed);
     }
 
     // Get some information about the file.
     struct stat datafileinfo;
-    stat(argv[2], &datafileinfo);
-    int capacity = 0;
+    stat(dataFile, &datafileinfo);
+    uint32_t capacity = 0;
 
-    const char* algorithm = "mvsteg";
-    int singlepass = is_single_pass(algorithm);
     // Step 1. Run a dummy pass to determine embedding capacity, if the algorithm is two-pass.
-    if(!singlepass) {
+    if(!singlePass) {
         movest_init_algorithm(algorithm);
         movest_params p = {
-                argv[2], MOVEST_DUMMY_PASS, NULL
+                dataFile, MOVEST_DUMMY_PASS, NULL
         };
         movest_init_encoder(&p);
         av_log(NULL, AV_LOG_INFO, "Analysing the video for embedding capacity...\n");
 
-        int ret = run_embedding(argv);
+        int ret = run_embedding(inputFile, outputFile);
         if(ret != 0) return ret;
 
         movest_result result = movest_finalise();
@@ -630,15 +713,19 @@ int main(int argc, char **argv)
 
     // Step 2. Do the actual embedding.
     movest_init_algorithm(algorithm);
-    int algparams[2] = { 0, capacity };
+    struct algoptions {
+        intptr_t seed, seedEnd;
+        uint32_t byteCapacity;
+    };
+    struct algoptions algparams = { (intptr_t)seed, (intptr_t)(seed + strlen(seed)), capacity };
     movest_params p = {
-            argv[2], MOVEST_NO_PARAMS, algparams
+            inputFile, MOVEST_NO_PARAMS, &algparams
     };
     movest_init_encoder(&p);
 
     av_log(NULL, AV_LOG_INFO, "Embedding...\n ");
 
-    int ret = run_embedding(argv);
+    int ret = run_embedding(inputFile, outputFile);
     if(ret != 0) return ret;
 
     movest_result res = movest_finalise();

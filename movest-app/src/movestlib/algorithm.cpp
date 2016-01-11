@@ -59,7 +59,7 @@ void movest_init_algorithm(const char *algname) {
     else if(std::strcmp(algname, "rand-hidenseek") == 0) {
         algorithm = new RandomisedHideSeek();
     }
-    else if(std::strcmp(algname, "dumpmvs") == 0) {
+    else if(std::strcmp(algname, "dumpmvs") == 0 || std::strcmp(algname, "dummypass") == 0) {
         algorithm = new DumpMVs();
     }
     else if(std::strcmp(algname, "msteg") == 0) {
