@@ -16,7 +16,7 @@ public:
     void initAsDecoder(movest_params *params);
 
 protected:
-    void modifyMV(int16_t *mv);
+    virtual void modifyMV(int16_t *mv);
     virtual void extractFromMv(int16_t mv_x, int16_t mv_y);
     virtual void embedIntoMv(int16_t *mv_x, int16_t *mv_y);
     uint index = 0;
