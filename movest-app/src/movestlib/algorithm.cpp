@@ -8,7 +8,7 @@
 #include "algorithm.h"
 #include "algo/HideSeek.h"
 #include "algo/RandomisedHideSeek.h"
-#include "algo/DumpMVs.h"
+#include "algo/Dummy.h"
 #include "algo/MSteg.h"
 #include "algo/F3.h"
 #include "algo/F4.h"
@@ -60,7 +60,7 @@ void movest_init_algorithm(const char *algname) {
         algorithm = new RandomisedHideSeek();
     }
     else if(std::strcmp(algname, "dumpmvs") == 0 || std::strcmp(algname, "dummypass") == 0) {
-        algorithm = new DumpMVs();
+        algorithm = new Dummy();
     }
     else if(std::strcmp(algname, "msteg") == 0) {
         algorithm = new MSteg();
