@@ -123,7 +123,8 @@ bool is_supported_algorithm(const char *algname) {
            || strcmp(algname, "f3") == 0
            || strcmp(algname, "f4") == 0
            || strcmp(algname, "mvsteg") == 0
-           || strcmp(algname, "outguess1") == 0;
+           || strcmp(algname, "outguess1") == 0
+           || strcmp(algname, "mvsteg-vuln") == 0;
 }
 
 int main(int argc, char **argv)
