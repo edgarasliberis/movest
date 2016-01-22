@@ -1,0 +1,105 @@
+\documentclass[11pt,british,usenames,dvipsnames,hypens,final]{scrartcl}
+%% Page setup
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm,headheight=3cm,headsep=0.5cm,footskip=1.5cm}
+\usepackage[unicode=true,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=1,
+ breaklinks=false,pdfborder={0 0 0},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{pdftitle={el398 Project Progress Report}, pdfauthor={E Liberis}}
+
+%% Font and text flow setup
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{xunicode}
+
+\usepackage{polyglossia}
+\setdefaultlanguage[variant=british]{english}
+
+\usepackage{fontspec}
+\setmainfont[Mapping=tex-text, Ligatures=TeX, Scale=1.1]{TeX Gyre Pagella}
+\setsansfont[Mapping=tex-text, LetterSpace=1]{Neue Haas Grotesk Display Pro}
+\setmonofont[Mapping=tex-text, Scale=1.1]{Latin Modern Mono}
+
+\usepackage{setspace}
+\setstretch{1.2}
+
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{0pt}
+
+%% List setup
+\renewcommand\thesubsection{\arabic{subsection}.}
+\usepackage{enumitem}
+\setlist{nolistsep}
+\setitemize{itemsep=2pt,topsep=0pt,parsep=5pt,partopsep=0pt}
+
+%% Misc appearance things
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\usepackage{multicol}
+\usepackage{alltt}
+
+%\usepackage{titlesec}
+%\titlespacing\section{0pt}{5pt plus 4pt minus 2pt}{1.5pt plus 0.5pt minus 0.5pt}
+%\titlespacing\subsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
+
+%% Some useful macros
+\newcommand{\arr}{\textrightarrow\ }
+\newcommand{\textsb}[1]{\textsf{\textbf{#1}}}
+\newcommand{\textsbc}[1]{\sffamily \textsc{\textbf{#1}}}
+
+\begin{document}
+% Title stuff
+{%
+\centering
+\textsbc{PROJECT PROGRESS REPORT} \\
+\huge \sffamily \textbf{Video Steganography using Motion Vectors}
+\par\bigskip
+}
+
+{\centering
+\begin{tabular}{rlrl}
+\textsbc{STUDENT} & E Liberis, \texttt{el398@cam.ac.uk} & \textsbc{OVERSEERS} & Dr. D J Greaves\\
+                  & Homerton College                    &                     & Prof. J Daugman\\[4pt]
+\textsbc{SUPERVISOR} & D R Thomas               & \textsbc{DIRECTOR}   & Dr. J Fawcett\\
+                     & \texttt{drt24@cam.ac.uk} & \textsbc{OF STUDIES} & Dr. B Roman (former)
+\end{tabular}
+\par\bigskip
+}
+
+The project is currently on track despite some difficulties encountered at the very beginning of the implementation. No major changes were made to the proposal, except a few minor adjustments to the original approach in order to mitigate the issues I had.
+
+Implementing the modification of \emph{motion vectors} (MV) involved analysing and updating one of the existing video transcoding libraries to call my modification routines at appropriate times. Two obvious candidates were \texttt{ffmpeg} (multipurpose video encoder / decoder) and \texttt{libx264} (exclusively H.264 encoder; also used by \texttt{ffmpeg}). I misjudged the complexity (as well as the code quality and clarity) of those libraries, so I spent two extra weeks understanding the dataflow to find suitable code injection points. To speed up this process I decided to focus on \texttt{ffmpeg} and exclude \texttt{libx264}. This change means that the project now uses the  \texttt{mpeg4} codec (fully contained within \texttt{ffmpeg}), instead of its successor, H.264, which was planned originally. This switch, however, doesn't affect the core of the project at all, and time lost has been covered by the planned "catch-up time" in the timeline.
+
+Planned extensions have been updated to account for what I discovered during the development and to more realistically fit the remaining time:
+\begin{itemize}
+\item As an extension, the application will offer user data encryption prior to embedding (not essential, but nevertheless very useful functionality, so it should be seen as an extension).
+\item Implement a more advanced LSB embedding algorithm (current options are good enough, but it would be interesting to iterate upon what is currently implemented to minimise the footprint on a video file left by the embedding process).
+\end{itemize}
+
+Another unexpected situation was my machine's permanent HDD failure, but the backup plan has proven useful in mitigating this quickly. 
+
+Otherwise, the implementation went according to plan. An end-user tool to perform steganography was successfully created. Most of planned algorithms were implemented: 
+\begin{multicols}{2}
+\begin{itemize}
+\item Hide \& Seek (sequential embedding)
+\item Variant of JSteg (as previous, but avoiding certain values)
+\item F3 and F4 (use different value changing strategy)
+\item Randomised Hide \& Seek (distributes bits uniformly across the video)
+\item OutGuess (same + filtering)
+\item Zhang's algorithm (uses length and phase information of MV)
+\end{itemize}
+\end{multicols}
+
+The latter makes some suspicious design decisions, so I implemented my own version of this algorithm, which I intend to evaluate against the original. 
+
+As promised, useful steganalytic routines for Matlab were implemented, including extracting values and LSBs of MVs; plotting LSBs and histogram data, $\chi^2$ attack, etc. All of these provide useful information and will be used extensively during the evaluation of aforementioned algorithms.
+
+List of remaining tasks before write-up:
+\begin{itemize}
+\item Perform user study to test whether videos with payload can be reliably distinguished visually. 
+\item Perform systematic evaluation of the algorithms and write up the results.
+\item Implement extension tasks and additional evaluation, if time permits.
+\end{itemize} 
+
+\end{document}
