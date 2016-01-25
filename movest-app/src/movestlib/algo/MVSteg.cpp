@@ -21,17 +21,6 @@ void MVSteg::initAsDecoder(movest_params *params) {
     Algorithm::initAsDecoder(params);
 }
 
-void MVSteg::encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride) {
-    for (int mb_y = 0; mb_y < mb_height; ++mb_y) {
-        for (int mb_x = 0; mb_x < mb_width; ++mb_x) {
-            int xy = mb_y * mv_stride + mb_x;
-            if (mb_type[xy] == 2) {
-                embedIntoMv(&mvs[xy][0], &mvs[xy][1]);
-            }
-        }
-    }
-}
-
 void MVSteg::modifyMV(int16_t *mv) {
     int bit = symb >> index;
     if((bit & 1) ^ (*mv & 1)) {
@@ -42,7 +31,7 @@ void MVSteg::modifyMV(int16_t *mv) {
     }
 }
 
-void MVSteg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
+void MVSteg::embedToPair(int16_t *mvX, int16_t *mvY) {
     double mvValX = double(*mvX) / 2;
     double mvValY = double(*mvY) / 2;
     double length = std::hypot(mvValX, mvValY);
@@ -73,20 +62,7 @@ void MVSteg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
     }
 }
 
-void MVSteg::decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_log2, int mb_width, int mb_height,
-                      int mv_stride, int mb_stride) {
-    for (int mb_y = 0; mb_y < mb_height; mb_y++) {
-        for (int mb_x = 0; mb_x < mb_width; mb_x++) {
-            int xy = (mb_x + mb_y * mv_stride) << mv_sample_log2;
-            // Type mismatch
-            if(mbtype_table[mb_x + mb_y * mb_stride] != 1) {
-                extractFromMv(mvs[0][xy][0], mvs[0][xy][1]);
-            }
-        }
-    }
-}
-
-void MVSteg::extractFromMv(int16_t mvX, int16_t mvY) {
+void MVSteg::extractFromPair(int16_t mvX, int16_t mvY) {
     double mvValX = double(mvX) / 2;
     double mvValY = double(mvY) / 2;
     double length = std::hypot(mvValX, mvValY);

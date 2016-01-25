@@ -9,6 +9,8 @@
 #include "HideSeek.h"
 #include <random>
 
+#define SEED_SIZE 8
+
 /**
  * Pair structure to hold "data bit" to "MV number" mapping.
  */
@@ -20,7 +22,6 @@ struct Pair {
 };
 
 struct AlgOptions {
-    char *seed, *seedEnd;
     uint32_t byteCapacity;
     uint32_t fileSize; // Decoder only
 };
@@ -40,7 +41,7 @@ private:
     unsigned char *data;
     Pair *bitToMvMapping;
 
-    void initialiseMapping(const movest_params *params, uint dataSize);
+    void initialiseMapping(AlgOptions *algParams, uint dataSize);
 };
 
 
