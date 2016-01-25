@@ -67,7 +67,7 @@
 \par\bigskip
 }
 
-The project is currently on track despite some difficulties encountered at the very beginning of the implementation. No major changes were made to the proposal, except a few minor adjustments to the original approach in order to mitigate the issues I had.
+The project is currently on track despite some difficulties encountered at the very beginning of the implementation. No major changes were made to the proposal, except a few minor adjustments to the original approach in order to mitigate the issues I had. I am currently at Week 13 -- 14 (Jan 14 -- Jan 28) milestone, with some evaluation tasks postponed to Weeks 15 -- 16 ("remaining evaluation work").
 
 Implementing the modification of \emph{motion vectors} (MV) involved analysing and updating one of the existing video transcoding libraries to call my modification routines at appropriate times. Two obvious candidates were \texttt{ffmpeg} (multipurpose video encoder / decoder) and \texttt{libx264} (exclusively H.264 encoder; also used by \texttt{ffmpeg}). I misjudged the complexity (as well as the code quality and clarity) of those libraries, so I spent two extra weeks understanding the dataflow to find suitable code injection points. To speed up this process I decided to focus on \texttt{ffmpeg} and exclude \texttt{libx264}. This change means that the project now uses the  \texttt{mpeg4} codec (fully contained within \texttt{ffmpeg}), instead of its successor, H.264, which was planned originally. This switch, however, doesn't affect the core of the project at all, and time lost has been covered by the planned "catch-up time" in the timeline.
 
@@ -79,6 +79,7 @@ Planned extensions have been updated to account for what I discovered during the
 
 Another unexpected situation was my machine's permanent HDD failure, but the backup plan has proven useful in mitigating this quickly. 
 
+\newpage
 Otherwise, the implementation went according to plan. An end-user tool to perform steganography was successfully created. Most of planned algorithms were implemented: 
 \begin{multicols}{2}
 \begin{itemize}
