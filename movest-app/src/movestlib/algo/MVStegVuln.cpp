@@ -21,7 +21,7 @@ void MVStegVuln::modifyMV(int16_t *mv) {
     }
 }
 
-void MVStegVuln::embedIntoMv(int16_t *mvX, int16_t *mvY) {
+void MVStegVuln::embedToPair(int16_t *mvX, int16_t *mvY) {
     double mvValX = double(*mvX) / 2;
     double mvValY = double(*mvY) / 2;
     double length = std::hypot(mvValX, mvValY);
@@ -53,7 +53,7 @@ void MVStegVuln::embedIntoMv(int16_t *mvX, int16_t *mvY) {
     }
 }
 
-void MVStegVuln::extractFromMv(int16_t mvX, int16_t mvY) {
+void MVStegVuln::extractFromPair(int16_t mvX, int16_t mvY) {
     double mvValX = double(mvX) / 2;
     double mvValY = double(mvY) / 2;
     double length = std::hypot(mvValX, mvValY);

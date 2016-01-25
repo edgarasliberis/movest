@@ -22,3 +22,11 @@ void Dummy::decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_l
     }
     datafile << std::endl;
 }
+
+void Dummy::embedToPair(int16_t *mvX, int16_t *mvY) {
+
+}
+
+void Dummy::extractFromPair(int16_t mvX, int16_t mvY) {
+
+}

@@ -14,12 +14,13 @@ extern "C" {
 typedef enum {
     MOVEST_NO_PARAMS = 0,
     MOVEST_DUMMY_PASS = 1,
-    MOVEST_EXTRACT_MVS = 1
+    MOVEST_ENABLE_ENCRYPTION = 2
 } movest_flags;
 
 typedef struct {
     const char *filename;
     movest_flags flags;
+    const char *password;
     void *algParams;
 } movest_params;
 
