@@ -133,7 +133,7 @@ void RandomisedHideSeek::extractFromMv(int16_t val) {
 }
 
 movest_result RandomisedHideSeek::finalise() {
-    if(!encoder) {
+    if(!encoder && !(flags & MOVEST_DUMMY_PASS)) {
         uint currentPos = 0;
         while(currentPos < dataSize) {
             uint blockSize = std::min((uint)BLOCKSIZE, dataSize - currentPos);
