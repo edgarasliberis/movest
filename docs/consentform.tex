@@ -1,0 +1,120 @@
+\documentclass[12pt,british,usenames,dvipsnames,hypens,final]{scrartcl}
+%% Page setup
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=1.5cm,lmargin=2cm,rmargin=2cm,headheight=3cm,headsep=0.5cm,footskip=1.5cm}
+\usepackage[unicode=true,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=1,
+ breaklinks=false,pdfborder={0 0 0},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{pdftitle={el398 Experiment Consent Form}, pdfauthor={E Liberis}}
+
+%% Font and text flow setup
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{xunicode}
+\usepackage{array}
+
+\usepackage{polyglossia}
+\setdefaultlanguage[variant=british]{english}
+
+\usepackage{fontspec}
+\setmainfont[Mapping=tex-text, Ligatures=TeX]{TeX Gyre Pagella}
+\setsansfont[Mapping=tex-text, LetterSpace=1]{Lato Heavy}
+\setmonofont[Mapping=tex-text]{Latin Modern Mono}
+
+\usepackage{setspace}
+\setstretch{1.1}
+
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{0pt}
+
+\usepackage{pifont}
+
+%% List setup
+\renewcommand\thesubsection{\arabic{subsection}.}
+\usepackage{enumitem}
+\setlist{nolistsep}
+\setitemize{itemsep=2pt,topsep=0pt,parsep=5pt,partopsep=0pt}
+
+%% Misc appearance things
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\usepackage{multicol}
+\usepackage{alltt}
+
+\usepackage{titlesec}
+\titlespacing\section{0pt}{5pt plus 4pt minus 2pt}{1.5pt plus 0.5pt minus 0.5pt}
+\titlespacing\subsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
+\titlespacing\subsubsection{0pt}{3pt plus 1pt minus 1pt}{-1pt plus 0.5pt minus 0.5pt}
+
+\pagenumbering{gobble}
+
+%% Some useful macros
+\newcommand{\arr}{\textrightarrow\ }
+\newcommand{\textsb}[1]{\textsf{\textbf{#1}}}
+\newcommand{\textsbc}[1]{\sffamily \textsc{\textbf{#1}}}
+
+\newcommand{\cuthere}{%
+\noindent
+\raisebox{-2.8pt}[0pt][0.75\baselineskip]{\small\ding{34}}
+\unskip{\tiny\dotfill}
+}
+
+\newcommand*{\SignatureAndDate}[1]{%
+    \par\noindent\makebox[2.5in]{\hrulefill}            \hfill\makebox[2.0in]{\hrulefill}%
+    \par\noindent\raisebox{6pt}{\makebox[2.5in][l]{#1}} \hfill\raisebox{6pt}{\makebox[2.0in][l]{Date}}%
+}%
+
+\begin{document}
+% Title stuff
+{%
+\Large \sffamily \textbf{Visual (In-)Distinguishability of Video Steganography \\ -- Consent Form}\smallskip
+}
+
+\subsubsection*{Description of the Study}
+
+The aim of this study is to determine whether using steganographic methods to hide data in video files results in visible changes to the video. The experiment will be conducted as follows.
+
+In each trial, you will be given a pair of ostensibly identical videos, one of which has been modified to contain a hidden payload. You will have full control of the playback, which means you can watch videos however you like: sequentially, side-by-side, replay certain parts, etc. You will have to choose which video you think was modified and write its letter (\textsb{A} or \textsb{B}) into the answer box corresponding to the current trial at the bottom of this page. There will be 10 trials in total and the length of each video is up to 30 seconds. 
+
+\subsubsection*{Disclaimer}
+
+Please note that none of the tasks is a test of your personal intelligence or ability. The objective is to test the quality of output produced by the system. Your answers are anonymous and no personal data is collected, which means that you can't be identified using the answers you provide. If interested, you can obtain a copy of trial videos and the correct classification after submitting your answers. Ask the researcher in person or email \texttt{el398@cam.ac.uk}.
+
+{%
+\vspace{-0.1cm}
+\smallskip
+\cuthere\\
+\medskip
+\raisebox{4.5pt}[0pt]{\small \:\: \textit{(You may retain the part of this page above the cut line. Bottom part has to be submitted to the researcher.)}}
+\vspace{-0.4cm}
+}
+
+
+\subsubsection*{Answer Box}
+Each column of the answer table corresponds to the trial. Please write \textsb{A} or \textsb{B} to indicate which video, you think, contains hidden payload.
+
+{%
+\centering
+\newcolumntype{t}{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{1cm}}
+\begin{tabular}{| c | t | t | t | t | t | t | t | t | t | t |}
+\hline
+\textbf{Trial \#} & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+\hline
+\textbf{Video} & & & & & & & & & &\\[20pt]
+\hline
+\end{tabular}
+\par
+\bigskip
+}
+
+\subsubsection*{Record of Consent}
+Your signature below indicates that you have understood the information about the visual (in-)distinguishability of video steganography experiment and consent to your participation. The participation is voluntary and you may refuse to answer certain questions on the questionnaire and withdraw from the study at any time with no penalty. This does not waive your legal rights. You should have received a copy of the consent form for your own record. If you have further questions related to this research, please contact the researcher.
+
+\vspace{0.5cm}
+\SignatureAndDate{Participant}
+
+\vspace{0.3cm}
+\SignatureAndDate{Researcher}
+
+\end{document}
