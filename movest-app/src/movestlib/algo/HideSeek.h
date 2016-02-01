@@ -19,6 +19,7 @@ protected:
     virtual void embedIntoMv(int16_t *mv);
     uint index = 0;
     char symb = 0;
+    bool stopEmbedding = false;
 };
 
 #endif //MOVEST_HIDESEEK_H

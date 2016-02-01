@@ -18,17 +18,29 @@
 #include "algo/OutGuess1.h"
 #include "algo/MVStegVuln.h"
 
+#define CRYPTO_SALT "MovestEncryption"
+
 void Algorithm::initAsEncoder(movest_params *params) {
     datafile.open(params->filename, std::ios::in | std::ios::binary);
     this->flags = params->flags;
-    this->password = params->password;
+    if(params->password == nullptr) {
+        this->password = "MovestDefaultPassword";
+    }
+    else {
+        this->password = params->password;
+    }
     encoder = true;
 }
 
 void Algorithm::initAsDecoder(movest_params *params) {
     datafile.open(params->filename, std::ios::out | std::ios::binary);
     this->flags = params->flags;
-    this->password = password;
+    if(params->password == nullptr) {
+        this->password = "MovestDefaultPassword";
+    }
+    else {
+        this->password = params->password;
+    }
     encoder = false;
 }
 

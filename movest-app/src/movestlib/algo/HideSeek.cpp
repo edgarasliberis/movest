@@ -26,6 +26,7 @@ void HideSeek::extractFromPair(int16_t mvX, int16_t mvY) {
 }
 
 void HideSeek::embedIntoMv(int16_t *mv) {
+    if(stopEmbedding) return;
     int bit = symb >> index;
     // Equivalent to setting the LSB of '*mv' to the one of 'bit'.
     if((bit & 1) && !(*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)++;
@@ -34,6 +35,9 @@ void HideSeek::embedIntoMv(int16_t *mv) {
     ++bitsProcessed;
 
     if(index == sizeof(char) * 8) {
+        if(datafile.eof()) {
+            stopEmbedding = true;
+        }
         datafile.read(&symb, 1);
         index = 0;
     }

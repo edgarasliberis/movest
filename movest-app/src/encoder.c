@@ -608,20 +608,25 @@ bool is_single_pass(const char* algorithm) {
 
 int main(int argc, char **argv)
 {
+    static int encryptFlag = 0;
     char* algorithm = NULL;
     char* dataFile = NULL;
-    char* seed = "\0\0\0\0";
+    char* password = NULL;
     static struct option long_options[] =
         {
+            {"encrypt", no_argument, &encryptFlag, 1},
             {"algorithm", required_argument, 0, 'a'},
             {"data", required_argument, 0, 'd'},
-            {"seed", required_argument, 0, 's'},
+            {"password", required_argument, 0, 'p'},
             {"help", no_argument, 0, 'h'}
         };
 
     int option_index = -1, c;
     while((c = getopt_long(argc, argv, "a:d:s:h", long_options, &option_index)) != -1) {
         switch(c) {
+            case 0:
+                // A flag was set.
+                break;
             case 'a':
                 if(!optarg || is_supported_algorithm(optarg) == 0) {
                     av_log(NULL, AV_LOG_ERROR, "No or unsupported algorithm provided (%s).\n", optarg);
@@ -636,12 +641,12 @@ int main(int argc, char **argv)
                 }
                 dataFile = optarg;
                 break;
-            case 's':
+            case 'p':
                 if(!optarg) {
-                    av_log(NULL, AV_LOG_ERROR, "-s/--seed requires seed data (a string) as an argument.\n");
+                    av_log(NULL, AV_LOG_ERROR, "-p/--password requires seed data (a string) as an argument.\n");
                     return 1;
                 }
-                seed = optarg;
+                password = optarg;
                 break;
             case 'h':
                 // Print some useful help.
@@ -670,18 +675,29 @@ int main(int argc, char **argv)
         av_log(NULL, AV_LOG_ERROR,
                "Algorithm requires a data file with payload data, that would get embedded. "
                "Use --data <payload_file> to specify a data file.");
+        return 1;
+    }
+
+    if (encryptFlag && !password){
+        av_log(NULL, AV_LOG_ERROR, "You must provide a password if you want to use crypto. Use -p/--password. \n");
+        return 1;
     }
 
     av_log(NULL, AV_LOG_INFO, "Input file: %s\n", inputFile);
     av_log(NULL, AV_LOG_INFO, "Output file: %s\n", outputFile);
     av_log(NULL, AV_LOG_INFO, "Algorithm: %s\n", algorithm);
+    av_log(NULL, AV_LOG_INFO, "Crypto: %s\n", encryptFlag? "ON" : "OFF");
     if(dataFile) {
         av_log(NULL, AV_LOG_INFO, "Data file: %s\n", dataFile);
     }
 
     bool singlePass = is_single_pass(algorithm);
     if(!singlePass) {
-        av_log(NULL, AV_LOG_INFO, "Seed: %s\n", seed);
+        if(!password) {
+            av_log(NULL, AV_LOG_INFO, "Password is required by the algorithm. Using default.");
+            password = "MovestDefaultPassword";
+        }
+        av_log(NULL, AV_LOG_INFO, "Password: *set*\n");
     }
 
     // Get some information about the file.
@@ -693,7 +709,7 @@ int main(int argc, char **argv)
     if(!singlePass) {
         movest_init_algorithm(algorithm);
         movest_params p = {
-                dataFile, MOVEST_DUMMY_PASS, NULL
+                dataFile, MOVEST_DUMMY_PASS, password, NULL
         };
         movest_init_encoder(&p);
         av_log(NULL, AV_LOG_INFO, "Analysing the video for embedding capacity...\n");
@@ -715,12 +731,13 @@ int main(int argc, char **argv)
     // Step 2. Do the actual embedding.
     movest_init_algorithm(algorithm);
     struct algoptions {
-        char *seed, *seedEnd;
         uint32_t byteCapacity;
+        uint32_t fileSize; // Decoder only
     };
-    struct algoptions algparams = { seed, seed + strlen(seed), capacity };
+
+    struct algoptions algparams = { capacity, 0 };
     movest_params p = {
-            dataFile, MOVEST_NO_PARAMS, &algparams
+            dataFile, MOVEST_NO_PARAMS, password, &algparams
     };
     movest_init_encoder(&p);
 

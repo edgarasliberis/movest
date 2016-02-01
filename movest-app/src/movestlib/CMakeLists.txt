@@ -38,4 +38,5 @@ target_link_libraries(movestlib librscode)
 
 find_package(Crypto++ REQUIRED)
 include_directories(${CRYPTO++_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../libs/cryptostreampp)
 target_link_libraries(movestlib ${CRYPTO++_LIBRARIES})

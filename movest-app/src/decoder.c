@@ -131,23 +131,25 @@ int main(int argc, char **argv)
 {
     int ret = 0, got_frame;
 
+    static int encryptFlag = 0;
     char* algorithm = NULL;
-    char* seed = "\0\0\0\0";
+    char* password = NULL;
     char* endPtr = NULL;
     uint32_t capacity = 0;
     uint32_t fileSize = 0;
 
     static struct option long_options[] =
     {
+        {"encrypt", no_argument, &encryptFlag, 1},
         {"algorithm", required_argument, 0, 'a'},
-        {"seed", required_argument, 0, 's'},
+        {"password", required_argument, 0, 'p'},
         {"capacity", required_argument, 0, 'c'},
         {"file-size", required_argument, 0, 'f'},
         {"help", no_argument, 0, 'h'}
     };
 
     int option_index = -1, c;
-    while((c = getopt_long(argc, argv, "a:s:c:f:h", long_options, &option_index)) != -1) {
+    while((c = getopt_long(argc, argv, "a:p:c:f:h", long_options, &option_index)) != -1) {
         switch(c) {
             case 'a':
                 if(!optarg || is_supported_algorithm(optarg) == 0) {
@@ -156,12 +158,12 @@ int main(int argc, char **argv)
                 }
                 algorithm = optarg;
                 break;
-            case 's':
+            case 'p':
                 if(!optarg) {
-                    av_log(NULL, AV_LOG_ERROR, "-s/--seed requires seed data (a string) as an argument.\n");
+                    av_log(NULL, AV_LOG_ERROR, "-p/--password requires seed data (a string) as an argument.\n");
                     return 1;
                 }
-                seed = optarg;
+                password = optarg;
                 break;
             case 'c':
                 if(!optarg) {
@@ -172,7 +174,7 @@ int main(int argc, char **argv)
                 break;
             case 'f':
                 if(!optarg) {
-                    av_log(NULL, AV_LOG_ERROR, "-s/--seed requires seed data (a string) as an argument.\n");
+                    av_log(NULL, AV_LOG_ERROR, "-f/--file-size output file size in bytes as an argument.\n");
                     return 1;
                 }
                 fileSize = atoi(optarg); // TODO: fix
@@ -200,11 +202,22 @@ int main(int argc, char **argv)
         algorithm = "mvsteg";
     }
 
+    if (encryptFlag && !password){
+        av_log(NULL, AV_LOG_ERROR, "You must provide a password if you want to use crypto. Use -p/--password. \n");
+        return 1;
+    }
+
+
     av_log(NULL, AV_LOG_INFO, "Video file: %s\n", videoFile);
     av_log(NULL, AV_LOG_INFO, "Output file: %s\n", dataOutFile);
     av_log(NULL, AV_LOG_INFO, "Algorithm: %s\n", algorithm);
+    av_log(NULL, AV_LOG_INFO, "Crypto: %s\n", encryptFlag? "ON" : "OFF");
     if(strcmp(algorithm, "rand-hideseek") == 0 || strcmp(algorithm, "outguess1") == 0) {
-        av_log(NULL, AV_LOG_INFO, "Seed: %s\n", seed);
+        if(!password) {
+            av_log(NULL, AV_LOG_ERROR, "You must provide a password for this algorithm. Use -p/--password. \n");
+            return 1;
+        }
+        av_log(NULL, AV_LOG_INFO, "Password: *SET*");
         av_log(NULL, AV_LOG_INFO, "Capacity: %d\n", capacity);
     }
     if(fileSize != 0) {
@@ -213,13 +226,12 @@ int main(int argc, char **argv)
 
     movest_init_algorithm(algorithm);
     struct algoptions {
-        char *seed, *seedEnd;
         uint32_t byteCapacity;
         uint32_t fileSize;
     };
-    struct algoptions algparams = {seed, seed + strlen(seed), capacity, fileSize};
+    struct algoptions algparams = { capacity, fileSize};
     movest_params p = {
-        dataOutFile, MOVEST_NO_PARAMS, &algparams
+        dataOutFile, MOVEST_NO_PARAMS, password, &algparams
     };
     movest_init_decoder(&p);
 
