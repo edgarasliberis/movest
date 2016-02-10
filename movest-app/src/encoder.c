@@ -622,7 +622,7 @@ int main(int argc, char **argv)
         };
 
     int option_index = -1, c;
-    while((c = getopt_long(argc, argv, "a:d:s:h", long_options, &option_index)) != -1) {
+    while((c = getopt_long(argc, argv, "a:d:p:h", long_options, &option_index)) != -1) {
         switch(c) {
             case 0:
                 // A flag was set.
@@ -705,11 +705,13 @@ int main(int argc, char **argv)
     stat(dataFile, &datafileinfo);
     uint32_t capacity = 0;
 
+    movest_flags encFlag = encryptFlag? MOVEST_ENABLE_ENCRYPTION : MOVEST_NO_PARAMS;
+
     // Step 1. Run a dummy pass to determine embedding capacity, if the algorithm is two-pass.
     if(!singlePass) {
         movest_init_algorithm(algorithm);
         movest_params p = {
-                dataFile, MOVEST_DUMMY_PASS, password, NULL
+                dataFile, MOVEST_DUMMY_PASS | encFlag, password, NULL
         };
         movest_init_encoder(&p);
         av_log(NULL, AV_LOG_INFO, "Analysing the video for embedding capacity...\n");
@@ -737,7 +739,7 @@ int main(int argc, char **argv)
 
     struct algoptions algparams = { capacity, 0 };
     movest_params p = {
-            dataFile, MOVEST_NO_PARAMS, password, &algparams
+            dataFile, MOVEST_NO_PARAMS | encFlag, password, &algparams
     };
     movest_init_encoder(&p);
 

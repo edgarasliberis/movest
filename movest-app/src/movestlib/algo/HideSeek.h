@@ -17,9 +17,15 @@ public:
 protected:
     virtual void extractFromMv(int16_t val);
     virtual void embedIntoMv(int16_t *mv);
-    uint index = 0;
-    char symb = 0;
+
+    void getDataToEmbed();
+    void writeRecoveredData();
+
     bool stopEmbedding = false;
+    uint indexLimit = 0;
+    uint index = 0;
+    uint8_t symb[CryptoFile::BlockSize];
+
 };
 
 #endif //MOVEST_HIDESEEK_H

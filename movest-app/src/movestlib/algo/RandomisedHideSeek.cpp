@@ -3,15 +3,10 @@
 //
 
 #include "RandomisedHideSeek.h"
-#include "../movest_connector.h"
-
-#include <algorithm>
-#include <iostream>
-#include <assert.h>
 
 extern "C" {
 #include <rscode/ecc.h>
-#define BLOCKSIZE 255
+#define BLOCKSIZE (8 * CryptoFile::BlockSize + NPAR)
 }
 
 void RandomisedHideSeek::initAsEncoder(movest_params *params) {
@@ -19,14 +14,7 @@ void RandomisedHideSeek::initAsEncoder(movest_params *params) {
     if(!(flags & MOVEST_DUMMY_PASS)) {
         initialize_ecc();
 
-        // Determine the size of the file
-        long begin = datafile.tellg();
-        datafile.seekg(0, std::ios::end);
-        long end = datafile.tellg();
-        datafile.clear();
-        datafile.seekg(0, std::ios::beg);
-
-        fileSize = uint(end - begin);
+        fileSize = datafile.remainingData();
         // Total size of embedded data:
         // fileSize + NPAR parity bytes for every (BLOCKSIZE - NPAR) bytes of the file
         uint blocks = (fileSize / (BLOCKSIZE - NPAR)) + (fileSize % (BLOCKSIZE - NPAR) != 0);
@@ -39,9 +27,9 @@ void RandomisedHideSeek::initAsEncoder(movest_params *params) {
         unsigned char fileData[BLOCKSIZE - NPAR];
         uint currentPos = 0;
         while(!datafile.eof() && currentPos < dataSize) {
-            datafile.read(reinterpret_cast<char*>(&fileData[0]), BLOCKSIZE - NPAR);
-            encode_data(fileData, (int)datafile.gcount(), data + currentPos);
-            currentPos += (int)datafile.gcount() + NPAR;
+            auto read = datafile.read(&fileData[0], BLOCKSIZE - NPAR);
+            encode_data(fileData, read, data + currentPos);
+            currentPos += read + NPAR;
         }
     }
 }
@@ -97,22 +85,18 @@ void RandomisedHideSeek::initialiseMapping(AlgOptions *algParams, uint dataSize)
 
 void RandomisedHideSeek::embedIntoMv(int16_t *mv) {
     if(flags & MOVEST_DUMMY_PASS) {
-        if(true /* *mv != 0 && *mv != 1*/) {
-            bitsProcessed++;
-        }
+        bitsProcessed++;
     } else {
         if(index >= 8*dataSize) return;
-        if(true /* *mv != 0 && *mv != 1*/) {
-            if (bitsProcessed == bitToMvMapping[index].mv) {
-                // We found a MV that's next on a list to be modified.
-                ulong dataBit = bitToMvMapping[index].bit;
-                int bit = data[dataBit / 8] >> (dataBit % 8);
+        if(bitsProcessed == bitToMvMapping[index].mv) {
+            // We found a MV that's next on a list to be modified.
+            ulong dataBit = bitToMvMapping[index].bit;
+            int bit = data[dataBit / 8] >> (dataBit % 8);
 
-                if((bit & 1) && !(*mv & 1)) (*mv)++;
-                if(!(bit & 1) && (*mv & 1)) (*mv)--;
+            if((bit & 1) && !(*mv & 1)) (*mv)++;
+            if(!(bit & 1) && (*mv & 1)) (*mv)--;
 
-                index++;
-            }
+            index++;
         }
         bitsProcessed++;
     }
@@ -120,16 +104,14 @@ void RandomisedHideSeek::embedIntoMv(int16_t *mv) {
 
 void RandomisedHideSeek::extractFromMv(int16_t val) {
     if(index >= 8*dataSize) return;
-    if (true/* val != 0 && val != 1*/) {
-        if (bitsProcessed == bitToMvMapping[index].mv) {
-            // We found a MV that was next on a list to be modified.
-            ulong dataBit = bitToMvMapping[index].bit;
-            data[dataBit / 8] |= (val & 1) << (dataBit % 8);
-            index++;
-        }
-
-        bitsProcessed++;
+    if (bitsProcessed == bitToMvMapping[index].mv) {
+        // We found a MV that was next on a list to be modified.
+        ulong dataBit = bitToMvMapping[index].bit;
+        data[dataBit / 8] |= (val & 1) << (dataBit % 8);
+        index++;
     }
+
+    bitsProcessed++;
 }
 
 movest_result RandomisedHideSeek::finalise() {
@@ -141,12 +123,11 @@ movest_result RandomisedHideSeek::finalise() {
             if (check_syndrome() != 0) {
                 correct_errors_erasures(data + currentPos, blockSize, 0, NULL);
             }
-            datafile.write(reinterpret_cast<char*>(&data[0] + currentPos), blockSize - NPAR);
+            datafile.write(&data[0] + currentPos, (uint)BLOCKSIZE - NPAR);
             currentPos += blockSize;
         }
-
-        delete data;
-        delete bitToMvMapping;
     }
+    delete data;
+    delete bitToMvMapping;
     return Algorithm::finalise();
 }

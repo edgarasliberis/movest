@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 
     static struct option long_options[] =
     {
-        {"encrypt", no_argument, &encryptFlag, 1},
+        {"decrypt", no_argument, &encryptFlag, 1},
         {"algorithm", required_argument, 0, 'a'},
         {"password", required_argument, 0, 'p'},
         {"capacity", required_argument, 0, 'c'},
@@ -151,6 +151,9 @@ int main(int argc, char **argv)
     int option_index = -1, c;
     while((c = getopt_long(argc, argv, "a:p:c:f:h", long_options, &option_index)) != -1) {
         switch(c) {
+            case 0:
+                // Flag handled
+                break;
             case 'a':
                 if(!optarg || is_supported_algorithm(optarg) == 0) {
                     av_log(NULL, AV_LOG_ERROR, "No or unsupported algorithm provided (%s).\n", optarg);
@@ -183,7 +186,7 @@ int main(int argc, char **argv)
                 // Print some useful help.
                 return 0;
             default:
-                av_log(NULL, AV_LOG_ERROR, "Unknown option provided\n");
+                av_log(NULL, AV_LOG_ERROR, "Unknown option provided: %c\n", c);
                 return 1;
         }
     }
@@ -206,7 +209,6 @@ int main(int argc, char **argv)
         av_log(NULL, AV_LOG_ERROR, "You must provide a password if you want to use crypto. Use -p/--password. \n");
         return 1;
     }
-
 
     av_log(NULL, AV_LOG_INFO, "Video file: %s\n", videoFile);
     av_log(NULL, AV_LOG_INFO, "Output file: %s\n", dataOutFile);
@@ -231,7 +233,7 @@ int main(int argc, char **argv)
     };
     struct algoptions algparams = { capacity, fileSize};
     movest_params p = {
-        dataOutFile, MOVEST_NO_PARAMS, password, &algparams
+        dataOutFile, encryptFlag? MOVEST_ENABLE_ENCRYPTION : MOVEST_NO_PARAMS, password, &algparams
     };
     movest_init_decoder(&p);
 

@@ -4,8 +4,8 @@
 
 #include <iostream>
 #include <cstring>
-#include <sha.h>
-#include <pwdbased.h>
+#include <cryptopp/sha.h>
+#include <cryptopp/pwdbased.h>
 
 #include "algorithm.h"
 #include "algo/HideSeek.h"
@@ -17,31 +17,34 @@
 #include "algo/MVSteg.h"
 #include "algo/OutGuess1.h"
 #include "algo/MVStegVuln.h"
+#include "movest_connector.h"
 
 #define CRYPTO_SALT "MovestEncryption"
+#define DEFAULT_PASSWORD "MovestDefaultPassword"
 
 void Algorithm::initAsEncoder(movest_params *params) {
-    datafile.open(params->filename, std::ios::in | std::ios::binary);
-    this->flags = params->flags;
-    if(params->password == nullptr) {
-        this->password = "MovestDefaultPassword";
-    }
-    else {
-        this->password = params->password;
-    }
-    encoder = true;
+    this->encoder = true;
+    this->initialiseAlgorithm(params);
 }
 
 void Algorithm::initAsDecoder(movest_params *params) {
-    datafile.open(params->filename, std::ios::out | std::ios::binary);
+    this->encoder = false;
+    this->initialiseAlgorithm(params);
+}
+
+void Algorithm::initialiseAlgorithm(movest_params *params) {
+    // Unpack parameters
     this->flags = params->flags;
-    if(params->password == nullptr) {
-        this->password = "MovestDefaultPassword";
+    this->password = params->password == nullptr? DEFAULT_PASSWORD : params->password;
+    auto iosFlags = std::ios::binary | ((this->encoder)? std::ios::in : std::ios::out);
+
+    // Set up encryption
+    if(this->flags & MOVEST_ENABLE_ENCRYPTION) {
+        std::vector<uint8_t> bytes = deriveBytes(CryptoFile::KeyLength + CryptoFile::BlockSize, CRYPTO_SALT);
+        datafile = CryptoFile(params->filename, &bytes[0], &bytes[CryptoFile::KeyLength], iosFlags);
+    } else {
+        datafile = CryptoFile(params->filename, iosFlags);
     }
-    else {
-        this->password = params->password;
-    }
-    encoder = false;
 }
 
 void Algorithm::encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride) {
@@ -73,7 +76,7 @@ std::vector<uint8_t> Algorithm::deriveBytes(size_t numBytes, std::string salt) {
     const byte *saltPtr = reinterpret_cast<const byte*>(salt.c_str());
 
     CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA1> pbkdf2;
-    pbkdf2.DeriveKey(&derived[0], numBytes, 0, passwordPtr, this->password.length(), saltPtr, salt.length(), 64000);
+    pbkdf2.DeriveKey(&derived[0], numBytes, 0, passwordPtr, this->password.length(), saltPtr, salt.length(), 100000);
 
     return derived;
 }
@@ -84,6 +87,7 @@ movest_result Algorithm::finalise() {
     if(encoder && !datafile.eof()) {
         error = 1;
     }
+
     datafile.close();
     return movest_result {
             uint(bitsProcessed / 8), error

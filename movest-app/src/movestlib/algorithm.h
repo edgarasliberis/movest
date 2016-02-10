@@ -5,10 +5,10 @@
 #ifndef MOVEST_ALGORITHM_H
 #define MOVEST_ALGORITHM_H
 
-#include <fstream>
 #include <memory>
 #include <vector>
 #include "movest_connector.h"
+#include "crypto/CryptoFile.h"
 
 class Algorithm {
 public:
@@ -22,9 +22,10 @@ public:
     virtual void initAsDecoder(movest_params *params);
     virtual movest_result finalise();
 protected:
+    void initialiseAlgorithm(movest_params *params);
     std::vector<uint8_t> deriveBytes(size_t numBytes, std::string salt);
 
-    std::fstream datafile;
+    CryptoFile datafile;
     int flags = 0;
     ulong bitsProcessed = 0;
     bool encoder;

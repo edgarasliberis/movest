@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 project(movestlib)
 include(ExternalProject)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
 
 file(GLOB_RECURSE SOURCE_FILES
@@ -38,5 +38,4 @@ target_link_libraries(movestlib librscode)
 
 find_package(Crypto++ REQUIRED)
 include_directories(${CRYPTO++_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../libs/cryptostreampp)
 target_link_libraries(movestlib ${CRYPTO++_LIBRARIES})

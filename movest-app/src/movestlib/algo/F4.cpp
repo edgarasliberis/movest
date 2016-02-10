@@ -9,37 +9,32 @@
 void F4::embedIntoMv(int16_t *mv) {
     if(*mv == 0) return;
 
-    int bit = (symb >> index) & 1;
+    int bit = (symb[index / 8] >> (index % 8)) & 1;
     int mvbit = (*mv) & 1;
 
     // If LSBs are the same and *mv is positive, increase the absolute value of MV
     if(bit != mvbit && *mv > 0 && !(flags & MOVEST_DUMMY_PASS)) {
-        --(*mv);
+        (*mv)--;
     }
     // If LSBs are different and *mv is negative, decrease the absolute value of MV
     if(bit == mvbit && *mv < 0 && !(flags & MOVEST_DUMMY_PASS)) {
-        ++(*mv);
+        (*mv)++;
     }
     if(*mv != 0) {
-        ++index;
-        ++bitsProcessed;
+        index++;
+        bitsProcessed++;
     }
 
-    if(index == sizeof(char) * 8) {
-        datafile.read(&symb, 1);
-        index = 0;
-    }
+    this->getDataToEmbed();
 }
 
 void F4::extractFromMv(int16_t val) {
     if(val == 0) return;
 
     int b = (val < 0)? ~val : val;
-    symb |= (b & 1) << index;
+    symb[index / 8] |= (b & 1) << (index % 8);
     index++;
-    if(index == sizeof(char) * 8) {
-        datafile.write(&symb, 1);
-        symb = 0;
-        index = 0;
-    }
+    bitsProcessed++;
+
+    this->writeRecoveredData();
 }
