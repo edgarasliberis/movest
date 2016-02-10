@@ -123,7 +123,7 @@ movest_result RandomisedHideSeek::finalise() {
             if (check_syndrome() != 0) {
                 correct_errors_erasures(data + currentPos, blockSize, 0, NULL);
             }
-            datafile.write(&data[0] + currentPos, (uint)BLOCKSIZE - NPAR);
+            datafile.write(&data[0] + currentPos, blockSize - NPAR);
             currentPos += blockSize;
         }
     }

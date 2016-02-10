@@ -219,6 +219,15 @@ int main(int argc, char **argv)
             av_log(NULL, AV_LOG_ERROR, "You must provide a password for this algorithm. Use -p/--password. \n");
             return 1;
         }
+        if(capacity == 0) {
+            av_log(NULL, AV_LOG_ERROR, "You must provide capacity parameter that encoder used. Use -c/--capacity. \n");
+            return 1;
+        }
+        if(fileSize == 0) {
+            av_log(NULL, AV_LOG_ERROR, "You must provide the resulting file size. Use -f/--file-size. \n");
+            return 1;
+        }
+
         av_log(NULL, AV_LOG_INFO, "Password: *SET*");
         av_log(NULL, AV_LOG_INFO, "Capacity: %d\n", capacity);
     }

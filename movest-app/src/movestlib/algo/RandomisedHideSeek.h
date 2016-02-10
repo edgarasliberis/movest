@@ -9,7 +9,7 @@
 #include "HideSeek.h"
 #include <random>
 
-#define SEED_SIZE 8
+#define SEED_SIZE 16
 
 /**
  * Pair structure to hold "data bit" to "MV number" mapping.
