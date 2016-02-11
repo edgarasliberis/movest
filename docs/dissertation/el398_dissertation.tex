@@ -1,0 +1,154 @@
+\documentclass[12pt,british,twoside,notitlepage,usenames,dvipsnames,hypens,final]{report}
+%% Page setup
+\usepackage[a4paper, twoside]{geometry}
+\geometry{verbose,tmargin=3cm,bmargin=3cm,lmargin=2.5cm,rmargin=2.5cm,headheight=3cm,headsep=0.5cm,footskip=1.5cm}
+\usepackage[unicode=true,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=1,
+ breaklinks=false,pdfborder={0 0 0},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{pdftitle={Video Steganography using Motion Vectors -- CST Part II dissertation}, pdfauthor={E Liberis}}
+
+\addtolength{\oddsidemargin}{6mm}       
+\addtolength{\evensidemargin}{-8mm}
+
+%% Font and text flow setup
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{xunicode}
+\usepackage{array}
+
+\usepackage{polyglossia}
+\setdefaultlanguage[variant=british]{english}
+
+\usepackage{sectsty}
+\allsectionsfont{\sffamily}
+
+\usepackage{fontspec}
+\setmainfont[Mapping=tex-text, Ligatures=TeX]{TeX Gyre Pagella}
+\setsansfont[Mapping=tex-text, LetterSpace=1]{Gillius ADF}
+\setmonofont[Mapping=tex-text]{Latin Modern Mono}
+
+\usepackage{setspace}
+\setstretch{1.1}
+
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{0pt}
+
+\usepackage{pifont}
+
+%% List setup
+\renewcommand\thesubsection{\arabic{subsection}.}
+\usepackage{enumitem}
+\setlist{nolistsep}
+\setitemize{itemsep=2pt,topsep=0pt,parsep=5pt,partopsep=0pt}
+
+%% Misc appearance things
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\usepackage{multicol}
+\usepackage{alltt}
+
+\usepackage{titlesec}
+\titlespacing\section{0pt}{8pt plus 4pt minus 2pt}{1pt plus 0.5pt minus 0.5pt}
+\titlespacing\subsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
+\titlespacing\subsubsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
+
+\usepackage{epigraph}
+\setlength{\epigraphrule}{0pt}
+
+\pagenumbering{gobble}
+
+%% Some useful macros
+\newcommand{\arr}{\textrightarrow\ }
+\newcommand{\textsb}[1]{\textsf{\textbf{#1}}}
+\newcommand{\textsbc}[1]{\sffamily \textsc{\textbf{#1}}}
+\usepackage{lipsum}
+\usepackage{tikz}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%% Title Page
+\pagestyle{empty}
+
+\hfill{\LARGE Edgaras Liberis}
+
+\vspace*{60mm}
+\begin{center}
+\Huge
+{\bf Video Steganography \\ using Motion Vectors} \\
+\vspace*{10mm}
+{ \sc \LARGE
+Computer Science Tripos, Part II \\
+Homerton College \\
+}
+\vspace*{10mm}
+\the\year 
+\end{center}
+
+\cleardoublepage
+
+%% Proforma
+\setcounter{page}{1}
+\pagenumbering{roman}
+\pagestyle{plain}
+
+\chapter*{Proforma}
+
+\vspace{-0.5cm}
+{\large
+\begin{tabular}{ll}
+Name:               & \bf Edgaras Liberis                          \\
+College:            & \bf Homerton College                         \\
+Project Title:      & \bf Video Steganography using Motion Vectors \\
+Examination:        & \bf Computer Science Tripos Part II, 2016    \\
+Word Count:         & \bf XXXX\footnotemark[1]                     \\
+Project Originator: & Edgaras Liberis                              \\
+Supervisor:         & Daniel Thomas                                \\ 
+\end{tabular}
+}
+\footnotetext[1]{This word count was computed
+by {\tt detex diss.tex | tr -cd '0-9A-Za-z $\tt\backslash$n' | wc -w}
+}
+\stepcounter{footnote}
+\vspace{0.5cm}
+
+\section*{Original Aims of the Project}
+
+\lipsum[1]
+
+
+\section*{Work Completed}
+
+All that has been completed appears in this dissertation.
+
+\section*{Special Difficulties}
+
+None.
+
+\cleardoublepage
+
+%% Declaration of Originality
+\section*{Declaration of Originality}
+I, Edgaras Liberis of Homerton College, being a candidate for Part II of the Computer Science Tripos, hereby declare that this dissertation and the work described in it are my own work, unaided except as may be specified below, and that the dissertation does not contain material that has already been used to any substantial extent for a comparable purpose.
+
+\bigskip
+\leftline{\bf Signed }
+
+\medskip
+\leftline{\bf Date}
+
+\cleardoublepage
+
+%% Chapters
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\pagestyle{headings}
+
+\chapter*{\scalebox{2}{\circled{1}} \:\: Introduction \hfill}
+\epigraph{\emph{``I knew you were trouble since you walked in"}}{Taylor Swift}
+
+
+\end{document}
