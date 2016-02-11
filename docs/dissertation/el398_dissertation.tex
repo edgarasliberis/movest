@@ -56,8 +56,6 @@
 \usepackage{epigraph}
 \setlength{\epigraphrule}{0pt}
 
-\pagenumbering{gobble}
-
 %% Some useful macros
 \newcommand{\arr}{\textrightarrow\ }
 \newcommand{\textsb}[1]{\textsf{\textbf{#1}}}
@@ -119,7 +117,6 @@ by {\tt detex diss.tex | tr -cd '0-9A-Za-z $\tt\backslash$n' | wc -w}
 
 \lipsum[1]
 
-
 \section*{Work Completed}
 
 All that has been completed appears in this dissertation.
@@ -140,15 +137,220 @@ I, Edgaras Liberis of Homerton College, being a candidate for Part II of the Com
 \medskip
 \leftline{\bf Date}
 
-\cleardoublepage
+\newpage
 
 %% Chapters
+\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}}
+\setcounter{chapter}{1}
+\newcommand{\chapterheader}[2]{%
+	\cleardoublepage
+	\setcounter{chapter}{#1}
+	\setcounter{section}{0}
+	\chapter*{\scalebox{2}{\circled{#1}} \:\: #2 \hfill}
+}
 \setcounter{page}{1}
 \pagenumbering{arabic}
 \pagestyle{headings}
 
-\chapter*{\scalebox{2}{\circled{1}} \:\: Introduction \hfill}
+% Introduction
+\chapterheader{1}{Introduction}
 \epigraph{\emph{``I knew you were trouble since you walked in"}}{Taylor Swift}
+
+Blah blah
+ 
+\section{Motivation}
+
+What is it, how it fits in Computer Science? Why do we want to use it / have it?
+Use RJA/MGK nice intro paper.
+
+% Preparation
+
+\chapterheader{2}{Preparation}
+
+Outline
+
+\section{Steganography Background}
+
+Section describes what steganography is, its definitions and aims. Can make useful reference from RJA/MGK paper or Scott's dissertation or references he uses, or a book (Fridrich?). 
+
+\section{Steganalysis Background}
+
+Subsection describes what steganalysis is, its definitions and aims. This section will have more subsections. Can make useful reference from RJA/MGK paper or Scott's dissertation. 
+
+\section{Video encoding background}
+
+\subsection{Video encoding principles}
+
+Subsection describes what video encoding is. What properties we exploit to efficiently encode videos? What approach is typically taken? (Try not to make this subsection too big)
+
+\subsection{Motion Vectors as embedding space}
+
+Subsection describes general idea how can we use motion vectors as a space for embedding data, arguing the undetectability. Give capacity estimates.
+
+\section{Technical details}
+
+Choice of tools, practical implementation, what approach could one take to implement this. (General approach, schematic, not the exact tools)
+
+\section{Existing tools}
+
+Evaluating and comparing existing tools. Why is this one better than competitors?
+
+\section{Requirements analysis}
+
+What do we want deliverables of the project to be? (described in the proposal)
+
+\subsection{Steganographic Tools}
+
+As above, specifically for encoder / decoder.
+
+\subsection{Steganalysis Tools}
+
+As above, specifically for steganalysis tools.
+
+\section{Technical tools \& choices}
+
+What technical decisions do we make before proceeding to implementation? Tools, languages, libraries? Justify everything.
+
+\subsection{Steganographic Tool}
+
+As above, specifically for encoder / decoder.
+
+\subsection{Steganalysis Tool}
+
+As above, specifically for steganalysis package.
+
+% Introduction
+\chapterheader{3}{Implementation}
+
+Coherent summary of the following chapter, quickly outlining approach taken.
+
+\section{Embedding and decoding process}
+
+\subsection{Encoder}
+
+How is encoder implemented? Structure, schematic, interesting parts. 
+
+\subsection{Decoder}
+
+How is decoder implemented? Structure, schematic, interesting parts. 
+
+\section{Steganalysis techniques}
+
+\subsection{Functions Supporting Extraction}
+
+Typed / untyped MVs; sequential decoder
+
+\subsection{LSB Plane + PLOT}
+
+\subsection{Histogram}
+
+\subsection{$\chi^2$ (Chi-Squared) Attack}
+
+In general terms, don't tailor to MV case very much yet.
+
+\section{Embedding algorithms}
+
+\subsection{Hide and Seek}
+
+What's it about, outline basic concepts. Show histogram detectability.
+
+\subsection{MSteg}
+
+Why it avoids 0 and 1. Histogram motivation. Show equal pairs.
+
+\subsection{F3}
+
+Shirinkage. Effects of that. Histogram attack.
+
+\subsection{F4}
+
+How it avoids histogram attack? Chi-square attack on sequential attack.
+
+\subsection{Randomised Hide-n-Seek}
+
+Explain upsides of randomised embedding. Impl issues, mention ECC. 
+
+\subsection{Outguess 0.1}
+
+Similarly avoids 0s and 1s as most detectable ones. Current attack is JPEG specific?
+
+\subsection{Cheng's Algorithm}
+
+Discuss how MVSteg should be implemented + design decisions.
+
+\section{Application}
+
+\subsection{Design \& Usage}
+
+Discuss implementation \& integration with libraries done.
+
+\subsection{Extension tasks}
+
+\subsection{Encryption}
+Discuss encryption features of the application.
+
+\subsection{Initially proposed extensions}
+Comment on why it didn't work out.
+
+%**F5????**
+%Minimising number of changes made to MVs
+
+\section{Testing}
+
+Discuss testing, manual / automatic.
+
+% Evaluation
+\chapterheader{4}{Evaluation}
+
+Coherent summary of the following chapter, quickly outlining evaluation approaches.
+
+\section{Evaluation of embedding and decoding process}
+
+Say / evaluate what was done for embedding / decoding modules. Anything interesting? Difficulties encountered? Does app do what is expected, usability?
+
+\section{Evaluation of embedding algorithms}
+
+\subsection{Fixing Cheng's algorithm}
+
+Dubious thresholding on length, see histograms. Which way to go?
+Detectable angle thresholding. Bad vs good.
+Detectable embedding 4x, Bad vs good.
+Potential attack using reversion technique (and mention tools again here).
+
+\subsection{Reversion Technique}
+
+What is the result on the dataset? Could we make a primitive classifier? (Reference paper)
+
+\subsection{Embedding capacity}
+
+Talk about the differences (esp. randomised).
+
+\subsection{Speed}
+
+Mention how fast transcoding is
+
+\subsection{Detectability by Humans (Study)}
+
+\subsubsection{Hypothesis}
+
+\subsubsection{Experimental procedure}
+
+\subsubsection{Results}
+
+Was the study hypothesis confirmed?
+
+
+\chapterheader{5}{Conclusions}
+
+\section{Summary}
+
+\section{Lessons learnt}
+
+\section{Future directions}
+
+People suggest different approaches, mention some.
+
 
 
 \end{document}
