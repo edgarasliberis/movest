@@ -8,11 +8,19 @@
 CryptoFile::CryptoFile(const std::string &path, std::ios_base::openmode mode) {
     this->encrypt = false;
     stream.open(path, mode);
+    if(stream.fail()) {
+        std::cerr << "Can't open " << path << std::endl;
+        exit(0);
+    }
 }
 
 CryptoFile::CryptoFile(const std::string &path, uint8_t key[KeyLength], uint8_t iv[BlockSize], std::ios_base::openmode mode) {
     this->encrypt = true;
     stream.open(path, mode);
+    if(stream.fail()) {
+        std::cerr << "Can't open " << path << std::endl;
+        exit(0);
+    }
     std::copy(key, key + KeyLength, this->key);
     std::copy(iv, iv + BlockSize, this->iv);
     enc = std::make_shared<CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption>(this->key, sizeof(this->key), this->iv);
