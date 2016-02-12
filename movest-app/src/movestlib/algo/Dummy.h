@@ -17,6 +17,9 @@ public:
     virtual void embedToPair(int16_t *mvX, int16_t *mvY);
 
     virtual void extractFromPair(int16_t mvX, int16_t mvY);
+
+private:
+    bool dimsWritten = false;
 };
 
 #endif //MOVEST_DUMPMVS_H
