@@ -8,13 +8,12 @@
  {hyperref}
 \hypersetup{pdftitle={Video Steganography using Motion Vectors -- CST Part II dissertation}, pdfauthor={E Liberis}}
 
-\addtolength{\oddsidemargin}{6mm}       
+\addtolength{\oddsidemargin}{6mm}
 \addtolength{\evensidemargin}{-8mm}
 
 %% Font and text flow setup
 \usepackage{amsthm}
 \usepackage{amsmath}
-\usepackage{xunicode}
 \usepackage{array}
 
 \usepackage{polyglossia}
@@ -71,7 +70,7 @@
 %% Title Page
 \pagestyle{empty}
 
-\hfill{\LARGE Edgaras Liberis}
+\hfill{\LARGE E Liberis}
 
 \vspace*{60mm}
 \begin{center}
@@ -93,9 +92,8 @@ Homerton College \\
 \pagenumbering{roman}
 \pagestyle{plain}
 
-\chapter*{Proforma}
+{\section*{\Huge Proforma}}
 
-\vspace{-0.5cm}
 {\large
 \begin{tabular}{ll}
 Name:               & \bf Edgaras Liberis                          \\
@@ -115,11 +113,11 @@ by {\tt detex diss.tex | tr -cd '0-9A-Za-z $\tt\backslash$n' | wc -w}
 
 \section*{Original Aims of the Project}
 
-\lipsum[1]
+The aim of this project is to implement and evaluate existing steganographic methods  applied to motion vectors. To achieve this an end-user tool should be developed, which integrates with a video encoding library and offers several embedding algorithms. These algorithms are compared based on several criteria, such as embedding capacity, speed, and detectability. To assess the latter a collection of general-purpose steganalysis routines should be created.   
 
 \section*{Work Completed}
 
-All that has been completed appears in this dissertation.
+Applications for embedding and extracting data from motion vectors were developed, featuring several popular LSB / image steganography algorithms. Matlab functions and scripts for steganalysis were created to extract and analyse motion vectors, offering classic and motion-vector-specific attacks against embedding schemes. Algorithms were compared against each other evaluating detectability, capacity and other aspects. Experiment on Human Subjects was performed to evaluate visual footprint of data embedding.
 
 \section*{Special Difficulties}
 
@@ -138,6 +136,7 @@ I, Edgaras Liberis of Homerton College, being a candidate for Part II of the Com
 \leftline{\bf Date}
 
 \newpage
+\tableofcontents
 
 %% Chapters
 \renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
@@ -155,24 +154,40 @@ I, Edgaras Liberis of Homerton College, being a candidate for Part II of the Com
 
 % Introduction
 \chapterheader{1}{Introduction}
-\epigraph{\emph{``I knew you were trouble since you walked in"}}{Taylor Swift}
-
-Blah blah
+ 
+\emph{``Steganography''} is a compound word that comes from Greek \emph{``steganos''} (``covered, concealed, or protected''), and \emph{``graphein''} (``writing''). It is usually defined as an art of concealing information within seemingly innocent carrier data \cite[p. 3]{fridrich}. Steganographic methods are commonly employed in communication where the detection of the existence of the message would attract unwanted attention. Typical examples of this are bypassing government censorship, avoiding law enforcement, and military intelligence, where the detection of the message may lead to revealing sender's location \cite{infohiding-survey}.
  
 \section{Motivation}
 
-What is it, how it fits in Computer Science? Why do we want to use it / have it?
-Use RJA/MGK nice intro paper.
+With the rise of the Information Age, modern steganography research has focused on investigating digital formats. Their appeal is in the redundancy in the structure of the data they encode --- it often provides convenient opportunities to embed secret messages within them \cite[p. 2]{fridrich}. Another contributing factor is the increasing popularity of content-sharing websites, which made pictures, videos and audio recordings so widespread, that using them is unlikely to raise any suspicion. 
+
+To see whether hiding information in a video file could be feasible, let's explore a typical video file format. \texttt{MPEG} family -- a de facto industry and consumer standard -- encodes a video stream by encoding a sequence of frames that comprise it. However, encoding every single frame is redundant, because successive frames are often very similar (\emph{temporal correlation} property). Therefore some frames can be compactly represented as a set of changes from their predecessors. Frames encoded in full are called \emph{intra-frames} (essentially a JPEG picture) and ones encoded as differences -- \emph{inter-frames}. This gives us two avenues to explore -- applying image steganography to intra-frames or trying to use inter-frames' ``difference lists'' as an embedding space. It follows that video files are expected to have the largest embedding capacity out of all media containers -- a property that makes them an appealing candidate for further investigation.
+  
+
+Out of all media containers, video files are expected to have the largest embedding capacity.  have high capacity compared to other container formats; why? intra frames -- jpeg -- reference Scott's diss, JPEG specific algos. motion vectors. LSB embedding. 
+
+How does the project fit: exploring LSB embedding in motion vector space, doing steganalysis.
+
+
+The counterpart field, which researches methods of detecting steganographic manipulations is called \emph{steganalysis}. Aim to the detect presence of the message using statistical attacks, brute force, etc.
+
+
+\section{Existing work}
+
+Existing papers
+
+Pixel-mod-based
+
+Stegosaurus
 
 % Preparation
-
 \chapterheader{2}{Preparation}
 
-Outline
+Outline, signposts
 
 \section{Steganography Background}
 
-Section describes what steganography is, its definitions and aims. Can make useful reference from RJA/MGK paper or Scott's dissertation or references he uses, or a book (Fridrich?). 
+Steganography definitions. Can make useful reference from RJA/MGK paper or Scott's dissertation or references he uses, or a book (Fridrich?). 
 
 \section{Steganalysis Background}
 
@@ -191,10 +206,6 @@ Subsection describes general idea how can we use motion vectors as a space for e
 \section{Technical details}
 
 Choice of tools, practical implementation, what approach could one take to implement this. (General approach, schematic, not the exact tools)
-
-\section{Existing tools}
-
-Evaluating and comparing existing tools. Why is this one better than competitors?
 
 \section{Requirements analysis}
 
@@ -220,7 +231,7 @@ As above, specifically for encoder / decoder.
 
 As above, specifically for steganalysis package.
 
-% Introduction
+% Implementation
 \chapterheader{3}{Implementation}
 
 Coherent summary of the following chapter, quickly outlining approach taken.
@@ -316,7 +327,7 @@ Say / evaluate what was done for embedding / decoding modules. Anything interest
 Dubious thresholding on length, see histograms. Which way to go?
 Detectable angle thresholding. Bad vs good.
 Detectable embedding 4x, Bad vs good.
-Potential attack using reversion technique (and mention tools again here).
+Potential attack using revaqersion technique (and mention tools again here).
 
 \subsection{Reversion Technique}
 
@@ -340,7 +351,7 @@ Mention how fast transcoding is
 
 Was the study hypothesis confirmed?
 
-
+% Conclusions
 \chapterheader{5}{Conclusions}
 
 \section{Summary}
@@ -351,6 +362,8 @@ Was the study hypothesis confirmed?
 
 People suggest different approaches, mention some.
 
-
+\cleardoublepage
+\bibliographystyle{unsrt}
+\bibliography{refs}
 
 \end{document}
