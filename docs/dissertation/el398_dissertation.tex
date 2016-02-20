@@ -11,6 +11,12 @@
 \addtolength{\oddsidemargin}{6mm}
 \addtolength{\evensidemargin}{-8mm}
 
+\raggedbottom
+\sloppy
+\clubpenalty1000%
+\widowpenalty1000%
+
+
 %% Font and text flow setup
 \usepackage{amsthm}
 \usepackage{amsmath}
@@ -48,7 +54,7 @@
 \usepackage{alltt}
 
 \usepackage{titlesec}
-\titlespacing\section{0pt}{8pt plus 4pt minus 2pt}{1pt plus 0.5pt minus 0.5pt}
+\titlespacing\section{0pt}{4pt plus 0.5pt minus 0pt}{0pt plus 0.5pt minus 0.5pt}
 \titlespacing\subsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
 \titlespacing\subsubsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
 
@@ -155,30 +161,36 @@ I, Edgaras Liberis of Homerton College, being a candidate for Part II of the Com
 % Introduction
 \chapterheader{1}{Introduction}
  
-\emph{``Steganography''} is a compound word that comes from Greek \emph{``steganos''} (``covered, concealed, or protected''), and \emph{``graphein''} (``writing''). It is usually defined as an art of concealing information within seemingly innocent carrier data \cite[p. 3]{fridrich}. Steganographic methods are commonly employed in communication where the detection of the existence of the message would attract unwanted attention. Typical examples of this are bypassing government censorship, avoiding law enforcement, and military intelligence, where the detection of the message may lead to revealing sender's location \cite{infohiding-survey}.
+\emph{``Steganography''} is a compound word that comes from Greek \emph{``steganos''} (``covered, concealed, or protected''), and \emph{``graphein''} (``writing''). It is usually defined as an art of concealing information within seemingly innocent carrier data \cite[p. 3]{fridrich}. Steganographic methods are commonly used where communicating parties wish to hide the existence of messages between them, because that may attract unwanted attention. Such situations could be bypassing government censorship, avoiding law enforcement, and military intelligence, where the detection of the message may lead to revealing sender's location \cite{infohiding-survey}. 
  
 \section{Motivation}
 
-With the rise of the Information Age, modern steganography research has focused on investigating digital formats. Their appeal is in the redundancy in the structure of the data they encode --- it often provides convenient opportunities to embed secret messages within them \cite[p. 2]{fridrich}. Another contributing factor is the increasing popularity of content-sharing websites, which made pictures, videos and audio recordings so widespread, that using them is unlikely to raise any suspicion. 
+With the rise of the Information Age, modern steganography research has focused on exploring digital formats as containers for hidden data. Their appeal is due to redundancy in the structure of the data they encode, which often provides convenient opportunities to embed secret messages \cite[p. 2]{fridrich}. Another contributing factor is the increasing popularity of content-sharing websites, which made pictures, videos and audio recordings so widespread, that using them is unlikely to raise any suspicion. 
 
-To see whether hiding information in a video file could be feasible, let's explore a typical video file format. \texttt{MPEG} family -- a de facto industry and consumer standard -- encodes a video stream by encoding a sequence of frames that comprise it. However, encoding every single frame is redundant, because successive frames are often very similar (\emph{temporal correlation} property). Therefore some frames can be compactly represented as a set of changes from their predecessors. Frames encoded in full are called \emph{intra-frames} (essentially a JPEG picture) and ones encoded as differences -- \emph{inter-frames}. This gives us two avenues to explore -- applying image steganography to intra-frames or trying to use inter-frames' ``difference lists'' as an embedding space. It follows that video files are expected to have the largest embedding capacity out of all media containers -- a property that makes them an appealing candidate for further investigation.
-  
+A sensible approach to digital steganography is to hide data within regions of a file that are highly tolerant to small modifications or noise. In images, for example, we could hide information by changing a pixel's colour to a very similar one. We can generalise this approach to so-called \emph{least-significant-bit (LSB) embedding} \cite{bateman}: typically the least significant bit in a binary representation of a value corresponds to the highest granularity level so changing it should not introduce a perceivable change.
 
-Out of all media containers, video files are expected to have the largest embedding capacity.  have high capacity compared to other container formats; why? intra frames -- jpeg -- reference Scott's diss, JPEG specific algos. motion vectors. LSB embedding. 
+Let's consider hiding information in a video file. To see whether video steganography could be feasible, let's do a high-level overview of a typical video file format. \texttt{MPEG} family -- a de facto industry and consumer standard -- encodes a video stream by encoding a sequence of frames that comprise it. However, encoding every single frame is redundant, because successive frames are often very similar (\emph{temporal correlation} property). Therefore some frames can be compactly represented as a set of changes from their predecessors. These changes are represented by how much a certain block has moved (\emph{motion vector (MV)}) and how pixels have changed (\emph{prediction error}) since the previous frame.  Frames encoded in full are called \emph{intra-frames} \cite{h264-std} (essentially a JPEG picture) and ones encoded as differences -- \emph{inter-frames} \cite{h264-std}. This gives us two avenues to explore: applying image steganography to intra-frames or using inter-frames' ``differences'' as a space for hidden data. Let's continue with the latter option, specifically considering embedding into MVs.
 
-How does the project fit: exploring LSB embedding in motion vector space, doing steganalysis.
+\textbf{PICTURE WILL BE GOOD HERE}
 
+The amount of data one can hide -- embedding capacity -- is an important aspect of a steganographic system. Given that videos are essentially sequences of frames with sound, we expect them to have the largest embedding capacity out of all media containers. Let's do a rough estimate: there are typically $\approx$20 inter-frames per second and 1000-5000 usable motion vectors available per frame\footnote{Depends on the selection criteria and the resolution of a video file.}. This results in embedding capacity of $\approx$20-100 Kbits/s, which indeed very favourably compares against embedding data into image or audio files.
 
-The counterpart field, which researches methods of detecting steganographic manipulations is called \emph{steganalysis}. Aim to the detect presence of the message using statistical attacks, brute force, etc.
+To be able to say how good a particular steganographic algorithm is, amongst other criteria, we need to evaluate whether the embedding it produces is detectable by an adversary. The counterpart field of study, which researches methods of detecting steganographic manipulations is called \emph{steganalysis}. Steganalysts use a multitude of domain-specific statistical attacks, such as plotting histograms, looking for correlations (or lack thereof) in the data, etc. to detect the presence of the hidden message. It is a cat and mouse game between the two fields, where new research is being published to break existing steganographic methods or the other way around -- to avoid detections.
 
+Given all of above we can identify a niche for a project. This project explores inter-frame video steganography, specifically embedding data into MVs. To achieve this, LSB embedding is employed by allowing to tweak the $x$ or $y$ components of a vector. An end-user tool was developed, offering several high-capacity data embedding algorithms and encryption with a user-provided password. These algorithms are later compared based on several criteria, such as embedding capacity, speed and detectability, where latter is evaluated using general-purpose statistical steganalytic methods, that were implemented in Matlab. 
 
 \section{Existing work}
 
-Existing papers
+Traditionally, image steganography has received more research attention compared to video steganography, so early attempts tried to straightforwardly use existing image (JPEG) steganography techniques \cite{bateman, jpegdctcoding}.
 
-Pixel-mod-based
+Bateman \cite{bateman} reviews the evolution of LSB-based embedding algorithms, starting with simple strategies, such as embedding data by changing the intensity level of every pixel. However, for data compression purposes images are often encoded using lossy JPEG, so these changes are lost after recompression. This can be mitigated by embedding data into something that JPEG stores directly in a compressed file, so later research focused on using DCT coefficients for this purpose\footnote{
+One of the main compression techniques that JPEG uses is \emph{Discrete Cosine Transform (DCT)}, which is similar to the Fourier Transform. A relatively small amount of coefficients is enough to reconstruct an image with sufficient quality. Those coefficients are not sensitive to small changes, which means they are suitable for data embedding.} \cite{jpegdctcoding}. Other approaches were improving on this by preserving various statistical properties that ``clean'' images would possess \cite{bateman, f5}. These will be introduced in more detail further on. Similarly to this project, Williams \cite{scott-fs} applies these image steganography techniques to videos, but by considering uncompressed videos as series of JPEG-encoded frames.
 
-Stegosaurus
+Other researchers took a different approach and explored inter-frame steganography using motion vectors. Xu \emph{et al.} \cite{xu2006steganography} used a phase of a MV ($\tan^{-1}(\frac{y}{x})$) to determine whether the $x$ or $y$ component will carry a single bit of data (approach in this paper is implemented and analysed later in this document). Non-LSB algorithms include an interesting approach by Fang \emph{et al.} \cite{fang2006data}, who proposed to find an alternative motion vector (with minimum prediction error), whose phase will be in a particular quadrant out of 4. This conveys 2 bits of information per MV.
+
+One of the main deliverables of this project is a usable end-user application for doing MV-based steganography, so I looked for competing applications in this area. While there are popular applications, such as MSU StegoVideo\footnote{\url{http://www.compression.ru/video/stego_video/index_en.html}} or OpenPuff\footnote{\url{http://embeddedsw.net/OpenPuff_Steganography_Home.html}}, they do not implement MV steganography, so evaluating them would inevitably lead to a discussion about the differences of theory behind them, as opposed to the quality and completeness of the implementation. The only application offering MV steganography that I was able to find is James Ridgway's \emph{Steganosaurus} \cite{steganosaurus}, but, unfortunately, I was not able to run it. The accompanying dissertation shined some light onto methods used, and it turned out that it only modifies the first (presumably the top left) motion vector of every frame, which severely limits the embedding capacity and increases chances of embedding being detected (location is known).   
+
+Discuss steganalysis.
 
 % Preparation
 \chapterheader{2}{Preparation}
@@ -260,6 +272,9 @@ Typed / untyped MVs; sequential decoder
 
 In general terms, don't tailor to MV case very much yet.
 
+\subsection{Transcoding attack using a classifier}
+SVMs are just the best.
+
 \section{Embedding algorithms}
 
 \subsection{Hide and Seek}
@@ -295,8 +310,6 @@ Discuss how MVSteg should be implemented + design decisions.
 \subsection{Design \& Usage}
 
 Discuss implementation \& integration with libraries done.
-
-\subsection{Extension tasks}
 
 \subsection{Encryption}
 Discuss encryption features of the application.
