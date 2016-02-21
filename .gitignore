@@ -2,8 +2,8 @@
 **/.idea
 *.iml
 
-movest-analysis/*.txt
-movest-analysis/*.m~
+movest-analysis/**/*.txt
+movest-analysis/**/*.m~
 docs/Trial Videos/*
 docs/**/*.swp
 docs/**/*.log
