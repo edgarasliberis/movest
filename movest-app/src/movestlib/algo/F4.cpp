@@ -12,7 +12,7 @@ void F4::embedIntoMv(int16_t *mv) {
     int bit = (symb[index / 8] >> (index % 8)) & 1;
     int mvbit = (*mv) & 1;
 
-    // If LSBs are the same and *mv is positive, increase the absolute value of MV
+    // If LSBs are the same and *mv is positive, decrease the absolute value of MV
     if(bit != mvbit && *mv > 0 && !(flags & MOVEST_DUMMY_PASS)) {
         (*mv)--;
     }
