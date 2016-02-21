@@ -4,6 +4,8 @@ function percentages = chiSquareAttack(mvs, types)
 %   probability of embedding in the first i% of data.
 
 mvvals = typedMvs(mvs, types); % Retrieve only non-skip MVs
+mvvals = mvvals(mvvals ~= 0);
+mvvals = mvvals(mvvals ~= 1);
 mvvals = mvvals - min(mvvals); % Normalise
 percentages = zeros(100, 1); % First i% of data are considered
 
@@ -26,7 +28,7 @@ for i = 1:100
             % +1 for Matlab indexing
             X(mvvals(j) / 2 + 1) = X(mvvals(j) / 2 + 1) + 1;
         else
-            Y((mvvals(j)-1)/2 + 1) = X((mvvals(j)-1)/2 + 1) + 1;
+            Y((mvvals(j)-1)/2 + 1) = Y((mvvals(j)-1)/2 + 1) + 1;
         end
     end
     
