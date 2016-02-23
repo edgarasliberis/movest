@@ -1,0 +1,33 @@
+>> mvstegsvmtraining
+mean = 0.0965
+stddev = 0.0177
+
+mean_ci =
+    0.0930
+    0.1000
+stddev_ci =
+    0.0155
+    0.0205
+
+>> hidenseeksvmtraining
+mean = 0
+stddev = 0
+
+mean_ci =
+     0
+     0
+stddev_ci =
+     0
+     0
+
+>> f4svmtraining
+mean = 0.3309
+stddev = 0.0288
+
+mean_ci = 
+    0.3252
+    0.3366
+stddev_ci =
+    0.0253
+    0.0334
+
