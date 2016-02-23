@@ -48,6 +48,7 @@
 \setitemize{itemsep=2pt,topsep=0pt,parsep=5pt,partopsep=0pt}
 
 %% Misc appearance things
+\newtheorem{definition}{Definition}
 \numberwithin{equation}{section}
 \numberwithin{figure}{section}
 \usepackage{multicol}
@@ -58,8 +59,20 @@
 \titlespacing\subsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
 \titlespacing\subsubsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
 
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+\titleformat{\chapter}[hang]{\Huge\sf\bfseries}{\scalebox{2}{\circled{\thechapter}}}{1cm}{\Huge\bfseries}
+
 \usepackage{epigraph}
 \setlength{\epigraphrule}{0pt}
+
+\usepackage{titletoc}
+\titlecontents*{chapter}% <section-type>
+  [0pt]% <left>
+  {}% <above-code>
+  {\sf\bfseries\chaptername\ \thecontentslabel:\quad}% <numbered-entry-format>
+  {}% <numberless-entry-format>
+  {\bfseries\hfill\contentspage}% <filler-page-format>
 
 %% Some useful macros
 \newcommand{\arr}{\textrightarrow\ }
@@ -67,8 +80,6 @@
 \newcommand{\textsbc}[1]{\sffamily \textsc{\textbf{#1}}}
 \usepackage{lipsum}
 \usepackage{tikz}
-\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
-            \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
@@ -141,83 +152,145 @@ I, Edgaras Liberis of Homerton College, being a candidate for Part II of the Com
 \medskip
 \leftline{\bf Date}
 
-\newpage
+\cleardoublepage
 \tableofcontents
-
 %% Chapters
 \renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
 \renewcommand{\thesubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}}
-\setcounter{chapter}{1}
-\newcommand{\chapterheader}[2]{%
-	\cleardoublepage
-	\setcounter{chapter}{#1}
-	\setcounter{section}{0}
-	\chapter*{\scalebox{2}{\circled{#1}} \:\: #2 \hfill}
-}
-\setcounter{page}{1}
-\pagenumbering{arabic}
-\pagestyle{headings}
+\setcounter{chapter}{0}
 
 % Introduction
-\chapterheader{1}{Introduction}
+\cleardoublepage
+\chapter{Introduction}
+\pagenumbering{arabic}
+\pagestyle{headings}
+\setcounter{page}{1}
 
-\emph{``Steganography''} is the art of concealing information within ostensibly innocent carrier data \cite[p. 3]{fridrich}, usually with the intention of creating a covert channel. Its applications include bypassing government censorship, avoiding law enforcement or military intelligence, and other situations in which detection of the communication may be harmful to the communicating parties (such as by revealing their location \cite{infohiding-survey}). 
+\emph{Steganography} is the art of concealing information within ostensibly innocent carrier data \cite[p. 3]{fridrich}, usually with the intention of creating a covert channel. Its applications include bypassing government censorship, avoiding law enforcement or military intelligence, and other situations in which detection of the communication may be harmful to the communicating parties (such as by revealing their location \cite{infohiding-survey}). 
  
 \section{Motivation}
+\label{motivation}
 
-In recent years, steganography research has explored the use of digital formats carrier data. Often, redundancy in data formats provides opportunity for concealing a payload \cite[p. 2]{fridrich}. Since multimedia formats have become some widespread online, their use is now unremarkable and unlikely to raise suspicion.
+In recent years, steganography research has explored the use of digital formats carrier data. Often, redundancy in data formats provides opportunity for concealing a payload \cite[p. 2]{fridrich}. Since multimedia formats have become so widespread online, their use is now unremarkable and unlikely to raise suspicion.
 
 A sensible approach to digital steganography is to hide data in regions of a file that are highly tolerant to small modifications or noise, such as by slightly changing the colour of a pixel in an image. Since the least significant bit in the binary representation of a value typically corresponds to the highest granularity level, changing it is less likely to be noticed---the key concept behind the so-called \emph{least-significant-bit (LSB) embedding} \cite{bateman}.
 
-\textbf{TODO} The \texttt{MPEG} video formats, a de facto standard, encode a video stream as a sequence of frames. Since encoding every frame independently would be redundant, the similarity of successive frames is exploited where possible to store frames as a set of changes from their predecessors. These changes are represented by how much a certain block of pixels has moved (\emph{motion vector, MV}) and how, in addition to this motion, the pixels have changed (\emph{prediction error}). Frames encoded independently are called \emph{intra-frames} \cite{h264-std} (essentially a JPEG image) and those encoded as differences called \emph{inter-frames} \cite{h264-std}. While both hold potential as carrier data, we will be looking only at embedding data into motion vectors.
-
-\textbf{PICTURE WILL BE GOOD HERE}
-
-The amount of data one can hide using a steganographic system is called embedding capacity. Since videos are essentially sequences of frames with sound, we expect them to have the largest embedding capacity of all media containers. As there are typically $\approx$20 inter-frames per second and 1000-5000 usable motion vectors available per frame\footnote{Depending on the selection criteria and the resolution of a video file.}, we estimate an embedding capacity of $\approx$20-100 Kbits/s for MPEG videos.
+Let us consider video steganography. The \texttt{MPEG} video formats, a de facto standard, encode a video stream as a sequence of frames. Since encoding every frame independently would be costly, the similarity of successive frames is exploited where possible to store frames as a set of changes from their predecessors. These changes are represented by how much a certain block of pixels (\emph{a macroblock}) has moved (\emph{motion vector, MV}) and how, in addition to this motion, the pixels have changed (\emph{prediction error}). Frames encoded independently are called \emph{intra-frames} or \emph{key frames} \cite{h264-std} (essentially a JPEG image) and those encoded as differences called \emph{inter-frames} \cite{h264-std}. While both hold potential as carrier data, we will be looking only at embedding data into motion vectors.
 
 To evaluate a steganographic algorithm, we need to determine if its use is detectable by an adversary. The study of methods of detecting steganographic manipulations is called \emph{steganalysis}. Steganalysts use various domain-specific statistical attacks, such as plotting histograms, looking for correlations (or lack thereof) in the data, etc. to detect the hidden message.
 
-This project explores hiding data in the MVs of MPEG videos by applying LSB embedding to the $x$ or $y$ components of the vector. A tool was developed to offer several high-capacity data embedding algorithms and encryption with a user-provided password. These algorithms were evaluated based on, embedding capacity, speed, and detectability (using statistical steganalytic methods implemented in Matlab) 
+This project explores hiding data in the MVs of \texttt{MPEG} videos by applying LSB embedding to the $x$ or $y$ components of the vector. A tool was developed to offer several high-capacity data embedding algorithms and encryption with a user-provided password. These algorithms were evaluated based on embedding capacity, speed, and detectability (using statistical steganalytic methods implemented in \texttt{Matlab}) 
 
 \section{Existing work}
 
-Traditionally, image steganography has received more research attention compared to video steganography, so early attempts tried to directly use existing image (JPEG) steganography techniques \cite{bateman, jpegdctcoding}.
+Traditionally, image steganography has received more research attention than video steganography, so early attempts tried to directly use existing image (JPEG) steganography techniques \cite{bateman, jpegdctcoding}.
 
 Bateman \cite{bateman} reviews the evolution of LSB-based embedding algorithms. Simple strategies such as changing the intensity of every pixel are destroyed by the lossiness of JPEG compression when the image is recompressed. This can be mitigated by embedding data into something that JPEG stores directly in a compressed file, so later research focused on using the DCT coefficients for this purpose\footnote{
 One of the main compression techniques that JPEG uses is \emph{Discrete Cosine Transform (DCT)}, which is similar to the Fourier Transform. A relatively small number of coefficients is enough to reconstruct an image with sufficient quality. Those coefficients are insensitive to small changes, making they are suitable for data embedding.} \cite{jpegdctcoding}. Other approaches improve on this by preserving statistical properties that ``clean'' images would possess \cite{bateman, f5} (further discussed in \ref{emb-alg}). Similarly to this project, Williams \cite{scott-fs} applies these image steganography techniques to videos by considering uncompressed videos as series of JPEG-encoded frames.
 
 Other researchers explored inter-frame steganography using motion vectors. Xu \emph{et al.} \cite{xu2006steganography} used the phase of an MV ($\tan^{-1}(\frac{y}{x})$) to determine which of the $x$ or $y$ component will carry a single bit of payload data (we discuss this method more in \ref{xu-alg}). Non-LSB algorithms include an interesting approach by Fang \emph{et al.} \cite{fang2006data}, who proposed to find an alternative motion vector (with minimum prediction error), whose phase will be in a particular quadrant out of 4. This conveys 2 bits of information per MV.
 
-One of the main deliverables of this project is a simple tool for doing MV-based steganography. Popular existing stegongraphy tools, such as MSU StegoVideo\footnote{\url{http://www.compression.ru/video/stego_video/index_en.html}} or OpenPuff\footnote{\url{http://embeddedsw.net/OpenPuff_Steganography_Home.html}} do not implement MV steganography. so we will not discuss them further. The only implementation of MV steganography that I was able to find is James Ridgway's \emph{Steganosaurus} \cite{steganosaurus}, but its algorithm seems rather limited. It only modifies the first (presumably the top left) motion vector of every frame severely limiting embedding capacity and increasing the ease of detection (as the location of the modified MV is known).   
+One of the main deliverables of this project is a simple tool for doing MV-based steganography. Popular existing steganography tools, such as MSU StegoVideo\footnote{\url{http://www.compression.ru/video/stego_video/index_en.html}} or OpenPuff\footnote{\url{http://embeddedsw.net/OpenPuff_Steganography_Home.html}} do not implement MV steganography, so we will not discuss them further. The only implementation of MV steganography that I was able to find is James Ridgway's \emph{Steganosaurus} \cite{steganosaurus}, but its algorithm seems rather limited. It only modifies the first (presumably the top left) motion vector of every frame, severely limiting embedding capacity and increasing the ease of detection (as the location of the modified MV is known).
 
-Discuss steganalysis.
+Meanwhile, steganalysis exploited properties specific to motion vectors to create novel steganalysis methods. A recurrent approach in these methods is developing a system to extract certain statistical features from videos and use them to train a classifier. Xu \emph{et al.} \cite{xu2013video} proposed to build a set of vector algebra constraints between MVs across several frames for this purpose. Deng \emph{el al.} \cite{deng2012digital} observes that neighbouring MVs often have the same motion vectors, so an abnormal MV can be spotted. Surprisingly, Cao \emph{et al.} \cite{cao2012video} argues that simply transcoding\footnote{Unpacking video into a sequence of images and recompressing it back again} a video would revert a significant amount of MVs to their original values. This reversion technique is evaluated in \ref{rev-tech}.
+
+%\subsection*{Outline of the remainder of the document}
+%\begin{itemize}
+%\item Chapter 2 (Preparation) discusses relevant theoretical background in more detail, existing tools the project builds upon and formal requirements.
+%\item Chapter 3 (Implementation) describes implementation specifics for the steganographic tool, steganalysis package and embedding algorithms, with some in-line evaluation of detectability.
+%\item Chapter 4 (Evaluation) discusses remaining aspects of evaluation, such as speed, capacity and automatic classification. 
+%\item Chapter 5 (Conclusions) summarises the work done, describes successes and shortcomings of the project and gives ideas for potential improvements.
+%\end{itemize}
+ 
 
 % Preparation
-\chapterheader{2}{Preparation}
+\cleardoublepage
+\chapter{Preparation}
 
-Outline, signposts
+\textit{In this chapter we discuss aims and properties of steganography and steganalysis more formally, cover video encoding principles and make an argument in favour of using motion vectors for video steganography. I decide which existing libraries and tools will be leveraged, outline formal requirements and describe the starting point. } 
 
 \section{Steganography Background}
 
-Steganography definitions. Can make useful reference from RJA/MGK paper or Scott's dissertation or references he uses, or a book (Fridrich?). 
+A substantial deliverable of this project is a \emph{steganographic system}, so let us review standard terminology used in the field \cite{infohiding-survey, bateman}:
+\begin{itemize}
+\item \emph{Embedded data / payload} --- the message that one wishes to hide.
+\item \emph{Carrier / carrier data / cover-object / cover-video / cover} --- an object (video) that will contain the embedded data.
+\item \emph{Stego-object / stego-video / container } --- an object (video) that contains the embedded data.
+\item \emph{Stego-key} ---  data that is used to ``control the embedding process and/or to restrict detection and/or recovery of the embedded data to parties who know it" \cite{infohiding-survey}. As we will see later, this could be a user-provided password, which is later used to seed the PRNG\footnote{Pseudo Random Number Generator} or derive encryption keys. 
+\item \emph{Embedding space} --- here defined as a particular type or region of data in a cover-object that is suitable for carrying the payload, e.g. DCT coefficients in JPEG.
+\item \emph{Embedding capacity} --- here defined as the amount of information (in bits) a particular embedding scheme can hide within a certain cover. Typically it also depends on the payload as well, but we relax this condition for now.
+\item \emph{Covert communication} -- communication performed by sending stego-objects. 
+\end{itemize}
 
+Now we can more formally define a steganographic system \cite{scott-fs}, that manipulates the cover to embed the data:
+
+\begin{definition}{Steganographic System}
+
+Let $\mathcal{C}$ be the set of all cover objects. For a given $c \in C$, let $\mathcal{K}_c$ denote the set of all stego keys for $c$, and the set $\mathcal{M}_c$ denote all messages that can be communicated in c. A steganographic system is then formally defined as a pair of embedding and extracting functions \texttt{Emb} and \texttt{Ext},
+\begin{align*}
+\texttt{Emb} &: \mathcal{C} \times \mathcal{K} \times \mathcal{M} \rightarrow \mathcal{C} \\
+\texttt{Ext} &: \mathcal{C} \times \mathcal{K} \rightarrow \mathcal{M}
+\end{align*}
+such that
+\begin{align*}
+\forall c \in \mathcal{C}, k \in \mathcal{K}_c, m \in \mathcal{M}_c . ~ \texttt{Ext}(\texttt{Emb}(c, k, m), k) = m
+\end{align*}
+
+\end{definition}
+
+That is a steganographic system (also referred to as \emph{embedding scheme / algorithm / method}) is defined by providing \emph{embedding} (encoding) and \emph{extracting} (decoding) functions, which describe how payload's bits should be embedded within (or extracted from) the cover.
+
+A steganographic system aims to protect the embedded data from being detected by an adversary. Therefore we should make some reasonable assumptions about adversary's capabilities prior to discussing system's security properties. Steganography considers three types of adversaries \cite{craver1998public}:
+\begin{itemize}
+\item \emph{Passive warden} -- an adversary who can only spy on the communication.
+\item \emph{Active warden} -- an adversary who can perform reasonable modifications to the stego-object (e.g. by cropping the stego-image).
+\item \emph{Malicious warden} -- an adversary who can significantly modify the payload or try to impersonate either party.
+\end{itemize}
+Warden analogy comes from thinking about communicating parties as if they were communicating prisoners and the warden is passing messages between cells \cite{craver1998public}. 
+This project is only concerned with passive wardens, so we do not expect stego-videos to withstand resizing, transcoding, \emph{etc.}
+
+A steganographic system that relies on so-called `security through obscurity' is generally frowned upon, as it is just a matter of time before an adversary figures out how the system works. This is addressed by \emph{Kerckhoffs' principle} (first formulated for cryptographic systems), which states that we should assume that the system is known to the enemy, so ``security must lie only in the choice of key" \cite{infohiding-survey}. In steganographic systems that is achieved by introducing a \emph{stego-key} which we assume two parties already share. Schemes implemented in the project use it for two purposes:
+
+\begin{itemize}
+\item If the embedding space of a cover-object has \emph{random noise}, schemes can hide the payload within that noise. This requires the payload to be indistinguishable from the random noise, which is achieved by encrypting it. Encryption key can be derived from the stego-key.
+
+\item Consider a scheme that spreads the payload over the cover, e.g. by selecting a location for each bit of the payload at random. This requires both parties to have a synchronised PRNG\footnote{PRNGs are synchronised if they generate an identical sequence of pseudo-random numbers.}, which can be achieved by seeding a known generator with the same seed --- the stego-key.
+\end{itemize}
 \section{Steganalysis Background}
 
-Subsection describes what steganalysis is, its definitions and aims. This section will have more subsections. Can make useful reference from RJA/MGK paper or Scott's dissertation. 
+Steganalysis is the study of detecting messages produced by steganographic systems \textbf{CITE}. A steganographic system is considered broken if a steganalyst, given an object, is able to tell whether it contains the hidden payload with a probability better than a random guess. 
 
-\section{Video encoding background}
+The most trivial example of steganalysis is when an adversary is given an original cover-object together with the ostensibly-stego-object. Then telling whether it actually contains the payload is just a matter of comparing the two. 
 
-\subsection{Video encoding principles}
+Steganalytic techniques can be either manual or automated, and can be further split into two broad categories \cite{bateman}:
+\begin{itemize}
+\item \emph{Targeted Steganalysis.} Steganalyst looks for abnormalities and traces left by a known embedding scheme, uses targeted visual or statistical attacks.
+\item \emph{Blind Steganalysis.} Steganalyst doesn't assume a particular scheme and instead looks whether properties of the given object match those normally expected from that kind of objects. 
+\end{itemize} 
 
-Subsection describes what video encoding is. What properties we exploit to efficiently encode videos? What approach is typically taken? (Try not to make this subsection too big)
+\section{Video Steganography}
 
-\subsection{Motion Vectors as embedding space}
+The project is concerned with using \texttt{MPEG} video files as containers for embedded data. Let us explore the \texttt{MPEG} format in more detail too see whether motion vectors is a feasible embedding space in terms of detectability and embedding capacity.  
 
-Subsection describes general idea how can we use motion vectors as a space for embedding data, arguing the undetectability. Give capacity estimates.
+\subsection{Video encoding background}
+
+As discussed in \ref{motivation}, video stream is encoded a series of interleaved \emph{intra-} and \emph{inter-frames} \textbf{FIGURE HERE}. Intra-frames are also known as \emph{I-frames} and inter-frames as \emph{P-frames} or \emph{B-frames}. P- (prediction) frames encode a frame by only considering the previous frame, whereas B- (bidirectional) frames consider both predecessor and successor frames \cite{h264-std}.
+
+Subsection describes what video encoding is. What properties we exploit to efficiently encode videos? What approach is typically taken? What is a macroblock, how are they distributed?
+
+\subsection{Motion vectors as embedding space}
+
+Subsection describes the general idea how can we use motion vectors as a space for embedding data, arguing the undetectability.
+
+More definitions relating to capacity. Frame independence assumption.
+
+The amount of data one can hide using a steganographic system is called embedding capacity. Since videos are essentially sequences of frames with sound, we expect them to have the largest embedding capacity of all media containers. As there are typically $\approx$20 inter-frames per second and 1000-5000 usable motion vectors available per frame\footnote{Depending on the selection criteria and the resolution of a video file.}, we estimate an embedding capacity of $\approx$20-100 Kbits/s for MPEG videos.
 
 \section{Technical details}
 
-Choice of tools, practical implementation, what approach could one take to implement this. (General approach, schematic, not the exact tools)
+Choice of tools, practical implementation, what approach could one take to implement this. (General approach, schematic, not the exact tools).
+
+Integrating with video encoder after motion vectors are computed.
 
 \section{Requirements analysis}
 
@@ -233,18 +306,21 @@ As above, specifically for steganalysis tools.
 
 \section{Technical tools \& choices}
 
-What technical decisions do we make before proceeding to implementation? Tools, languages, libraries? Justify everything.
-
 \subsection{Steganographic Tool}
 
-As above, specifically for encoder / decoder.
+What technical decisions do we make before proceeding with implementation? Tools, languages, libraries? Justify everything.
+Specifically for encoder / decoder. 
 
 \subsection{Steganalysis Tool}
 
-As above, specifically for steganalysis package.
+As above, specifically for steganalysis package. Why Matlab?
+
+\section{Starting Point}
+
 
 % Implementation
-\chapterheader{3}{Implementation}
+\cleardoublepage
+\chapter{Implementation}
 
 Coherent summary of the following chapter, quickly outlining approach taken.
 
@@ -272,8 +348,8 @@ Typed / untyped MVs; sequential decoder
 
 In general terms, don't tailor to MV case very much yet.
 
-\subsection{Transcoding attack using a classifier}
-SVMs are just the best.
+\subsection{Reversion Technique}
+Implementation of data processor and SVM.
 
 \section{Embedding algorithms}
 \label{emb-alg}
@@ -327,7 +403,8 @@ Comment on why it didn't work out.
 Discuss testing, manual / automatic.
 
 % Evaluation
-\chapterheader{4}{Evaluation}
+\cleardoublepage
+\chapter{Evaluation}
 
 Coherent summary of the following chapter, quickly outlining evaluation approaches.
 
@@ -337,16 +414,17 @@ Say / evaluate what was done for embedding / decoding modules. Anything interest
 
 \section{Evaluation of embedding algorithms}
 
-\subsection{Fixing Cheng's algorithm}
+\subsection{Fixing Xu's algorithm}
 
 Dubious thresholding on length, see histograms. Which way to go?
-Detectable angle thresholding. Bad vs good.
-Detectable embedding 4x, Bad vs good.
-Potential attack using revaqersion technique (and mention tools again here).
+Detectable angle thresholding.
+Detectable embedding 4x.
+Potential attack using the reversion technique (and mention tools again here).
 
 \subsection{Reversion Technique}
+\label{rev-tech}
 
-What is the result on the dataset? Could we make a primitive classifier? (Reference paper)
+What is the result on the dataset per algorithm?
 
 \subsection{Embedding capacity}
 
@@ -367,7 +445,8 @@ Mention how fast transcoding is
 Was the study hypothesis confirmed?
 
 % Conclusions
-\chapterheader{5}{Conclusions}
+\cleardoublepage
+\chapter{Conclusions}
 
 \section{Summary}
 
@@ -375,7 +454,7 @@ Was the study hypothesis confirmed?
 
 \section{Future directions}
 
-People suggest different approaches, mention some.
+People suggest different approaches, mention some. Is it really white noise?
 
 \cleardoublepage
 \bibliographystyle{unsrt}
