@@ -217,9 +217,9 @@ This project is concerned with the development of a \emph{steganographic system}
 \item \emph{Embedded data / payload} --- the message that one wishes to hide.
 \item \emph{Carrier / carrier data / cover-object / cover-video / cover} --- an object (video) that will contain the embedded data.
 \item \emph{Stego-object / stego-video / container } --- an object (video) that contains the embedded data.
-\item \emph{Stego-key} ---  data that is used to ``control the embedding process and/or to restrict detection and/or recovery of the embedded data to parties who know it"~\cite{infohiding-survey}. As we will see later, this could be a user-provided password, which is later used to seed the PRNG\footnote{Pseudo Random Number Generator} or derive encryption keys. 
-\item \emph{Embedding space} --- here defined as a particular type or region of data in a cover-object that is suitable for carrying the payload, e.g. DCT coefficients in JPEG.
-\item \emph{Embedding capacity} --- here defined as the amount of information (in bits) a particular embedding scheme can hide within a certain cover. Typically it also depends on the payload as well, but we relax this condition for now.
+\item \emph{Stego-key} ---  data that is used to ``control the embedding process and/or to restrict detection and/or recovery of the embedded data to parties who know it"~\cite{infohiding-survey}. This could be a user-provided password which is later used to seed a PRNG\footnote{Pseudo Random Number Generator} or derive encryption keys. 
+\item \emph{Embedding space} --- a particular type or region of data in a cover-object that is suitable for carrying the payload, e.g. DCT coefficients in JPEG.
+\item \emph{Embedding capacity} --- the amount of information (in bits) a particular embedding scheme can hide within a certain cover. Typically it also depends on the payload as well, but we relax this condition for now.
 \item \emph{Covert communication} -- communication performed by sending stego-objects. 
 \end{itemize}
 
