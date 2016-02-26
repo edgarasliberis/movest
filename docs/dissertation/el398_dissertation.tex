@@ -175,7 +175,7 @@ In recent years, steganography research has explored the use of digital formats 
 
 A sensible approach to digital steganography is to hide data in regions of a file that are highly tolerant to small modifications or noise, such as by slightly changing the colour of a pixel in an image. Since the least significant bit in the binary representation of a value typically corresponds to the highest granularity level, changing it is less likely to be noticed---the key concept behind the so-called \emph{least-significant-bit (LSB) embedding}~\cite{bateman}\label{lsb-steg}. 
 
-Let us consider video steganography. The \texttt{MPEG} video format encodes a video stream as a sequence of frames. Since encoding every frame independently would be costly, the similarity of successive frames is exploited where possible to store frames as a set of changes from their predecessors. These changes are represented by how much a certain block of pixels has moved (\emph{motion vector, MV}) and how, in addition to this motion, the pixels have changed (\emph{prediction error}). Frames encoded independently are called \emph{intra-frames} or \emph{key frames} (essentially a JPEG image) and those encoded as differences called \emph{inter-frames}~\cite{h264-std}. While both hold potential as carrier data, we will be looking only at embedding data into motion vectors.
+Let us consider video steganography. The \texttt{MPEG} video format encodes a video stream as a sequence of frames. Since encoding every frame independently would be costly, the similarity of successive frames is exploited where possible to store frames as a set of changes from their predecessors. These changes are represented by how much a certain block of pixels has moved (\emph{motion vector, MV}) and how, in addition to this motion, the pixels have changed (\emph{prediction error}). Frames encoded independently are called \emph{intra-frames} or \emph{key frames} (essentially a JPEG image) and those encoded as differences called \emph{inter-frames}~\cite{h264-std}. While both hold potential as carrier data, embedding data into motion vectors will be considered.
 
 To evaluate a steganographic algorithm, we need to determine if its use is detectable by an adversary. The study of methods of detecting steganographic manipulations is called \emph{steganalysis}. Steganalysts use various domain-specific statistical attacks, such as plotting histograms, looking for correlations (or lack thereof) in the data, etc. to detect the hidden message.
 
@@ -190,7 +190,7 @@ One of the main compression techniques that JPEG uses is \emph{Discrete Cosine T
 
 Other researchers explored inter-frame steganography using motion vectors. Xu \emph{et al.}~\cite{xu2006steganography} used the phase of an MV ($\tan^{-1}(\frac{y}{x})$) to determine which of the $x$ or $y$ component will carry a single bit of payload data (I discuss this method more in \ref{xu-alg}). Non-LSB algorithms include an interesting approach by Fang \emph{et al.}~\cite{fang2006data}, who proposed to find an alternative motion vector (with minimum prediction error), whose phase will be in a particular quadrant out of 4. This conveys 2 bits of information per MV.
 
-One of the main deliverables of this project is a simple tool for doing MV-based steganography. Popular existing steganography tools, such as MSU StegoVideo\footnote{\url{http://www.compression.ru/video/stego_video/index_en.html}} or OpenPuff\footnote{\url{http://embeddedsw.net/OpenPuff_Steganography_Home.html}} do not implement MV steganography, so we will not discuss them further. The only implementation of MV steganography that I was able to find is James Ridgway's \emph{Steganosaurus}~\cite{steganosaurus}, but its algorithm seems rather limited. It only modifies the first (presumably the top left) motion vector of every frame, severely limiting embedding capacity and increasing the ease of detection (as the location of the modified MV is known).
+One of the main deliverables of this project is a simple tool for doing MV-based steganography. Popular existing steganography tools, such as MSU StegoVideo\footnote{\url{http://www.compression.ru/video/stego_video/index_en.html}} or OpenPuff\footnote{\url{http://embeddedsw.net/OpenPuff_Steganography_Home.html}} do not implement MV steganography, so they will not discussed further. The only implementation of MV steganography that I was able to find is James Ridgway's \emph{Steganosaurus}~\cite{steganosaurus}, but its algorithm seems rather limited. It only modifies the first (presumably the top left) motion vector of every frame, severely limiting embedding capacity and increasing the ease of detection (as the location of the modified MV is known).
 
 Meanwhile, steganalysis exploited properties specific to motion vectors to create novel steganalysis methods. A recurrent approach in these methods is developing a system to extract certain statistical features from videos and use them to train a classifier. Xu \emph{et al.}~\cite{xu2013video} proposed to build a set of vector algebra constraints between MVs across several frames for this purpose. Deng \emph{el al.}~\cite{deng2012digital} observes that neighbouring MVs often have the same motion vectors, so an abnormal MV can be spotted. Surprisingly, Cao \emph{et al.}~\cite{cao2012video} argues that simply transcoding\footnote{Unpacking a video into a sequence of images and recompressing it back again.} a video would revert a significant amount of MVs to their original values. This reversion technique is evaluated in \ref{rev-tech}.
 
@@ -219,7 +219,7 @@ This project is concerned with the development of a \emph{steganographic system}
 \item \emph{Stego-object / stego-video / container } --- an object (video) that contains the embedded data.
 \item \emph{Stego-key} ---  data that is used to ``control the embedding process and/or to restrict detection and/or recovery of the embedded data to parties who know it"~\cite{infohiding-survey}. This could be a user-provided password which is later used to seed a PRNG\footnote{Pseudo Random Number Generator} or derive encryption keys. 
 \item \emph{Embedding space} --- a particular type or region of data in a cover-object that is suitable for carrying the payload, e.g. DCT coefficients in JPEG.
-\item \emph{Embedding capacity} --- the amount of information (in bits) a particular embedding scheme can hide within a certain cover. Typically it also depends on the payload as well, but we relax this condition for now.
+\item \emph{Embedding capacity} --- the amount of information (in bits) a particular embedding scheme can hide within a certain cover. Typically it also depends on the payload as well, but this condition is relaxed for now.
 \item \emph{Covert communication} -- communication performed by sending stego-objects. 
 \end{itemize}
 
@@ -241,7 +241,7 @@ such that
 
 In other words, a steganographic system (also referred to as \emph{embedding scheme / algorithm / method}) is defined by providing \emph{embedding} (encoding) and \emph{extracting} (decoding) functions, which describe how payload's bits should be embedded within (or extracted from) the cover.
 
-A steganographic system aims to protect the embedded data from being detected by an adversary. Therefore we should make some reasonable assumptions about adversary's capabilities prior to discussing system's security properties. Steganography considers three types of adversaries~\cite{craver1998public}:
+A steganographic system aims to protect the embedded data from being detected by an adversary. Therefore, before discussing system's security properties,one should make reasonable assumptions about adversary's capabilities. Steganography considers three types of adversaries~\cite{craver1998public}:
 \begin{itemize}
 \item \emph{Passive warden} -- an adversary who can only spy on the communication.
 \item \emph{Active warden} -- an adversary who can perform reasonable modifications to the stego-object (e.g. by cropping the stego-image).
@@ -273,7 +273,7 @@ This project implements both targeted and blind steganalysis methods against mot
 
 \section{Video Steganography}
 
-The project uses MPEG video files as containers for embedded data. We explore the MPEG format in more detail to see whether motion vectors is a feasible embedding space in terms of detectability and embedding capacity.  
+The project uses MPEG video files as containers for embedded data. The MPEG format should be explored in more detail to see whether motion vectors is a feasible embedding space in terms of detectability and embedding capacity.
 
 \subsection{Video encoding background}
 
@@ -300,7 +300,7 @@ During the encoding, a frame which will be encoded as a P-frame is partitioned i
 
 Computing motion vectors is a tradeoff between accuracy and computation time, adjusted by the search window size. Therefore codecs typically settle for an approximation instead of an optimal MV, resulting in a non-minimal prediction error \cite[p.~257]{richardson2004h}. While MVs are encoded losslessly, this accuracy tradeoff allows minor changes to them go unnoticed: a property that makes them suitable for LSB steganography (see \ref{lsb-steg}).
 
-To estimate the embedding capacity, let us generalise how all implemented embedding schemes should operate on motion vectors. Suppose an embedding scheme processes every motion vector in a grid individually for every frame, and has an associated selection function $f$, which provides a number of bits that can be embedded into that motion vector ($f(\overrightarrow{mv}) = 0$, if an MV is unused). Later on, this will allow to conveniently define a MV selection criteria for different embedding schemes.
+To estimate the embedding capacity, we generalise how all implemented embedding schemes should operate on motion vectors. Suppose an embedding scheme processes every motion vector in a grid individually for every frame, and has an associated selection function $f$, which provides a number of bits that can be embedded into that motion vector ($f(\overrightarrow{mv}) = 0$, if an MV is unused). Later on, this will allow to conveniently define a MV selection criteria for different embedding schemes.
 
 \begin{definition}{Embedding capacity for video}
 
@@ -312,7 +312,7 @@ where $W$ and $H$ are width and height of the macroblock grid, P-frames$(V)$ is 
 
 \end{definition}
 
-To see that videos could generally hold a non-negligible amount of hidden data, we can estimate $\mathcal{C}_{V, M}$ by taking a product of the number of P-frames, the total number of MVs per frame and the average number of bits embedded per MV. An average HD video could reasonably have 6--15 P-frames per second\footnote{Depends on how often the encoder decides to use B-frames and I-frames. P-frames are better for video streaming as they do not require the successor frame to be known during decoding.} with 3600 MVs each\footnote{If video's resolution is 1280x720 (HD), 16x16 macroblocks would partition the frame into a grid of size 80x45. This gives 3600 macroblocks in total.}. Assuming only a quarter of each frame would contain hidden data, we estimate the channel's capacity to be 5.4--13 Kbits/s, which is higher than for any other popular digital media format.
+To see whether videos could generally hold a non-negligible amount of hidden data, one can estimate $\mathcal{C}_{V, M}$ by taking a product of the number of P-frames, the total number of MVs per frame and the average number of bits embedded per MV. An average HD video could reasonably have 6--15 P-frames per second\footnote{Depends on how often the encoder decides to use B-frames and I-frames. P-frames are better for video streaming as they do not require the successor frame to be known during decoding.} with 3600 MVs each\footnote{If video's resolution is 1280x720 (HD), 16x16 macroblocks would partition the frame into a grid of size 80x45. This gives 3600 macroblocks in total.}. Assuming only a quarter of each frame would contain hidden data, I estimate the channel's capacity to be 5.4--13 Kbits/s, which is higher than for any other popular digital media format.
 
 \section{Requirements analysis}
 
