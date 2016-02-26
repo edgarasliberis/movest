@@ -175,7 +175,7 @@ In recent years, steganography research has explored the use of digital formats 
 
 A sensible approach to digital steganography is to hide data in regions of a file that are highly tolerant to small modifications or noise, such as by slightly changing the colour of a pixel in an image. Since the least significant bit in the binary representation of a value typically corresponds to the highest granularity level, changing it is less likely to be noticed---the key concept behind the so-called \emph{least-significant-bit (LSB) embedding}~\cite{bateman}\label{lsb-steg}. 
 
-Let us consider video steganography. The \texttt{MPEG} video format encodes a video stream as a sequence of frames. Since encoding every frame independently would be costly, the similarity of successive frames is exploited where possible to store frames as a set of changes from their predecessors. These changes are represented by how much a certain block of pixels has moved (\emph{motion vector, MV}) and how, in addition to this motion, the pixels have changed (\emph{prediction error}). Frames encoded independently are called \emph{intra-frames} or \emph{key frames} (essentially a JPEG image) and those encoded as differences called \emph{inter-frames}~\cite{h264-std}. While both hold potential as carrier data, embedding data into motion vectors will be considered.
+Let us consider video steganography. The Moving Picture Experts Group (MPEG) video format encodes a video stream as a sequence of frames. Since encoding every frame independently would be costly, the similarity of successive frames is exploited where possible to store frames as a set of changes from their predecessors. These changes are represented by how much a certain block of pixels has moved (\emph{motion vector, MV}) and how, in addition to this motion, the pixels have changed (\emph{prediction error}). Frames encoded independently are called \emph{intra-frames} or \emph{key frames} (essentially a JPEG image) and those encoded as differences called \emph{inter-frames}~\cite{h264-std}. While both hold potential as carrier data, embedding data into motion vectors will be considered.
 
 To evaluate a steganographic algorithm, we need to determine if its use is detectable by an adversary. The study of methods of detecting steganographic manipulations is called \emph{steganalysis}. Steganalysts use various domain-specific statistical attacks, such as plotting histograms, looking for correlations (or lack thereof) in the data, etc. to detect the hidden message.
 
@@ -212,60 +212,60 @@ Meanwhile, steganalysis exploited properties specific to motion vectors to creat
 
 \section{Steganography Background}
 
-This project is concerned with the development of a \emph{steganographic system}, so let us review terminology used in the field~\cite{infohiding-survey, bateman}:
+This project develops a \emph{steganographic system}, so let us review terminology used in the field~\cite{infohiding-survey, bateman}:
 \begin{itemize}
 \item \emph{Embedded data / payload} --- the message that one wishes to hide.
-\item \emph{Carrier / carrier data / cover-object / cover-video / cover} --- an object (video) that will contain the embedded data.
-\item \emph{Stego-object / stego-video / container } --- an object (video) that contains the embedded data.
+\item \emph{Carrier data / cover } --- an object (video) that will contain the embedded data.
+\item \emph{Stego-object } --- an object (video) that already contains the embedded data.
 \item \emph{Stego-key} ---  data that is used to ``control the embedding process and/or to restrict detection and/or recovery of the embedded data to parties who know it"~\cite{infohiding-survey}. This could be a user-provided password which is later used to seed a PRNG\footnote{Pseudo Random Number Generator} or derive encryption keys. 
-\item \emph{Embedding space} --- a particular type or region of data in a cover-object that is suitable for carrying the payload, e.g. DCT coefficients in JPEG.
+\item \emph{Embedding space} --- a particular type or region of data in a cover that is suitable for carrying the payload, for example DCT coefficients in JPEG.
 \item \emph{Embedding capacity} --- the amount of information (in bits) a particular embedding scheme can hide within a certain cover. Typically it also depends on the payload as well, but this condition is relaxed for now.
 \item \emph{Covert communication} -- communication performed by sending stego-objects. 
 \end{itemize}
 
-A more formal definition of a steganographic system~\cite{scott-fs}, that manipulates the cover to embed the data is as follows:
+A more formal definition of a steganographic system~\cite[p.~53]{fridrich}, that manipulates the cover to embed the data is as follows:
 
 \begin{definition}{Steganographic System}
 
-Let $\mathcal{C}$ be the set of all cover objects. For a given $c \in C$, let $\mathcal{K}_c$ denote the set of all stego keys for $c$, and the set $\mathcal{M}_c$ denote all messages that can be communicated in c. A steganographic system is then formally defined as a pair of embedding and extracting functions \texttt{Emb} and \texttt{Ext},
+Let $\mathcal{C}$ be the set of all cover objects. For a given $x \in C$, let $\mathcal{K}(x)$ denote the set of all stego-keys for $x$, and the set $\mathcal{M}(x)$ denote all messages that can be communicated in x. A steganographic system is then formally defined as a pair of embedding and extracting functions \texttt{Emb} and \texttt{Ext},
 \begin{align*}
 \texttt{Emb} &: \mathcal{C} \times \mathcal{K} \times \mathcal{M} \rightarrow \mathcal{C} \\
 \texttt{Ext} &: \mathcal{C} \times \mathcal{K} \rightarrow \mathcal{M}
 \end{align*}
 such that
 \begin{align*}
-\forall c \in \mathcal{C}, k \in \mathcal{K}_c, m \in \mathcal{M}_c . ~ \texttt{Ext}(\texttt{Emb}(c, k, m), k) = m
+\forall x \in \mathcal{C}, k \in \mathcal{K}(x), m \in \mathcal{M}(x) . ~ \texttt{Ext}(\texttt{Emb}(x, k, m), k) = m
 \end{align*}
 
 \end{definition}
 
-In other words, a steganographic system (also referred to as \emph{embedding scheme / algorithm / method}) is defined by providing \emph{embedding} (encoding) and \emph{extracting} (decoding) functions, which describe how payload's bits should be embedded within (or extracted from) the cover.
+In other words, a steganographic system (also referred to as \emph{embedding scheme / algorithm}) is defined by providing \emph{embedding} (encoding) and \emph{extracting} (decoding) functions which describe how payload's bits should be embedded within (or extracted from) the cover.
 
-A steganographic system aims to protect the embedded data from being detected by an adversary. Therefore, before discussing system's security properties,one should make reasonable assumptions about adversary's capabilities. Steganography considers three types of adversaries~\cite{craver1998public}:
+A steganographic system aims to protect the payload from being detected by an adversary. Therefore, before discussing system's security properties, one should make reasonable assumptions about adversary's capabilities. Steganography considers three types of adversaries~\cite{craver1998public}:
 \begin{itemize}
 \item \emph{Passive warden} -- an adversary who can only spy on the communication.
-\item \emph{Active warden} -- an adversary who can perform reasonable modifications to the stego-object (e.g. by cropping the stego-image).
+\item \emph{Active warden} -- an adversary who can perform reasonable modifications to the stego-object, for example, by cropping the edges, if it is an image.
 \item \emph{Malicious warden} -- an adversary who can significantly modify the payload or try to impersonate either party.
 \end{itemize}
 Warden analogy comes from thinking about communicating parties as if they were communicating prisoners and the warden is passing messages between cells~\cite{craver1998public}. 
-This project is only concerned with passive wardens, stego-videos are not expected to withstand resizing, transcoding, \emph{etc.}
+This project is only concerned with passive wardens, so stego-videos are not expected to withstand resizing, transcoding, \emph{etc.}
 
-A steganographic system that relies on so-called `security through obscurity' is generally frowned upon, as it is just a matter of time before an adversary figures out how the system works. This is addressed by \emph{Kerckhoffs' principle} (first formulated for cryptographic systems), which states that one should assume that the system is known to the enemy, so ``security must lie only in the choice of key"~\cite{infohiding-survey}. In steganographic systems that is achieved by introducing a \emph{stego-key} which is assumed to be already known to all parties. Schemes implemented in the project use it for two purposes:
+A steganographic system that relies on so-called `security through obscurity' is generally frowned upon, as it is just a matter of time before an adversary figures out how the system works. This is addressed by \emph{Kerckhoffs' principle} (first formulated for cryptographic systems) which states that one should assume the system is known to the enemy, so ``security must lie only in the choice of key"~\cite{infohiding-survey}. In steganographic systems that is achieved by introducing a \emph{stego-key} which is assumed to be already shared between all parties. Schemes implemented in the project use it for two purposes:
 
 \begin{itemize}
-\item If the embedding space of a cover-object has \emph{random noise}, schemes can hide the payload within it. This requires the payload to be indistinguishable from the random noise which is achieved by encrypting it. Encryption key can be derived from the stego-key.
+\item If the embedding space of a cover has \emph{random noise}, schemes can hide the payload within it. This requires the payload to be indistinguishable from the random noise which is achieved by encrypting it. Encryption key can be derived from the stego-key.
 
-\item Consider a scheme that spreads the payload over the cover, e.g. by selecting a location for each bit of the payload at random. This requires both parties to have a synchronised PRNG\footnote{PRNGs are synchronised if they generate an identical sequence of pseudo-random numbers.}, which can be achieved by seeding a known generator with the same seed --- the stego-key.
+\item Consider a scheme that spreads the payload over the cover, for instance, by selecting a location for each bit of the payload at random. This requires both parties to have a synchronised PRNG\footnote{PRNGs are synchronised if they generate an identical sequence of pseudo-random numbers.}, which can be achieved by initialising generators with the same seed --- the stego-key.
 \end{itemize}
 \section{Steganalysis Background}
 
 Steganalysis is the study of detecting messages produced by steganographic systems~\cite[p.~10]{fridrich}. A steganographic system is considered broken if a steganalyst, given an object, is able to tell whether it contains the hidden payload with a probability better than a random guess.
 
-The most trivial example of steganalysis is when an adversary is given an original cover-object together with the ostensibly-stego-object. Then telling whether the latter actually contains the payload is just a matter of comparing the two. 
+The most trivial example of steganalysis is when an adversary is given an original cover-object together with an ostensibly-stego-object. Then telling whether the latter actually contains the payload is just a matter of comparing the two. 
 
 Steganalytic techniques can be either manual or automated, and can be further split into two broad categories~\cite{bateman}:
 \begin{itemize}
-\item \emph{Targeted Steganalysis.} Steganalyst looks for abnormalities and traces left by a known embedding scheme using visual or statistical attacks specific to a particular scheme.
+\item \emph{Targeted Steganalysis.} Steganalyst looks for abnormalities and traces left by a known embedding scheme using visual or statistical attacks specific to it.
 \item \emph{Blind Steganalysis.} Steganalyst doesn't assume a particular scheme and instead looks whether properties of the given object match those normally expected from that kind of objects. 
 \end{itemize} 
 
@@ -273,11 +273,11 @@ This project implements both targeted and blind steganalysis methods against mot
 
 \section{Video Steganography}
 
-The project uses MPEG video files as containers for embedded data. The MPEG format should be explored in more detail to see whether motion vectors is a feasible embedding space in terms of detectability and embedding capacity.
+The project uses MPEG video files as covers for embedded data. The MPEG format should be explored in more detail to see whether motion vectors are a feasible embedding space considering the detectability and embedding capacity.
 
 \subsection{Video encoding background}
 
-A video \emph{codec} (en\underline{co}der + \underline{dec}oder) is an application that takes a series of images (video frames) and compresses it into a single video file or vice versa \cite[sec.~3.1]{richardson2004h}. MPEG (Moving Picture Experts Group) family of codecs is the most common choice for video compression.
+A video \emph{codec} (en\underline{co}der + \underline{dec}oder) is an application that takes a series of images (video frames) and compresses it into a single video file or vice versa \cite[sec.~3.1]{richardson2004h}. MPEG family of codecs is the most common choice for video compression.
 
 As discussed in \ref{motivation}, MPEG video stream is represented by a series of interleaved \emph{intra-} and \emph{inter-frames}. Intra-frames are also known as \emph{I-frames} and inter-frames are further classified into \emph{P-frames} or \emph{B-frames}. P- (prediction) frames encode an image by only looking at the predecessor frame, whereas B- (bidirectional) frames consider both predecessor and successor frames [Fig.~\ref{fig:ipb-seq}]~\cite{crowcroft1999internetworking}. To simplify the implementation, from now on I will only consider P-frames, although, in principle, all methods should apply equally well to B-frames too.
 
@@ -287,7 +287,7 @@ As discussed in \ref{motivation}, MPEG video stream is represented by a series o
 \label{fig:ipb-seq}
 \end{figure}
 
-During the encoding, a frame which will be encoded as a P-frame is partitioned into a grid of blocks of size 16-by-16 pixels\footnote{H.264 allows higher granularity for fine details by allowing some blocks to be 8x8, 8x16 or 16x8.}. These blocks are called \emph{macroblocks}, and for each macroblock the encoder searches for its most similar match in a predecessor frame within a bounded search window \cite[p.~256]{richardson2004h}. The difference of pixels between the match and the original block is called \emph{prediction error}, and the position difference of the two is called \emph{motion vector} [Fig.~\ref{fig:mb-search}]. For simplicity, we say that a block of pixels has moved since the predecessor frame by the amount specified by its motion vector and, in addition to motion, pixels themselves have changed according to the prediction error.
+During the encoding, a frame which will be encoded as a P-frame is partitioned into a grid of blocks of size 16-by-16 pixels\footnote{H.264 allows higher granularity for fine details by allowing some blocks to be 8x8, 8x16 or 16x8.}. These blocks are called \emph{macroblocks}, and for each macroblock the encoder searches for its most similar match in a predecessor frame (within a bounded search window) \cite[p.~256]{richardson2004h}. The difference of pixels between the match and the original block is called \emph{prediction error}, and the displacement between the two is called \emph{motion vector} [Fig.~\ref{fig:mb-search}]. For simplicity, we say that a block of pixels has moved since the predecessor frame by the amount specified by its motion vector and, in addition to motion, pixels themselves have changed according to the prediction error.
 
 \begin{figure}[tbh]
 \centerline{\includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]
@@ -298,9 +298,9 @@ During the encoding, a frame which will be encoded as a P-frame is partitioned i
 
 \subsection{Motion vectors as embedding space}
 
-Computing motion vectors is a tradeoff between accuracy and computation time, adjusted by the search window size. Therefore codecs typically settle for an approximation instead of an optimal MV, resulting in a non-minimal prediction error \cite[p.~257]{richardson2004h}. While MVs are encoded losslessly, this accuracy tradeoff allows minor changes to them go unnoticed: a property that makes them suitable for LSB steganography (see \ref{lsb-steg}).
+Computing motion vectors is a tradeoff between accuracy and computation time which is adjusted using the search window size. Therefore codecs typically settle for an approximation instead of a globally-optimal MV, resulting in a non-minimal prediction error \cite[p.~257]{richardson2004h}. While MVs are encoded losslessly, this accuracy tradeoff allows minor changes to them go unnoticed: a property that makes them suitable for LSB steganography (see \ref{lsb-steg}).
 
-To estimate the embedding capacity, we generalise how all implemented embedding schemes should operate on motion vectors. Suppose an embedding scheme processes every motion vector in a grid individually for every frame, and has an associated selection function $f$, which provides a number of bits that can be embedded into that motion vector ($f(\overrightarrow{mv}) = 0$, if an MV is unused). Later on, this will allow to conveniently define a MV selection criteria for different embedding schemes.
+To estimate the embedding capacity, we generalise how all implemented embedding schemes should operate on motion vectors. Suppose an embedding scheme processes every motion vector in a grid individually for every frame and has an associated selection function $f$ which provides a number of bits that can be embedded into a particular motion vector. Later on, this will allow to conveniently define a MV selection criteria for different embedding schemes.
 
 \begin{definition}{Embedding capacity for video}
 
@@ -312,13 +312,13 @@ where $W$ and $H$ are width and height of the macroblock grid, P-frames$(V)$ is 
 
 \end{definition}
 
-To see whether videos could generally hold a non-negligible amount of hidden data, one can estimate $\mathcal{C}_{V, M}$ by taking a product of the number of P-frames, the total number of MVs per frame and the average number of bits embedded per MV. An average HD video could reasonably have 6--15 P-frames per second\footnote{Depends on how often the encoder decides to use B-frames and I-frames. P-frames are better for video streaming as they do not require the successor frame to be known during decoding.} with 3600 MVs each\footnote{If video's resolution is 1280x720 (HD), 16x16 macroblocks would partition the frame into a grid of size 80x45. This gives 3600 macroblocks in total.}. Assuming only a quarter of each frame would contain hidden data, I estimate the channel's capacity to be 5.4--13 Kbits/s, which is higher than for any other popular digital media format.
+To see whether videos could generally hold a non-negligible amount of hidden data, one can estimate $\mathcal{C}_{V, M}$ by taking a product of the number of P-frames, the total number of MVs per frame and the average number of bits embedded per MV. For instance, an average HD video could reasonably have 6--15 P-frames per second\footnote{Depends on how often the encoder decides to use B-frames and I-frames. P-frames are better for video streaming as they do not require the successor frame during decoding.} with 3600 MVs each\footnote{If video's resolution is 1280x720 (HD), 16x16 macroblocks would partition the frame into a grid of size 80x45. This gives 3600 macroblocks in total.}. Assuming only a quarter of each frame would contain embedded data, I estimate the channel's capacity to be 5.4--13 Kbits/s, which is higher than for any other popular digital media format.
 
 \section{Requirements analysis}
 
-The project consists of two main software deliverables:
+The project has two main software deliverables:
 \begin{itemize}
-\item  An application that allows the user to embed secret messages into MPEG video files using a selection of LSB embedding algorithms.
+\item  An application that allows a user to embed secret messages into MPEG video files using a selection of LSB embedding algorithms.
 \item A steganalysis suite that implements some general-purpose routines to detect motion vector-based steganography.
 \end{itemize}
 
@@ -348,11 +348,11 @@ Below is a list of requirements for both deliverables, prioritised using \emph{M
 
 \subsection{Technical choices}
 
-Steganographic application requires modifying MPEG video files, which in turn requires parsing the format of a file, modifying motion vector values, and repackaging the data back into a valid playable video. Developing a codec does not relate to steganography and is potentially error prone, so I leverage an existing set of codecs---\texttt{FFmpeg}\footnote{\url{https://www.ffmpeg.org/}}---to achieve this. As codecs are typically written in C or C++, it is a natural choice for this task to and makes the integration easier.
+The steganographic application requires modifying MPEG video files, which in turn requires parsing the format of a file, modifying motion vector values, and repackaging the data back into a playable video. Developing a codec does not relate to steganography and is potentially error prone, so I leverage an existing set of codecs---\texttt{FFmpeg}\footnote{\url{https://www.ffmpeg.org/}}---to achieve this. As codecs are typically written in C or C++, it is a natural choice for this task to and makes the integration easier.
 
 Performing encryption prior to embedding requires using a cryptography library. \emph{Crypto++}, a popular C++ cryptography implementation, is used in the project.
 
-Steganalysis suite was integrated into a scientific computation package, because it provides useful tools, such as statistical primitives, plotting capabilities, classifiers, \textit{etc.} without changing the environment, which benefits the user. The choice was made in favour of Matlab due to its widespread use and comprehensive functionality.
+Steganalysis suite was integrated into a scientific computation package for user's benefit, because it provides useful tools, such as statistical primitives, plotting capabilities and classifiers, without changing the environment. The choice was made in favour of Matlab, because of its widespread use and comprehensive functionality.
 
 \subsection{Risk analysis}
 FFmpeg is a complex piece of software, mostly written in a style of C that sacrifices clarity for performance. A potential risk for the project was the difficulty of proper integration with FFmpeg and hence inability to access or reliably modify motion vectors. Complete failure to do so was very unlikely, but nevertheless it could have consumed a significant amount of development time. To mitigate this, some ``catch-up'' time was allocated in the project timetable.  
@@ -362,7 +362,7 @@ FFmpeg is a complex piece of software, mostly written in a style of C that sacri
 \item \emph{Git} was used for version control, allowing quick roll-back and managing multiple source trees using branches.
 \item \emph{Backups} were done by uploading the source tree and other relevant files to Dropbox. The git repository itself was hosted remotely on GitHub.
 \item \emph{Testing} \textbf{TODO}
-\item \emph{Interative (spiral) development model} was used continuously add and test new embedding techniques and steganalysis methods to the project.
+\item \emph{Interative (spiral) development model} was used to continuously add and test new embedding schemes and steganalysis methods.
 \end{itemize}
 
 \section{Starting Point}
@@ -372,13 +372,13 @@ Prior to submitting the proposal, I have familiarised myself with the general co
 
 During the development of this project I made use of some material covered in the following Part II courses:
 \begin{itemize}
-\item \textit{Information Theory} --- channel capacity, error correcting codes,
-\item \textit{\LaTeX~and Matlab} --- typesetting and basics of Matlab,
+\item \textit{Information Theory} --- channel capacity, error correcting codes;
+\item \textit{\LaTeX~and Matlab} --- typesetting and basics of Matlab;
 \item \textit{Artificial Intelligence II} --- classifier evaluation.
 \end{itemize}
 
 \bigskip
-This chapter summarised relevant theoretical and practical background necessary to start the implementation. Next chapter will cover the design and features of the system, implemented steganographic algorithms and steganalysis methods, with some in-line evaluation.
+This chapter summarised relevant theoretical and practical background necessary to start the implementation. Next chapter will cover the design and features of the system, implemented steganographic algorithms and steganalysis methods, together with some in-line evaluation.
 
 % Implementation
 \cleardoublepage
