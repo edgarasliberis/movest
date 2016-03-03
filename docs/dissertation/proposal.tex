@@ -1,0 +1,495 @@
+%% LyX 2.1.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[12pt,twoside,british,usenames,dvipsnames,hypens,final]{scrartcl}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{fontspec}
+\setmainfont[Mapping=tex-text]{TeX Gyre Pagella}
+\setsansfont[Mapping=tex-text]{Gillius ADF No2}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2cm,rmargin=2cm,headheight=3cm,headsep=0.5cm,footskip=2cm}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage{url}
+\usepackage{setspace}
+\setstretch{1.1}
+\usepackage[unicode=true,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=1,
+ breaklinks=false,pdfborder={0 0 0},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{pdftitle={Video Steganography using Motion Vectors},
+ pdfauthor={E Liberis}}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+%\raggedbottom                           % try to avoid widows and orphans
+%\sloppy
+%\clubpenalty1000%
+%\widowpenalty1000%
+
+\addtolength{\oddsidemargin}{6mm}       % adjust margins
+\addtolength{\evensidemargin}{-6mm}
+
+\usepackage{titlesec}
+\titlespacing\section{0pt}{5pt plus 4pt minus 2pt}{1.5pt plus 0.5pt minus 0.5pt}
+\titlespacing\subsection{0pt}{5pt plus 4pt minus 2pt}{0.5pt plus 0.5pt minus 0.5pt}
+
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{0pt}
+
+\usepackage{enumitem}
+\setlist{nolistsep}
+
+% Define macro \wordcount for including the counts
+\hypersetup{%
+    pdfborder = {0 0 0}
+}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows,fit}
+\tikzset{
+block/.style={
+  draw, 
+  rectangle, 
+  minimum height=1.2cm, 
+  minimum width=1.9cm, align=center
+  }, 
+line/.style={->,>=latex'}
+}
+%\usepackage{flafter}
+
+\usepackage{gillius2}
+\usepackage{fancyhdr}
+
+\fancyhf[HLE,HRO]{\nouppercase{\leftmark}}
+\fancyhf[HC]{\textsc{Part II Project Proposal}}
+\fancyhf[HLO,HRE]{\thepage}
+\fancyhf[FC]{}
+
+\let\oldenumerate=\enumerate
+\def\enumerate{
+\oldenumerate
+\setlength{\itemsep}{3pt}
+\setlength{\parsep}{0pt}
+}
+\let\olditemize=\itemize
+\def\itemize{
+\olditemize
+\setlength{\itemsep}{3pt}
+\setlength{\parsep}{0pt}
+}
+
+\date{20th October 2015}
+
+\makeatother
+
+\usepackage{xunicode}
+\usepackage{polyglossia}
+\setdefaultlanguage[variant=british]{english}
+\begin{document}
+\bibliographystyle{plain}
+
+
+\subject{\textsc{Computer Science Part II Project Proposal}}
+
+
+\title{Video Steganography using Motion Vectors}
+
+
+\author{E. Liberis, Homerton College\\
+\texttt{\small{}el398@cam.ac.uk}}
+
+\maketitle
+\begin{center}
+Project originator: E. Liberis
+\par\end{center}
+
+	\vspace*{0.5\paperwidth}
+
+\begin{description}
+\item [{Supervisor:}] Daniel Thomas
+\item [{Director~of~studies:}] Dr. Bogdan Roman
+\item [{Overseers:}] Dr. D J Greaves, Prof. J Daugman
+\end{description}
+\newpage{}
+
+
+\section*{Introduction and Description of the Work}
+
+Steganography refers to a set of techniques for concealing information
+within seemingly innocent carrier data (covers), and for detecting
+such hidden information. This is widely used for enabling communication
+where the detection of the existence of the message would attract
+unwanted attention~\cite{Government Policies}.
+
+Files with commonly-found data formats are less likely to raise suspicion
+as covers, and redundancy in the structure of the data provides opportunities
+to hide data. Digital media tends to have both of these properties,
+contributing to their widespread use as covers in earlier work~\cite{Image Steg,MV LSB,MV Phase,MV Steg}.
+This project will be investigating the use of motion vectors in video
+steganography.
+
+Successive frames in a video often only differ by the movement of
+pixels in some regions of the frame. This ``temporal correlation''
+is exploited by modern video codecs, notably H.264, to improve compression
+ratios by storing only the motion data since the last frame, where
+doing so is cheaper than storing the whole frame.\footnote{Codec periodically inserts individually encoded frames (I-frames)
+whenever picture changes significantly and at regular intervals (to
+recover if a streaming error occurs).} Frames stored in this way are called P- or B- frames and are represented
+by a list of blocks of pixels that have moved since the previous frame
+(\textit{macroblocks}), and the direction of the movement (\textit{motion
+vector})~\cite{H.264 Spec}. Computing motion vectors is a tradeoff
+between accuracy and computation time, so codecs typically settle
+for an approximation instead of an optimal MV. While MVs are encoded
+losslessly, this accuracy tradeoff allows minor changes to them go
+unnoticed~\cite{MV Phase}: a property essential to the steganographic
+techniques underlying this project.
+
+The main deliverable of this project will be a steganography tool
+for embedding arbitrary data into H.264-encoded videos, using a variety
+of motion-vector-related techniques. A common trick for reducing distortion
+of the cover data is to modify the least-significant bits of encoded
+values, be they LSBs of pixels in an image or values of a motion vector.
+As well as na\"ively embedding the message in LSBs, there are some
+more intelligent approaches for making messages harder to detect,
+such as selecting target LSBs using a PRNG or avoiding regions with
+low variance~\cite{Image Steg}. Methods that specifically target motion
+vectors have been proposed by Zhang \emph{et al.}~\cite{MV LSB} and Fang
+\emph{et al.}~\cite{MV Phase}, which make use of length, phase and inaccuracies
+of a motion vector. 
+
+The branch of steganography concerning the detection of embedded messages
+is called steganalysis. Another deliverable of this project is to
+provide a toolkit to perform video steganalysis that neatly integrates
+with existing scientific computing packages (Matlab, Python-based
+libraries). A popular approach in steganalysis is to look at statistical
+differences of modified and unmodified values, as selectively modifying
+certain values may make them stand out from the rest. General approaches
+use histograms, Chi-Squared attacks~\cite{Image Steg}, and motion-vector-specific
+attacks (Deng et al. ~\cite{MV Steg}), exploit correlations seen in
+neighbourhoods of MVs and other statistical metrics. 
+
+I propose a project, consisting of two main deliverables:
+\begin{itemize}
+\item Development of an application that allows end user to encrypt\footnote{Since properly encrypted data is indistinguishable from random noise
+encrypting the secret message thwarts many statistical attacks which
+would otherwise detect patterns in the data.} and embed their secret message into H.264 video files, using embedding
+algorithms introduced above. 
+\item Development of a steganalysis suite that implements some of the recent
+research advances and integrates into scientific computation packages.
+\end{itemize}
+
+\section*{Resources Required}
+
+I will be using C++ as a main language for developing the steganographic
+tool, primarily due to my experience with it and the speed and ease
+of interfacing with codecs: necessary for manipulating motion vectors.
+Steganalysis tools will be developed using Matlab or Python, as both
+have extensive support for scientific computation and are popular
+within the community. 
+
+I will be using my own computer, running Ubuntu 15.04, for convenience.
+The project can be continued on MCS machines should it become unusable.
+I accept full responsibility for this machine and I have made contingency
+plans to protect myself against hardware and/or software failure.
+Nightly backups will be made to a removable storage and \texttt{Dropbox},
+and the code will be hosted on \texttt{GitHub} (with \texttt{git}
+version control).
+
+No other special resources are required. 
+
+
+\section*{Starting Point}
+
+This project uses some of the cryptography concepts introduced in
+Part IB \textit{Security I} course. I have familiarised myself with
+the general concepts of steganography and LSB embedding though some
+introductory texts and relevant papers, and briefly looked at H.264
+codec format. 
+
+Implementing my own H.264 codec is out of scope for this project,
+so a possibly modified version of a library (provisionally \texttt{libx264})
+will be used to gain access to the motion vectors. Steganography tools
+may also rely on some inbuilt routines of scientific computing packages
+(plotting, histogram, matrices handling, etc.).
+
+The project may also benefit from material in Part II courses \textit{Information
+Theory}, \textit{Digital Signal Processing, \LaTeX~ and Matlab} and
+\textit{Security II}.
+
+
+\section*{Substance and Structure of the Project}
+
+The aim of this project is to (a) develop a steganography tool, and
+(b) develop a steganalysis suite, as described in the first section. 
+
+Both aims will require further research into H.264 codec and ability
+to modify MVs of a H.264-encoded video file, which would in turn require
+parsing the format of the codec, modifying motion vector values, and
+repackaging the data back into a playable video file. As developing
+a H.264 codec does not relate to steganography and is potentially
+error prone, I plan to leverage existing libraries and/or tools, such
+as \texttt{ffmpeg}, to achieve this. As codecs are typically written
+in C++, it is a natural choice for this task.
+
+Modifying MV requires further research into steganographic techniques,
+as well as the implementation and adaptation of these algorithms for
+use in a codec. The application should also be able to take user data
+and perform encryption prior to embedding, which would require using
+a relevant cryptography library. 
+
+The second objective will require substantial further research of
+steganalysis methods described in recent academic papers, as well
+as an investigation of how to use and integrate scientific packages
+for implementing these methods. 
+
+The dissertation shall consider the embedding techniques, evaluating
+their relative applicability, detectability, embedding capacity, speed,
+effectiveness, and resistance to attacks by developed steganalysis
+methods. Detectability will also be evaluated by conducting a study
+with human participants, asking them to distinguish between a modified
+and an unmodified video. Effectiveness of steganalysis methods will
+be evaluated by comparing their success in attacking implemented methods
+on a dataset of videos.\footnote{Yet to be obtained, but that should not pose any problems.}
+
+The steganography application will be manually and automatically tested
+to ensure it works as reliably as expected. Individual modules will
+be tested using unit tests and application as a whole using integration
+tests. Development will follow the iterative (spiral) model, continuously
+adding embedding techniques and steganalysis methods, and \texttt{gitflow}
+workflow.
+
+
+\section*{Success Criteria}
+
+The project shall be considered successful if steganography application,
+steganalysis tools and/or accompanying disseration (as appropriate)
+satisfy the following requirements (prioritised using the \textit{MoSCoW}
+rule):
+\begin{itemize}
+\item \textit{(M)} Ability to modify motion vectors of a H.264 video file.
+\item \textit{(M) }Multiple LSB and non-LSB MV embedding techniques.
+\item \textit{(M)} Multiple steganalysis methods.
+\item \textit{(S)} Encryption of the secret message prior to embedding.
+\item \textit{(M)} Explanation and justification of changes to or inapplicability
+of some techniques, if required.
+\item \textit{(S)} Compatibility with existing scientific computation packages
+(\textit{Matlab} or Python-based packages)
+\item \textit{(M)} Evaluation of the following properties of techniques:
+
+\begin{itemize}
+\item \textit{(M)} Applicability to MV steganography.
+\item \textit{(M)} Resistance to attacks.
+\item \textit{(C)} Embedding capacity.
+\item \textit{(C)} Speed of processing videos.
+\item \textit{(S)} Detectability by a human.
+\end{itemize}
+\item \textit{(M)} Evaluation of the following properties of methods:
+
+\begin{itemize}
+\item \textit{(M)} Effectiveness against implemented embedding techniques.
+\item \textit{(S) }Usefulness (verbosity, amount of information provided)
+to the steganalyst.
+\end{itemize}
+\item \textit{(M)} Introduction of the underlying theoretical background.
+\end{itemize}
+
+\section*{Extensions}
+\begin{itemize}
+\item Deng et al.~\cite{MV Steg} propose using statistical differences between
+videos with and without embedded messages as features for a classifier.
+Using this and other features proposed in similar works, a classifier
+trained using machine learning could be produced.
+\item Currently, social networks such as YouTube, Facebook and Tumblr transcode
+(convert between formats) user-uploaded videos before presenting them
+to other users. This results in MVs being recomputed and overwritten,
+destroying the hidden message. More aggressive embedding techniques
+could be developed, possibly using some control data and error-correction
+codes, to withstand such transcoding. 
+\end{itemize}
+
+\section*{Timetable and Milestones}
+
+
+\subsection*{Weeks 1 -- 2 (Oct 22 -- Nov 5)}
+\begin{itemize}
+\item Research and implementation of access and modification of MVs in a
+H.264 video file.
+\end{itemize}
+
+\subsection*{Weeks 3 -- 4 (Nov 5 -- Nov 19)}
+\begin{itemize}
+\item Background reading on steganography and other relevant preparation.
+\end{itemize}
+
+\subsection*{Weeks 5 -- 6 (Nov 19 -- Dec 3)}
+\begin{itemize}
+\item Investigation and implementation of popular image steganography techniques,
+including LSB embedding, and evaluation of their relevance to MV steganography.
+\end{itemize}
+
+\subsection*{Weeks 7 -- 8 (Dec 3 -- Dec 17)}
+\begin{itemize}
+\item Creation of tools that allow to carry out statistical attacks on aforementioned
+methods and their evaluation.
+\item Research and implementation of the methods of video watermarking proposed
+by Zhang \emph{et al.}~\cite{MV LSB} and Fang \emph{et al.}~\cite{MV Phase}
+\end{itemize}
+
+\subsection*{Weeks 9 -- 10 (Dec 17 -- Dec 31)}
+\begin{itemize}
+\item Finishing implementation of aforementioned methods.
+\item Christmas vacation and catch-up (if required).
+\end{itemize}
+
+\subsection*{Weeks 11 -- 12 (Dec 31 -- Jan 14)}
+\begin{itemize}
+\item Research and implementation of statistical steganalysis methods.
+\item Evaluation of created tools against all implemented embedding algorithms.
+\end{itemize}
+
+\subsection*{Weeks 13 -- 14 (Jan 14 -- Jan 28)}
+\begin{itemize}
+\item Finishing any remaining implementation.
+\item Writing progress report and preparing for the presentation.
+\end{itemize}
+
+\subsection*{Weeks 15 -- 16 (Jan 28 -- Feb 11)}
+\begin{itemize}
+\item Evaluation of the indistinguishability of videos with hidden messages
+and ordinary videos using human test subjects.
+\item Remaining evaluation tasks.
+\end{itemize}
+
+\subsection*{Weeks 17 -- 18 (Feb 11 -- Feb 25)}
+\begin{itemize}
+\item Any remaining catch-up work.
+\item Implement extension tasks, if time permits.
+\end{itemize}
+
+\subsection*{Weeks 19 -- 20 (Feb 25 -- Mar 10) }
+\begin{itemize}
+\item Commence writing dissertation.
+\item Ongoing evaluation tasks and further exploration of extension goals.
+\end{itemize}
+
+\subsection*{Weeks 21 -- 22 (Mar 10 -- Mar 24)}
+\begin{itemize}
+\item Write ``Introduction'' and ``Preparation'' chapters.
+\item Request supervisors' feedback and iterate upon it.
+\end{itemize}
+
+\subsection*{Weeks 23 -- 24 (Mar 24 -- Apr 7)}
+\begin{itemize}
+\item Write ``Implementation'' chapter.
+\item Request supervisors' feedback and iterate upon it.
+\end{itemize}
+
+\subsection*{Weeks 25 -- 26 (Apr 7 -- Apr 21)}
+\begin{itemize}
+\item Write ``Evaluation'' chapter.
+\item Request supervisors' feedback and iterate upon it.
+\end{itemize}
+
+\subsection*{Weeks 27 -- 28 (Apr 21 -- May 5)}
+\begin{itemize}
+\item Finish remaining parts of the dissertation.
+\item Polish and incorporate final feedback.
+\item Submit the dissertation.
+\end{itemize}
+
+\begin{thebibliography}{1}
+\bibitem{Government Policies} Omar J. Pahati \textit{``Confounding
+Carnivore: How to Protect Your Online Privacy,''} AlterNet, Nov 28,
+2001 (retrieved Oct 2015)\\
+\url{http://www.alternet.org/story/11986/confounding_carnivore%3A_how_to_protect_your_online_privacy}
+
+\bibitem{Image Steg}Philip Bateman \textit{``Image Steganography
+and Steganalysis,'' }2008\\
+\url{http://chemistry47.com/PDFs/Cryptography/Steganography/Image%20Steganography%20and%20Steganalysis.pdf}
+
+\bibitem{MV Phase}Ding-Yu Fang; Long-Wen Chang, \textit{``Data hiding
+for digital video with phase of motion vector},'' IEEE International Symposium
+on Circuits and Systems, 2006. Proceedings.\\
+ \url{http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1692862&isnumber=35661}
+
+\bibitem{MV Steg}Yu Deng, Yunjie Wu, Linna Zhou, \textit{``Digital
+video steganalysis using motion vector recovery-based features,''}
+Appl. Opt. 51, 4667-4677 (2012)\\
+\url{http://www.ncbi.nlm.nih.gov/pubmed/22781241}
+
+\bibitem{MV LSB}Jun Zhang; Jiegu Li; Ling Zhang, \textit{``Video
+watermark technique in motion vector,''} in Computer Graphics and
+Image Processing, Proceedings of XIV Brazilian Symposium on ,
+vol., no., pp.179-182, Oct 2001\\
+\url{http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=963053&isnumber=20786}
+
+\bibitem{H.264 Spec}International Telecommunication Union (ITU),
+\textit{``H.264: Advanced video coding for generic audiovisual services,''
+}Feb 2014 (specification of the H.264 video codec)\\
+\url{https://www.itu.int/rec/T-REC-H.264-201402-I/en}
+
+\end{thebibliography}
+
+\part*{\newpage{}Study involving Human Participants}
+
+
+\subsection*{Description of the study}
+
+The aim of this study is to determine whether using steganographic
+methods to hide data in video files results in visible changes to
+the video. The experiment will be conducted as follows. 
+
+In each trial, participants will be shown pairs of ostensibly identical
+videos, positioned side-by-side, one of which has been modified to
+contain a hidden payload. They will choose the video which they think
+was modified, after which the true answer will be revealed.
+
+The experiment will feature 7-10 pairs of videos, each up to 30 seconds
+long, taking up to 20 minutes per participant. Which video is the
+modified one will be randomised, to avoid positional bias. Since the
+steganographic methods rely on motion data encoded in the videos,
+videos containing a wide range of movement, from almost still to highly
+dynamic, will be used.
+
+We hypothesise that human participants will not be able to distinguish
+between modified and an unmodified video. To test this, we will determine
+if the data support the opposite claim to a statistically significant
+level -- that humans \textit{are} able to tell the videos apart. We
+will look into the numbers of times the participants were right or
+wrong in their choice and test whether there is a statistically significant
+skew in either direction.
+
+
+\subsection*{Precautions to be taken to avoid any risk}
+
+No personal data about the participants will be collected and all
+results will be recorded anonymously. Videos shown to the participants
+will be free from flashing images, emotionally neutral, and free from
+distressful, disturbing, offensive or otherwise unsettling images.\newpage{}
+
+
+\part*{Resources Declaration}
+
+The project does not require any special resources except own laptop,
+for convenience.
+
+Specifications:
+\begin{itemize}
+\item Intel(R) Core(TM) i5-3210M CPU @ 2.50GHz
+\item nVidia Geforce GT 630M 2GB
+\item 500GB HDD
+\item 4GB RAM 
+\end{itemize}
+I accept full responsibility for this machine and I have made contingency
+plans to protect myself against hardware and/or software failure.
+
+The project can be continued on MCS machines should the laptop become
+unusable. Nightly backups of the project files will be made to a removable
+storage and \texttt{Dropbox}, and the code will be hosted on \texttt{GitHub}
+(with \texttt{git} version control).
+\end{document}
