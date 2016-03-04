@@ -7,11 +7,11 @@
 
 #include "HideSeek.h"
 
-class MVStegVuln : public HideSeek {
+class XuAlg : public HideSeek {
 protected:
     void modifyMV(int16_t *mv);
     virtual void extractFromPair(int16_t mvX, int16_t mvY);
-    virtual void embedToPair(int16_t *mvX, int16_t *mvY);
+    virtual void embedIntoMv(int16_t *mvX, int16_t *mvY);
 };
 
 #endif //MOVEST_MVSTEGVULN_H

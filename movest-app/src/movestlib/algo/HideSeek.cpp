@@ -16,19 +16,19 @@ void HideSeek::initAsDecoder(movest_params *params) {
     Algorithm::initAsDecoder(params);
 }
 
-void HideSeek::embedToPair(int16_t *mvX, int16_t *mvY) {
+void HideSeek::embedIntoMv(int16_t *mvX, int16_t *mvY) {
     if(stopEmbedding) return;
-    embedIntoMv(mvX);
+    embedIntoMvComponent(mvX);
     if(stopEmbedding) return;
-    embedIntoMv(mvY);
+    embedIntoMvComponent(mvY);
 }
 
-void HideSeek::extractFromPair(int16_t mvX, int16_t mvY) {
-    extractFromMv(mvX);
-    extractFromMv(mvY);
+void HideSeek::extractFromMv(int16_t mvX, int16_t mvY) {
+    extractFromMvComponent(mvX);
+    extractFromMvComponent(mvY);
 }
 
-void HideSeek::embedIntoMv(int16_t *mv) {
+void HideSeek::embedIntoMvComponent(int16_t *mv) {
     int bit = symb[index / 8] >> (index % 8);
     // Equivalent to setting the LSB of '*mv' to the one of 'bit'.
     if((bit & 1) && !(*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)++;
@@ -39,7 +39,7 @@ void HideSeek::embedIntoMv(int16_t *mv) {
     this->getDataToEmbed();
 }
 
-void HideSeek::extractFromMv(int16_t val) {
+void HideSeek::extractFromMvComponent(int16_t val) {
     symb[index / 8] |= (val & 1) << (index % 8);
     index++;
     bitsProcessed++;

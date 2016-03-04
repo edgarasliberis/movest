@@ -124,7 +124,7 @@ bool is_supported_algorithm(const char *algname) {
            || strcmp(algname, "f4") == 0
            || strcmp(algname, "mvsteg") == 0
            || strcmp(algname, "outguess1") == 0
-           || strcmp(algname, "mvsteg-vuln") == 0;
+           || strcmp(algname, "xualg") == 0;
 }
 
 int main(int argc, char **argv)
@@ -313,5 +313,5 @@ int main(int argc, char **argv)
     movest_result res = movest_finalise();
     fprintf(stderr, "Bytes processed: %d\n", res.bytes_processed);
 
-    return res.error;
+    return res.error_code;
 }

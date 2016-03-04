@@ -20,7 +20,7 @@ void MVSteg::modifyMV(int16_t *mv) {
     }
 }
 
-void MVSteg::embedToPair(int16_t *mvX, int16_t *mvY) {
+void MVSteg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
     if(stopEmbedding) return;
     double mvValX = double(*mvX) / 2;
     double mvValY = double(*mvY) / 2;

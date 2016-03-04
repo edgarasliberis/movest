@@ -21,12 +21,12 @@ typedef struct {
     const char *filename;
     movest_flags flags;
     const char *password;
-    void *algParams;
+    void *alg_params;
 } movest_params;
 
 typedef struct {
     unsigned int bytes_processed;
-    int error;
+    int error_code;
 } movest_result;
 
 void movest_init_encoder(movest_params *params);

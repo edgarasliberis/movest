@@ -6,7 +6,7 @@
 
 #define ABS(x) (((x) >= 0)? (x) : (-(x)))
 
-void F4::embedIntoMv(int16_t *mv) {
+void F4::embedIntoMvComponent(int16_t *mv) {
     if(*mv == 0) return;
 
     int bit = (symb[index / 8] >> (index % 8)) & 1;
@@ -28,7 +28,7 @@ void F4::embedIntoMv(int16_t *mv) {
     this->getDataToEmbed();
 }
 
-void F4::extractFromMv(int16_t val) {
+void F4::extractFromMvComponent(int16_t val) {
     if(val == 0) return;
 
     int b = (val < 0)? ~val : val;

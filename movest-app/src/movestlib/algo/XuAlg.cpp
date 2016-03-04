@@ -2,7 +2,7 @@
 // Created by el on 12/01/16.
 //
 
-#include "MVStegVuln.h"
+#include "XuAlg.h"
 #include <cmath>
 #include <iostream>
 
@@ -11,7 +11,7 @@
 #define MAX_THRESH 30
 #define PI 3.14159265
 
-void MVStegVuln::modifyMV(int16_t *mv) {
+void XuAlg::modifyMV(int16_t *mv) {
     int bit = symb[index / 8] >> (index % 8);
     if((bit & 1) ^ (*mv & 1)) {
         if(!(flags & MOVEST_DUMMY_PASS)){
@@ -21,7 +21,7 @@ void MVStegVuln::modifyMV(int16_t *mv) {
     }
 }
 
-void MVStegVuln::embedToPair(int16_t *mvX, int16_t *mvY) {
+void XuAlg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
     if(stopEmbedding) return;
     double mvValX = double(*mvX) / 2;
     double mvValY = double(*mvY) / 2;
@@ -51,7 +51,7 @@ void MVStegVuln::embedToPair(int16_t *mvX, int16_t *mvY) {
     this->getDataToEmbed();
 }
 
-void MVStegVuln::extractFromPair(int16_t mvX, int16_t mvY) {
+void XuAlg::extractFromPair(int16_t mvX, int16_t mvY) {
     double mvValX = double(mvX) / 2;
     double mvValY = double(mvY) / 2;
     double length = std::hypot(mvValX, mvValY);

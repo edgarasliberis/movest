@@ -598,7 +598,7 @@ bool is_supported_algorithm(const char *algname) {
         || strcmp(algname, "f4") == 0
         || strcmp(algname, "mvsteg") == 0
         || strcmp(algname, "outguess1") == 0
-        || strcmp(algname, "mvsteg-vuln") == 0;
+        || strcmp(algname, "xualg") == 0;
 }
 
 bool is_single_pass(const char* algorithm) {
@@ -751,5 +751,5 @@ int main(int argc, char **argv)
     movest_result res = movest_finalise();
     av_log(NULL, AV_LOG_INFO, "Bytes processed: %d\n", res.bytes_processed);
     av_log(NULL, AV_LOG_INFO, "Finished.");
-    return res.error;
+    return res.error_code;
 }

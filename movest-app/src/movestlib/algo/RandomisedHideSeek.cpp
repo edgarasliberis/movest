@@ -20,7 +20,7 @@ void RandomisedHideSeek::initAsEncoder(movest_params *params) {
         uint blocks = (fileSize / (BLOCKSIZE - NPAR)) + (fileSize % (BLOCKSIZE - NPAR) != 0);
         dataSize = blocks * NPAR + fileSize;
 
-        initialiseMapping(static_cast<AlgOptions*>(params->algParams), dataSize);
+        initialiseMapping(static_cast<AlgOptions*>(params->alg_params), dataSize);
 
         // Fill the data buffer with blocks of file data & parity bytes
         data = new unsigned char[dataSize];
@@ -38,7 +38,7 @@ void RandomisedHideSeek::initAsDecoder(movest_params *params) {
     Algorithm::initAsDecoder(params);
     if(!(flags & MOVEST_DUMMY_PASS)) {
         initialize_ecc();
-        AlgOptions *opt = static_cast<AlgOptions*>(params->algParams);
+        AlgOptions *opt = static_cast<AlgOptions*>(params->alg_params);
         fileSize = opt->fileSize;
 
         // Total size of embedded data:
@@ -83,7 +83,7 @@ void RandomisedHideSeek::initialiseMapping(AlgOptions *algParams, uint dataSize)
     std::sort(bitToMvMapping, bitToMvMapping + bitDataSize);
 }
 
-void RandomisedHideSeek::embedIntoMv(int16_t *mv) {
+void RandomisedHideSeek::embedIntoMvComponent(int16_t *mv) {
     if(flags & MOVEST_DUMMY_PASS) {
         bitsProcessed++;
     } else {
@@ -102,7 +102,7 @@ void RandomisedHideSeek::embedIntoMv(int16_t *mv) {
     }
 }
 
-void RandomisedHideSeek::extractFromMv(int16_t val) {
+void RandomisedHideSeek::extractFromMvComponent(int16_t val) {
     if(index >= 8*dataSize) return;
     if (bitsProcessed == bitToMvMapping[index].mv) {
         // We found a MV that was next on a list to be modified.

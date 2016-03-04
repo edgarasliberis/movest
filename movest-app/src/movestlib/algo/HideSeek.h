@@ -5,18 +5,18 @@
 #ifndef MOVEST_HIDESEEK_H
 #define MOVEST_HIDESEEK_H
 
-#include "../algorithm.h"
+#include "../Algorithm.h"
 
 class HideSeek : public Algorithm {
 public:
-    virtual void embedToPair(int16_t *mvX, int16_t *mvY);
-    virtual void extractFromPair(int16_t mvX, int16_t mvY);
-    virtual void initAsEncoder(movest_params *params);
     virtual void initAsDecoder(movest_params *params);
+    virtual void initAsEncoder(movest_params *params);
+    virtual void embedIntoMv(int16_t *mvX, int16_t *mvY);
+    virtual void extractFromMv(int16_t mvX, int16_t mvY);
 
 protected:
-    virtual void extractFromMv(int16_t val);
-    virtual void embedIntoMv(int16_t *mv);
+    virtual void embedIntoMvComponent(int16_t *mv);
+    virtual void extractFromMvComponent(int16_t val);
 
     void getDataToEmbed();
     void writeRecoveredData();
