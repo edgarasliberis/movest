@@ -1,10 +1,13 @@
 function percentages = chiSquareAttack(mvs, types)
 %CHISQUAREATTACK Computes probability of embedding.
 %   Returns a vector of 100 elements, where ith position denotes the
-%   probability of embedding in the first i% of data.
+%   p-value (interp. "probability of embedding") in the first i% of data.
+%   Results are provided with 95% confidence. Typically we say that
+%   data contains secret message if p > 0.9 and it doesn't if p < 0.1
+%   (otherwise inconclusive).
 
 mvvals = typedMvs(mvs, types); % Retrieve only non-skip MVs
-mvvals = mvvals(mvvals ~= 0);
+mvvals = mvvals(mvvals ~= 0);  % Remove 0s and 1s
 mvvals = mvvals(mvvals ~= 1);
 mvvals = mvvals - min(mvvals); % Normalise
 percentages = zeros(100, 1); % First i% of data are considered
@@ -36,13 +39,18 @@ for i = 1:100
     Z = (X + Y) / 2;
     
     % Minimum frequency condition, filter insignificant data
-    X = X(Z > 2);
-    Z = Z(Z > 2);
+    X = X(Z > 8);
+    Z = Z(Z > 8);
     
     % Number of categories after filtering
     n = size(Z, 1);
     
     % Chi-squared test
-    chi2 = sum(((X - Z) .^ 2) ./ Z);
-    percentages(i) = 1 - gammainc(chi2/2, (n-1)/2);
+    [~,p,~] = chi2gof(1:n, 'Frequency', X, 'Expected', Z);
+    percentages(i) = p; % p-value, ...
+                        % interpreted as a probability of embedding
+                        
+    % (Manual implementation)
+    % chi2 = sum(((X - Z) .^ 2) ./ Z);
+    % 1 - gammainc(chi2/2, (n-1)/2);
 end
