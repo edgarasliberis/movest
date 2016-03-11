@@ -49,7 +49,7 @@ void MVSteg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
     this->getDataToEmbed();
 }
 
-void MVSteg::extractFromPair(int16_t mvX, int16_t mvY) {
+void MVSteg::extractFromMv(int16_t mvX, int16_t mvY) {
     double mvValX = double(mvX) / 2;
     double mvValY = double(mvY) / 2;
     double length = std::hypot(mvValX, mvValY);

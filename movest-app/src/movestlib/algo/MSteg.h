@@ -8,8 +8,7 @@
 #include "HideSeek.h"
 
 class MSteg : public HideSeek {
-
-protected:
+public:
     void embedIntoMvComponent(int16_t *mv);
     void extractFromMvComponent(int16_t val);
 };

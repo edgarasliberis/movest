@@ -9,7 +9,7 @@
 
 class MVSteg : public HideSeek {
 public:
-    virtual void extractFromPair(int16_t mvX, int16_t mvY);
+    virtual void extractFromMv(int16_t mvX, int16_t mvY);
     virtual void embedIntoMv(int16_t *mvX, int16_t *mvY);
 
 protected:

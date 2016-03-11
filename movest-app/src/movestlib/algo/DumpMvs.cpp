@@ -3,14 +3,14 @@
 //
 
 #include <iostream>
-#include "Dummy.h"
+#include "DumpMvs.h"
 
-void Dummy::encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride) {
+void DumpMvs::encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride) {
     // Dummy Pass
 }
 
-void Dummy::decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_log2, int mb_width, int mb_height,
-                   int mv_stride, int mb_stride) {
+void DumpMvs::decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_log2, int mb_width, int mb_height,
+                     int mv_stride, int mb_stride) {
     auto &stream = datafile.exposeStream();
     if(!dimsWritten) {
         stream << mb_height << " " << mb_width << std::endl;
@@ -26,9 +26,9 @@ void Dummy::decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_l
     }
 }
 
-void Dummy::embedIntoMv(int16_t *mvX, int16_t *mvY) {
+void DumpMvs::embedIntoMv(int16_t *mvX, int16_t *mvY) {
 }
 
-void Dummy::extractFromMv(int16_t mvX, int16_t mvY) {
+void DumpMvs::extractFromMv(int16_t mvX, int16_t mvY) {
 
 }

@@ -21,10 +21,8 @@ public:
     void initAsEncoder(movest_params *params);
     void initAsDecoder(movest_params *params);
     movest_result finalise();
-
-protected:
-    void embedIntoMvComponent(int16_t *mv);
-    void extractFromMvComponent(int16_t val);
+    virtual void embedIntoMvComponent(int16_t *mv);
+    virtual void extractFromMvComponent(int16_t val);
 
 private:
     /**
