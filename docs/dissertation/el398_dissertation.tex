@@ -17,12 +17,10 @@
 \widowpenalty1000%
 
 %% Font and text flow setup
-\usepackage{pstricks-add}
 \usepackage{amsthm}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{array}
-\usepackage{subcaption}
 
 \usepackage{polyglossia}
 \setdefaultlanguage[variant=british]{english}
@@ -43,8 +41,11 @@
 
 \usepackage{pifont}
 \usepackage{graphicx}
-\usepackage{epstopdf}
 \usepackage{wrapfig}
+\usepackage{pstricks-add}
+\usepackage{subcaption}
+\usepackage[section]{algorithm}
+\usepackage{algpseudocode}
 
 %% List setup
 \renewcommand\thesubsection{\arabic{subsection}.}
@@ -487,7 +488,7 @@ In a method, originally developed for attacking image steganography, Westfeld an
 
 We can now devise a statistical procedure (\texttt{chiSquareAttack.m}) which can tell with a certain probability whether motion vectors contain a secret message. As described above, we consider even-odd pairs of motion vector values of the form $(2k, 2k+1)$. 
 
-Let $X_k$ and $Y_k$ be the number of times values $2k$ and $2k+1$ occur as motion vector values respectively. Let us also consider another variable $Z_k = \frac{X_k + Y_k}{2}$ --- the average of the two. If the video contains the payload, $X_k$ and $Y_k$ should be almost equal, or, in other words, be distributed as $Z_k$. To prevent influence from the noise in data, pairs that have $Z_k < 8$ are considered to be underrepresented and are neglected in further analysis (\emph{minimum frequency condition}). \textbf{address the difference from the paper?}
+Let $X_k$ and $Y_k$ be the number of times values $2k$ and $2k+1$ occur as motion vector values respectively. Let us also consider another variable $Z_k = \frac{X_k + Y_k}{2}$ --- the average of the two. If the video contains the payload, $X_k$ and $Y_k$ should be almost equal, or, in other words, be distributed as $Z_k$. To prevent influence from the noise in data, pairs that have $Z_k < 8$ are considered to be under-represented and are neglected in further analysis (\emph{minimum frequency condition}). \textbf{address the difference from the paper?}
 
 We can use the \emph{$\chi^2$ (chi-squared) test} to check the hypothesis that there is no significant difference between $X_k$ and $Z_k$ (null hypothesis). Case for $Y_k$ is symmetric and not considered further. The test tells us we can compute the quantity
 
@@ -503,7 +504,7 @@ This method can be further extended to estimate the size of the payload. From th
 Cao \emph{et al.}~\cite{cao2012video} proves that decoding and re-encoding (transcoding) the video tends to remove the changes caused by embedding the payload. That is, motion vectors tend to revert to their original values. Therefore, if a video does not contain the payload, we expect differences between respective motion vectors of the original and transcoded video to be mostly low or zero, and if it does contain the payload, we expect larger differences to be more common.
 
 \begin{wrapfigure}{R}{5.5cm}
-\includegraphics[scale=0.75]{img/movest_reversion_sketch.png}
+\includegraphics[scale=0.7]{img/movest_reversion_sketch.png}
 \caption{Partitioning stego and non-stego videos.}
 \label{fig:movest-reversion-sketch}
 \end{wrapfigure}
@@ -525,13 +526,13 @@ Therefore we can build a classifier which will try to learn the partition betwee
 \section{Embedding algorithms}
 \label{emb-alg}
 
-The project implements 7 embedding algorithms, which are presented in this section together with some in-line evaluation to justify design choices.
+The project implements 7 embedding algorithms which are presented in this section together with some in-line evaluation justifying design choices.
 
 \subsection{Hide \& Seek}
 
-\emph{Hide \& Seek}~\cite{bateman} is the algorihm that was alluded to in the previous section. The algorithm embeds payload bits into both $x$ and $y$ components of each motion vector by setting their LSB to that of the payload. This achieves the maximal capacity for this kind of embedding --- 2 bits per macroblock. However, it is also susceptible to all attacks described in the previous section. 
+\emph{Hide \& Seek}~\cite{bateman} is the algorithm that was alluded to in the previous section. The algorithm embeds payload bits into both $x$ and $y$ components of each motion vector by setting their LSB to that of the payload. This achieves the maximal capacity for this kind of embedding --- 2 bits per macroblock. However, it is also susceptible to all attacks described in the previous section. 
 
-Since data is embedded into all possible macroblocks, visual analysis allows easily spotting it in an non-noisy region. Figure \ref{fig:visual-analysis-example} shows two 2D plots of the same frame: one without the embedding and one with data embedded at 45\% of capacity. Unusual noise in the first half of the frame exposes the embedding.  
+Since data is embedded into all possible macroblocks, visual analysis allows easily spotting it in an non-noisy region. Figure \ref{fig:visual-analysis-example} shows two 2D plots of the same frame: one without the embedding and one with data embedded at about 45\% of capacity. Unusual noise in the first half of the frame exposes the embedding.  
 
 \begin{figure}[tbh]
 \centerline{
@@ -549,66 +550,72 @@ Since data is embedded into all possible macroblocks, visual analysis allows eas
 
 \subsection{MSteg}
 
-%\begin{wrapfigure}{R}{5.5cm}
-%\includegraphics[scale=0.75]{img/msteg-visual.eps}
-%\caption{LSB plane of the frame after MSteg embedding.}
-%\label{fig:msteg-visual}
-%\end{wrapfigure}
+\emph{MSteg} is my straightforward adaptation of the \emph{JSteg} algorithm~\cite{bateman}, which was initially developed for embedding into JPEG DCT coefficients. The algorithm operates in the same way as Hide \& Seek, but addresses the visual detection problem by not embedding into ``still'' regions, where noise would be easily detectable. From the implementation perspective, it avoids embedding bits into 0-valued $x$ and $y$ components. Components with value 1 are also avoided, since embedding bit 0 would turn them into zeros, making decoding ambiguous.
 
-\emph{MSteg} is my straightforward adaptation of the \emph{JSteg} algorithm, which was initially developed for embedding into JPEG DCT coefficients, to motion vector steganography. The algorithm operates in the same way as Hide \& Seek, but addresses the visual detection problem by not embedding into ``still'' regions, where noise would be easily detectable. From the implementation perspective, it avoids embedding bits into 0-valued $x$ and $y$ components. Components with value 1 are also avoided, since embedding bit 0 would turn them into zeros, making decoding ambiguous.
+Figure \ref{fig:msteg-visual} shows that MSteg performs better when subjected to visual analysis. However, we would still expect values in an even-odd pair occur at the same frequency, as described earlier. Histogram in Figure \ref{fig:msteg-hist} confirms this and therefore the $\chi^2$ attack is successful at detecting the embedding (Figure \ref{fig:chisq-attack}).
 
-Figure \ref{fig:msteg-visual} shows that MSteg performs better when subjected to visual analysis. However, ...
-
-%\begin{figure}[tbh]
-%\centerline{
-%\begin{subfigure}[t]{0.4\textwidth}
-%\includegraphics[scale=0.9]{img/msteg-visual.eps}
-%\caption{}
-%\label{fig:msteg-visual}
-%\end{subfigure}
-%\hfill
-%\begin{subfigure}[t]{0.52\textwidth}
-%\includegraphics[scale=0.92]{img/chisq-attack.eps}
-%\end{subfigure}
-%\\[5ex]
-%\begin{subfigure}{0.4\textwidth}
-%\resizebox{1.4\textwidth}{!}{\input{img/msteg-hist.tex}}
-%\end{subfigure}
-%}
-%\caption{An example of a frame prior to embedding (left) %and after embedding at 45\% capacity (right).}
-%\label{fig:visual-analysis-example}
-%\end{figure}
-
-\begin{figure}
-\begin{subfigure}{.5\textwidth}
+\begin{figure}[tbh]
 \centering
-\includegraphics[scale=0.9]{img/msteg-visual.eps}
-\caption{LSB plane of the frame after MSteg embedding.}
-\label{fig:sub1}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-\centering
-\raisebox{4mm}{\includegraphics[scale=0.92]{img/chisq-attack.eps}}
-\caption{}
-\label{fig:sub2}
-\end{subfigure}\\[1ex]
-\begin{subfigure}[t]{0.4\textwidth}
-\centering
-\resizebox{1.4\textwidth}{!}{\input{img/msteg-hist.tex}}
-\caption{}
-\label{fig:sub3}
-\end{subfigure}
-\caption{Three subfigures}
-\label{fig:test}
+\begin{minipage}[t]{.4\textwidth}
+  \centering
+  \includegraphics[scale=0.8]{img/msteg-visual.eps}
+  \caption{LSB plane of the frame subjected to MSteg embedding.}
+  \label{fig:msteg-visual}
+\end{minipage}%
+\quad\quad
+\begin{minipage}[t]{.45\textwidth}
+  \centering
+  \includegraphics[scale=0.84]{img/chisq-attack.eps}
+  \caption{An example of probability of embedding computed by the $\chi^2$ attack when embedding was done at 58\% of capacity.}
+  \label{fig:chisq-attack}
+\end{minipage}
 \end{figure}
 
-Histogram motivation. Show equal pairs.
-
-$\chi^2$ attack successfully picks up the trail and correctly reports embedding capacity (Figure XXX)
+\begin{figure}[tbh]
+\centering
+\resizebox{0.6\textwidth}{!}{\input{img/msteg-hist.tex}}
+\caption{Part of a histogram of video's motion vectors  after MSteg embedding. Colour cues added to highlight even-odd pairs.}
+\label{fig:msteg-hist}
+\end{figure}
 
 \subsection{F3}
 
-Shrinkage. Effects of that. Histogram attack.
+Another algorithm adapted from image steganography is \emph{F3}~\cite{f5}. F3 improves on previous approaches by using a different strategy --- decrementing the absolute value of an MV component if its LSB doesn't match the payload bit. This breaks the even-odd correspondence exploited by the $\chi^2$ attack, making F3 resistant to it. Similarly to MSteg, 0-valued components are ignored by the encoder and decoder. F3's embedding procedure is summarised in Algorithm \ref{alg:f3-embed}. 
+
+\begin{algorithm}
+\caption{Embedding procedure for \emph{F3}.}
+\label{alg:f3-embed}
+\begin{algorithmic}
+\Procedure {F3-Embed}{$mv_C$, $payload_i$}
+\If {$mv_C = 0$}
+    \Return {false}
+\Else
+    \If {$\textit{LSB}(mv_C) \neq payload_i$}
+    	\Comment {Decrease the absolute value of $mv_C$}
+        \If {$mv_C$ > 0}
+        	\State $mv_C \gets mv_C - 1$
+        \Else
+        \State $mv_C \gets mv_C + 1$
+        \EndIf
+    \EndIf
+    
+    \Return $mv_C \neq 0$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Procedure \textsc{F3-Embed} operates on both $x$ and $y$ components ($mv_C$) of each motion vector in turn and reports whether embedding has been successful, \emph{i.e.} $mv_C$ is a non-zero value. If so, decoder will be able to use it, and if $mv_C$ was or has become zero, the same bit is re-embedded into the subsequent component. Extraction procedure simply reads off LSBs to reconstruct the data.
+
+\begin{wrapfigure}{R}{5.5cm}
+\includegraphics[scale=0.75]{img/f3-hist.eps}
+\caption{Part of a histogram of motion vectors with F3 embedding. Note the unusually higher peaks corresponding to even numbers.}
+\label{fig:f3-hist}
+\end{wrapfigure}
+
+This leads to an interesting effect called \emph{shrinkage}. Whenever we try to embed a zero bit (\emph{steganographic zero}) into $mv_C = -1$ or $mv_C = 1$, the value of $mv_C$ will become 0, so the zero bit will have to be re-embedded again. As a result of this, F3 will embed more steganographic zeroes than ones. 
+
+This is the main weakness of the algorithm. Typical encrypted payload has the same number of steganographic zeroes and ones, but F3 embedding will embed more zeros and hence make values with LSB 0 more common (Figure \ref{fig:f3-hist}). However, the embedding is not be vulnerable if steganographic ones are more common in the payload, so shrinkage effect balances out the number of ones and zeroes embedded.  
 
 \subsection{F4}
 
