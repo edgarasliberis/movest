@@ -21,6 +21,7 @@ public:
     virtual void initAsEncoder(movest_params *params);
     virtual void initAsDecoder(movest_params *params);
     virtual movest_result finalise();
+    virtual ~Algorithm() {};
 protected:
     void initialiseAlgorithm(movest_params *params);
     std::vector<uint8_t> deriveBytes(size_t numBytes, std::string salt);
