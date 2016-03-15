@@ -5,6 +5,9 @@
 #include <iostream>
 #include "CryptoFile.h"
 
+const int CryptoFile::BlockSize;
+const int CryptoFile::KeyLength;
+
 CryptoFile::CryptoFile(const std::string &path, std::ios_base::openmode mode): encrypt(false) {
     this->stream = std::make_shared<std::fstream>(path, mode);
     if(this->stream->fail()) {
@@ -23,7 +26,7 @@ CryptoFile::CryptoFile(const std::string &path, uint8_t key[KeyLength], uint8_t 
     initCrypto(key, iv);
 }
 
-std::streamsize CryptoFile::read(uint8_t *out, uint size) {
+std::streamsize CryptoFile::read(uint8_t *out, ulong size) {
     if(stream->eof()) return 0;
     if(encrypt) {
         uint8_t buf[size];
@@ -35,7 +38,7 @@ std::streamsize CryptoFile::read(uint8_t *out, uint size) {
     return stream->gcount();
 }
 
-std::streamsize CryptoFile::write(const uint8_t *out, uint size) {
+std::streamsize CryptoFile::write(const uint8_t *out, ulong size) {
     if(encrypt) {
         uint8_t buf[size];
         dec->ProcessData(buf, out, size);
@@ -74,14 +77,12 @@ uint CryptoFile::remainingData() {
 CryptoFile::CryptoFile(std::iostream *stream):
         encrypt(false), stream(stream) {}
 
-CryptoFile::CryptoFile(std::iostream *stream, uint8_t key[KeyLength], uint8_t [BlockSize]):
+CryptoFile::CryptoFile(std::iostream *stream, uint8_t key[KeyLength], uint8_t iv[BlockSize]):
         encrypt(true), stream(stream) {
     initCrypto(key, iv);
 }
 
 void CryptoFile::initCrypto(uint8_t key[KeyLength], uint8_t iv[BlockSize]) {
-    std::copy(key, key + KeyLength, this->key);
-    std::copy(iv, iv + BlockSize, this->iv);
-    this->enc = std::make_shared<CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption>(this->key, sizeof(this->key), this->iv);
-    this->dec = std::make_shared<CryptoPP::CTR_Mode<CryptoPP::AES>::Decryption>(this->key, sizeof(this->key), this->iv);
+    this->enc = std::make_shared<CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption>(key, KeyLength, iv);
+    this->dec = std::make_shared<CryptoPP::CTR_Mode<CryptoPP::AES>::Decryption>(key, KeyLength, iv);
 }

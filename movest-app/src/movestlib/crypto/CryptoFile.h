@@ -64,7 +64,7 @@ public:
      * @param out Output buffer.
      * @param size Number of bytes to read.
      */
-    std::streamsize read(uint8_t *out, uint size);
+    std::streamsize read(uint8_t *out, ulong size);
 
     /**
      * Writes data from a buffer into a file.
@@ -73,7 +73,7 @@ public:
      * @param out Output buffer.
      * @param size Number of bytes to read.
      */
-    std::streamsize write(const uint8_t *out, uint size);
+    std::streamsize write(const uint8_t *out, ulong size);
 
     /**
      * Number of bytes available for reading.
@@ -104,7 +104,6 @@ private:
     void initCrypto(uint8_t key[KeyLength], uint8_t iv[BlockSize]);
     std::shared_ptr<CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption> enc;
     std::shared_ptr<CryptoPP::CTR_Mode<CryptoPP::AES>::Decryption> dec;
-    uint8_t key[KeyLength], iv[BlockSize];
     bool encrypt;
     std::shared_ptr<std::iostream> stream;
 };

@@ -2,12 +2,17 @@ cmake_minimum_required(VERSION 3.3)
 project(movestlib)
 include(ExternalProject)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
+set(COMMON_FLAGS "-Wall -Wextra -Wpedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ${COMMON_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 ${COMMON_FLAGS}")
 
-file(GLOB_RECURSE SOURCE_FILES
-    "*.h"
+file(GLOB SOURCE_FILES
+    "algo/*.h"
+    "algo/*.cpp"
+    "crypto/*.h"
+    "crypto/*.cpp"
     "*.cpp"
+    "*.h"
 )
 
 link_directories(${EP_INSTALL}/lib)
@@ -39,3 +44,17 @@ target_link_libraries(movestlib librscode)
 find_package(Crypto++ REQUIRED)
 include_directories(${CRYPTO++_INCLUDE_DIR})
 target_link_libraries(movestlib ${CRYPTO++_LIBRARIES})
+
+# Test
+enable_testing()
+find_package(GTest REQUIRED)
+find_package(Threads REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+set(PROJECT_TEST_NAME movestlib_test)
+
+file(GLOB TEST_SRC_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
+add_executable(${PROJECT_TEST_NAME} ${TEST_SRC_FILES})
+target_link_libraries(${PROJECT_TEST_NAME} ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} movestlib ${CRYPTO++_LIBRARIES})
+
+add_test(MovestTests ${PROJECT_TEST_NAME})
