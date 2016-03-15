@@ -2,33 +2,24 @@
 // Created by el on 02/01/16.
 //
 
+#include <cstdlib>
+
 #include "F3.h"
 
-#define ABS(x) (((x) >= 0)? (x) : (-(x)))
-
-void F3::embedIntoMvComponent(int16_t *mv) {
-    if(*mv == 0) return;
-
-    int bit = (symb[index / 8] >> (index % 8)) & 1;
-    int mvbit = ABS(*mv) & 1;
+bool F3::embedIntoMvComponent(int16_t *mv, int bit) {
+    if(*mv == 0) return false;
+    int mvbit = abs(*mv) & 1;
 
     // If LSBs are different, decrease the absolute value of MV
     if((bit ^ mvbit) && !(flags & MOVEST_DUMMY_PASS)) {
         if(*mv > 0) --(*mv);
         else ++(*mv);
     }
-    if(*mv != 0) {
-        ++index;
-        ++bitsProcessed;
-    }
-
-    this->getDataToEmbed();
+    return *mv != 0;
 }
 
-void F3::extractFromMvComponent(int16_t val) {
-    if(val == 0) return;
-    symb[index / 8] |= (ABS(val) & 1) << (index % 8);
-    index++;
-    bitsProcessed++;
-    this->writeRecoveredData();
+bool F3::extractFromMvComponent(int16_t val, int *bit) {
+    if(val == 0) return false;
+    *bit = abs(val) & 1;
+    return true;
 }

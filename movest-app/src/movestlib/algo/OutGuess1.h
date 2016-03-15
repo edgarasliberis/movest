@@ -9,8 +9,8 @@
 
 class OutGuess1 : public RandomisedHideSeek {
 public:
-    virtual void embedIntoMvComponent(int16_t *mv);
-    virtual void extractFromMvComponent(int16_t val);
+    virtual void processMvComponentEmbed(int16_t *mv);
+    virtual void processMvComponentExtract(int16_t val);
 };
 
 #endif //MOVEST_OUTGUESS1_H

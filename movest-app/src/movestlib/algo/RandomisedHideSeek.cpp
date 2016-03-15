@@ -6,7 +6,7 @@
 
 extern "C" {
 #include <rscode/ecc.h>
-#define BLOCKSIZE (8 * CryptoFile::BlockSize + NPAR)
+#define BLOCKSIZE 255
 }
 
 void RandomisedHideSeek::initAsEncoder(movest_params *params) {
@@ -83,7 +83,7 @@ void RandomisedHideSeek::initialiseMapping(AlgOptions *algParams, uint dataSize)
     std::sort(bitToMvMapping, bitToMvMapping + bitDataSize);
 }
 
-void RandomisedHideSeek::embedIntoMvComponent(int16_t *mv) {
+void RandomisedHideSeek::processMvComponentEmbed(int16_t *mv) {
     if(flags & MOVEST_DUMMY_PASS) {
         bitsProcessed++;
     } else {
@@ -93,22 +93,24 @@ void RandomisedHideSeek::embedIntoMvComponent(int16_t *mv) {
             ulong dataBit = bitToMvMapping[index].bit;
             int bit = data[dataBit / 8] >> (dataBit % 8);
 
-            if((bit & 1) && !(*mv & 1)) (*mv)++;
-            if(!(bit & 1) && (*mv & 1)) (*mv)--;
-
-            index++;
+            bool success = HideSeek::embedIntoMvComponent(mv, bit);
+            if(success) index++;
         }
         bitsProcessed++;
     }
 }
 
-void RandomisedHideSeek::extractFromMvComponent(int16_t val) {
+void RandomisedHideSeek::processMvComponentExtract(int16_t mv) {
     if(index >= 8*dataSize) return;
     if (bitsProcessed == bitToMvMapping[index].mv) {
         // We found a MV that was next on a list to be modified.
-        ulong dataBit = bitToMvMapping[index].bit;
-        data[dataBit / 8] |= (val & 1) << (dataBit % 8);
-        index++;
+        int bit = 0;
+        bool success = HideSeek::extractFromMvComponent(mv, &bit);
+        if(success) {
+            ulong dataBit = bitToMvMapping[index].bit;
+            data[dataBit / 8] |= (bit & 1) << (dataBit % 8);
+            index++;
+        }
     }
 
     bitsProcessed++;

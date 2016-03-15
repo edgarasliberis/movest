@@ -2,17 +2,20 @@
 // Created by el on 12/01/16.
 //
 
-#ifndef MOVEST_MVSTEGVULN_H
-#define MOVEST_MVSTEGVULN_H
+#ifndef MOVEST_XUALG_H
+#define MOVEST_XUALG_H
 
-#include "HideSeek.h"
+#include "MVSteg.h"
 
-class XuAlg : public HideSeek {
+class XuAlg : public MVSteg {
 public:
-    virtual void extractFromMv(int16_t mvX, int16_t mvY);
-    virtual void embedIntoMv(int16_t *mvX, int16_t *mvY);
-protected:
-    void modifyMV(int16_t *mv);
+    virtual bool doEmbedding(int16_t *mvX, int16_t *mvY, int bit);
+    virtual bool doExtraction(int16_t mvX, int16_t mvY, int *bit);
+    virtual bool usableMv(int16_t mvX, int16_t mvY);
+
+private:
+    void modifyMv(int16_t *mv, int bit);
+    static double phase(int16_t mvX, int16_t mvY);
 };
 
-#endif //MOVEST_MVSTEGVULN_H
+#endif //MOVEST_XUALG_H

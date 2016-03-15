@@ -9,8 +9,8 @@
 
 class F4 : public HideSeek {
 public:
-    void embedIntoMvComponent(int16_t *mv);
-    void extractFromMvComponent(int16_t val);
+    bool embedIntoMvComponent(int16_t *mv, int bit);
+    bool extractFromMvComponent(int16_t val, int *bit);
 };
 
 #endif //MOVEST_F4_H

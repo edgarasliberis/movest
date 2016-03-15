@@ -4,14 +4,16 @@
 
 #include "MSteg.h"
 
-void MSteg::embedIntoMvComponent(int16_t *mv) {
+bool MSteg::embedIntoMvComponent(int16_t *mv, int bit) {
     if(*mv != 0 && *mv != 1) {
-        HideSeek::embedIntoMvComponent(mv);
+        return HideSeek::embedIntoMvComponent(mv, bit);
     }
+    return false;
 }
 
-void MSteg::extractFromMvComponent(int16_t val) {
+bool MSteg::extractFromMvComponent(int16_t val, int *bit) {
     if(val != 0 && val != 1) {
-        HideSeek::extractFromMvComponent(val);
+        return HideSeek::extractFromMvComponent(val, bit);
     }
+    return false;
 }

@@ -17,33 +17,46 @@ void HideSeek::initAsDecoder(movest_params *params) {
 }
 
 void HideSeek::embedIntoMv(int16_t *mvX, int16_t *mvY) {
+    processMvComponentEmbed(mvX);
+    processMvComponentEmbed(mvY);
+}
+
+void HideSeek::processMvComponentEmbed(int16_t *mv) {
     if(stopEmbedding) return;
-    embedIntoMvComponent(mvX);
-    if(stopEmbedding) return;
-    embedIntoMvComponent(mvY);
+    bool success = embedIntoMvComponent(mv, symb[index / 8] >> (index % 8));
+    if(success) {
+        ++index;
+        ++bitsProcessed;
+        this->getDataToEmbed();
+    }
 }
 
 void HideSeek::extractFromMv(int16_t mvX, int16_t mvY) {
-    extractFromMvComponent(mvX);
-    extractFromMvComponent(mvY);
+    processMvComponentExtract(mvX);
+    processMvComponentExtract(mvY);
 }
 
-void HideSeek::embedIntoMvComponent(int16_t *mv) {
-    int bit = symb[index / 8] >> (index % 8);
+void HideSeek::processMvComponentExtract(int16_t mv) {
+    int bit = 0;
+    bool success = extractFromMvComponent(mv, &bit);
+    if(success) {
+        symb[index / 8] |= (bit & 1) << (index % 8);
+        index++;
+        bitsProcessed++;
+        this->writeRecoveredData();
+    }
+}
+
+bool HideSeek::embedIntoMvComponent(int16_t *mv, int bit) {
     // Equivalent to setting the LSB of '*mv' to the one of 'bit'.
     if((bit & 1) && !(*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)++;
     if(!(bit & 1) && (*mv & 1) && !(flags & MOVEST_DUMMY_PASS)) (*mv)--;
-    ++index;
-    ++bitsProcessed;
-
-    this->getDataToEmbed();
+    return true;
 }
 
-void HideSeek::extractFromMvComponent(int16_t val) {
-    symb[index / 8] |= (val & 1) << (index % 8);
-    index++;
-    bitsProcessed++;
-    this->writeRecoveredData();
+bool HideSeek::extractFromMvComponent(int16_t val, int *bit) {
+    *bit = val;
+    return true;
 }
 
 void HideSeek::getDataToEmbed() {

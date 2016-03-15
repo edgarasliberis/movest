@@ -6,14 +6,15 @@
 #define MOVEST_MVSTEG_H
 
 #include "HideSeek.h"
+#include "F4.h"
 
-class MVSteg : public HideSeek {
+class MVSteg : public F4 {
 public:
     virtual void extractFromMv(int16_t mvX, int16_t mvY);
     virtual void embedIntoMv(int16_t *mvX, int16_t *mvY);
-
-protected:
-    virtual void modifyMV(int16_t *mv);
+    virtual bool doEmbedding(int16_t *mvX, int16_t *mvY, int bit);
+    virtual bool doExtraction(int16_t mvX, int16_t mvY, int *bit);
+    virtual bool usableMv(int16_t mvX, int16_t mvY);
 };
 
 #endif //MOVEST_MVSTEG_H
