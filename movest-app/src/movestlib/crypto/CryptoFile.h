@@ -27,14 +27,14 @@ public:
     CryptoFile() {};
 
     /**
-     * Constructs an object with encryption disabled.
+     * Constructs a file with encryption disabled.
      * @param path Path to a file.
      * @param mode File open mode, e.g std::ios::in
      */
     CryptoFile(const std::string &path, std::ios_base::openmode mode);
 
     /**
-     * Constructs an object with AES-CTR encryption enabled.
+     * Constructs a file with AES-CTR encryption enabled.
      *
      * @param path Path to a file.
      * @param key An encryption key.
@@ -42,6 +42,21 @@ public:
      * @param mode File open mode, e.g std::ios::in
      */
     CryptoFile(const std::string &path, uint8_t key[KeyLength], uint8_t iv[BlockSize], std::ios::openmode mode);
+
+    /**
+     * Constructs a wrapper around a stream with encryption disabled.
+     * @param stream The stream.
+     */
+    CryptoFile(std::iostream *stream);
+
+    /**
+     * Constructs a wrapper around a stream with AES-CTR encryption enabled.
+     *
+     * @param stream The stream.
+     * @param key An encryption key.
+     * @param iv An initialisation vector.
+     */
+    CryptoFile(std::iostream *stream, uint8_t key[KeyLength], uint8_t iv[BlockSize]);
 
     /**
      * Reads data from the file into a buffer.
@@ -83,14 +98,15 @@ public:
     /**
      * Exposes the underlying file stream, encryption will not be performed.
      */
-    std::fstream& exposeStream();
+    std::iostream& exposeStream();
 
 private:
+    void initCrypto(uint8_t key[KeyLength], uint8_t iv[BlockSize]);
     std::shared_ptr<CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption> enc;
     std::shared_ptr<CryptoPP::CTR_Mode<CryptoPP::AES>::Decryption> dec;
     uint8_t key[KeyLength], iv[BlockSize];
     bool encrypt;
-    std::fstream stream;
+    std::shared_ptr<std::iostream> stream;
 };
 
 #endif //MOVEST_CRYPTOFILE_H
