@@ -4,17 +4,15 @@
 
 #include "F4.h"
 
-#define ABS(x) (((x) >= 0)? (x) : (-(x)))
-
 bool F4::embedIntoMvComponent(int16_t *mv, int bit) {
     if(*mv == 0) return false;
     int mvbit = (*mv) & 1;
 
-    // If LSBs are the same and *mv is positive, decrease the absolute value of MV
+    // If LSBs are not the same and *mv is positive, decrease the absolute value of MV
     if(bit != mvbit && *mv > 0 && !(flags & MOVEST_DUMMY_PASS)) {
         (*mv)--;
     }
-    // If LSBs are different and *mv is negative, decrease the absolute value of MV
+    // If LSBs are not different and *mv is negative, decrease the absolute value of MV
     if(bit == mvbit && *mv < 0 && !(flags & MOVEST_DUMMY_PASS)) {
         (*mv)++;
     }
