@@ -12,29 +12,31 @@
 void XuAlg::modifyMv(int16_t *mv, int bit) {
     if((bit & 1) ^ (*mv & 1)) {
         if(!(flags & MOVEST_DUMMY_PASS)){
-            if (*mv > 0) (*mv)++;
+            if (*mv >= 0) (*mv)++;
             else (*mv)--;
         }
     }
 }
 
 bool XuAlg::doEmbedding(int16_t *mvX, int16_t *mvY, int bit) {
-    double angle = phase(*mvX, *mvY);
-    if (angle < PI / 2) modifyMv(mvX, bit);
+    if(!usableMv(*mvX, *mvY)) return false;
+
+    // |Phase| < 90deg is the same as x > 0
+    if (*mvX > 0) modifyMv(mvX, bit);
     else modifyMv(mvY, bit);
 
-    // If the maximal component changed, it will re-embed the data
+    // If the usable component changed, it will re-embed the data
     // If it didn't, re-embedding into the same component is a no-op
-    angle = phase(*mvX, *mvY);
-    if (angle < PI / 2) modifyMv(mvX, bit);
+    if (*mvX > 0) modifyMv(mvX, bit);
     else modifyMv(mvY, bit);
 
-    return true;
+    return usableMv(*mvX, *mvY); // Check for shrinkage (components have an upper bound)
 }
 
 bool XuAlg::doExtraction(int16_t mvX, int16_t mvY, int *bit) {
+    if(!usableMv(mvX, mvY)) return false;
     double angle = phase(mvX, mvY);
-    *bit = (angle < PI / 2)? mvX : mvY;
+    *bit = (mvX > 0)? mvX : mvY;
     return true;
 }
 

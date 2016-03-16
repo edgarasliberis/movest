@@ -7,9 +7,9 @@
 
 // Chosen by a fair dice roll
 #define THRESH 5
-#define MAX_THRESH 31
 
 bool MVSteg::doEmbedding(int16_t *mvX, int16_t *mvY, int bit) {
+    if(!usableMv(*mvX, *mvY)) return false;
     bool success;
 
     if (abs(*mvX) > abs(*mvY)) success = F4::embedIntoMvComponent(mvX, bit);
@@ -21,19 +21,15 @@ bool MVSteg::doEmbedding(int16_t *mvX, int16_t *mvY, int bit) {
     if (abs(*mvX) > abs(*mvY)) success = F4::embedIntoMvComponent(mvX, bit);
     else success = F4::embedIntoMvComponent(mvY, bit);
 
-    return success;
+    return success && usableMv(*mvX, *mvY); // Check for shrinkage
 }
 
 void MVSteg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
     if(stopEmbedding) return;
-    if(!usableMv(*mvX, *mvY)) return;
 
     int bit = symb[index / 8] >> (index % 8);
     bool success = doEmbedding(mvX, mvY, bit);
     if(!success) return;
-
-    // Check for shrinkage
-    if(!usableMv(*mvX, *mvY)) return;
 
     index++;
     bitsProcessed++;
@@ -42,14 +38,13 @@ void MVSteg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
 }
 
 bool MVSteg::doExtraction(int16_t mvX, int16_t mvY, int *bit) {
+    if(!usableMv(mvX, mvY)) return false;
     int16_t val = (abs(mvX) > abs(mvY))? mvX : mvY;
     bool success = F4::extractFromMvComponent(val, bit);
     return success;
 }
 
 void MVSteg::extractFromMv(int16_t mvX, int16_t mvY) {
-    if(!usableMv(mvX, mvY)) return;
-
     int bit = 0;
     bool success = doExtraction(mvX, mvY, &bit);
     if(!success) return;
