@@ -55,7 +55,7 @@ uint8_t iv[CryptoFile::BlockSize] = { 0x00, 0x00, 0x00, 0x60, 0xDB, 0x56, 0x72, 
 uint8_t ciphertext[] = {0x14, 0x5A, 0xD0, 0x1D, 0xBF, 0x82, 0x4E, 0xC7,
                         0x56, 0x08, 0x63, 0xDC, 0x71, 0xE3, 0xE0, 0xC0 };*/
 
-TEST(CryptoFileText, ReadAESCTREncryption)
+TEST(CryptoFileTest, ReadAESCTREncryption)
 {
     // CryptoFile will take ownership
     std::stringstream *stream = new std::stringstream(std::string(reinterpret_cast<char*>(plaintext)));
@@ -67,7 +67,7 @@ TEST(CryptoFileText, ReadAESCTREncryption)
         EXPECT_EQ(ciphertext[i], buff[i]);
 }
 
-TEST(CryptoFileText, WriteAESCTREncryption)
+TEST(CryptoFileTest, WriteAESCTREncryption)
 {
     // CryptoFile will take ownership
     std::stringstream *stream = new std::stringstream();
