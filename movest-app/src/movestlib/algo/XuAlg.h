@@ -15,7 +15,6 @@ public:
 
 private:
     void modifyMv(int16_t *mv, int bit);
-    static double phase(int16_t mvX, int16_t mvY);
 };
 
 #endif //MOVEST_XUALG_H

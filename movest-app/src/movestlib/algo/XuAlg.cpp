@@ -35,7 +35,6 @@ bool XuAlg::doEmbedding(int16_t *mvX, int16_t *mvY, int bit) {
 
 bool XuAlg::doExtraction(int16_t mvX, int16_t mvY, int *bit) {
     if(!usableMv(mvX, mvY)) return false;
-    double angle = phase(mvX, mvY);
     *bit = (mvX > 0)? mvX : mvY;
     return true;
 }
@@ -46,8 +45,4 @@ bool XuAlg::usableMv(int16_t mvX, int16_t mvY) {
     double length = std::hypot(mvValX, mvValY);
 
     return !(length < THRESH || abs(mvX) > MAX_THRESH || abs(mvY) > MAX_THRESH);
-}
-
-double XuAlg::phase(int16_t mvX, int16_t mvY) {
-    return fabs(atan2(mvX / 2, mvY / 2));
 }
