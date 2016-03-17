@@ -9,6 +9,14 @@ extern "C" {
 #define BLOCKSIZE 255
 }
 
+RandomisedHideSeek::RandomisedHideSeek(RandomisedHideSeek::AlgOptions *algOptions) {
+    if(algOptions == nullptr) {
+        this->opt = AlgOptions{0, 0};
+    } else {
+        this->opt = *algOptions;
+    }
+}
+
 void RandomisedHideSeek::initAsEncoder(movest_params *params) {
     Algorithm::initAsEncoder(params);
     if(!(flags & MOVEST_DUMMY_PASS)) {
@@ -20,7 +28,7 @@ void RandomisedHideSeek::initAsEncoder(movest_params *params) {
         uint blocks = (fileSize / (BLOCKSIZE - NPAR)) + (fileSize % (BLOCKSIZE - NPAR) != 0);
         dataSize = blocks * NPAR + fileSize;
 
-        initialiseMapping(static_cast<AlgOptions*>(params->alg_params), dataSize);
+        initialiseMapping(dataSize);
 
         // Fill the data buffer with blocks of file data & parity bytes
         data = new unsigned char[dataSize];
@@ -38,23 +46,22 @@ void RandomisedHideSeek::initAsDecoder(movest_params *params) {
     Algorithm::initAsDecoder(params);
     if(!(flags & MOVEST_DUMMY_PASS)) {
         initialize_ecc();
-        AlgOptions *opt = static_cast<AlgOptions*>(params->alg_params);
-        fileSize = opt->fileSize;
+        fileSize = opt.fileSize;
 
         // Total size of embedded data:
         // fileSize + NPAR parity bytes for every (BLOCKSIZE - NPAR) bytes of the file
         uint blocks = (fileSize / (BLOCKSIZE - NPAR)) + (fileSize % (BLOCKSIZE - NPAR) != 0);
         dataSize = blocks * NPAR + fileSize;
 
-        initialiseMapping(opt, dataSize);
+        initialiseMapping(dataSize);
 
         data = new unsigned char[dataSize]();
     }
 }
 
-void RandomisedHideSeek::initialiseMapping(AlgOptions *algParams, uint dataSize) {
+void RandomisedHideSeek::initialiseMapping(uint dataSize) {
     // Build a mapping from a data bit to the particular MV
-    uint64_t capacity = algParams->byteCapacity;
+    uint64_t capacity = opt.byteCapacity;
 
     assert(encoder || dataSize <= capacity);
 

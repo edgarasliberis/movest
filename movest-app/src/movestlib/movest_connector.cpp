@@ -22,7 +22,7 @@ void movest_decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_l
     algorithm->decode(mvs, mbtype_table, mv_sample_log2, mb_width, mb_height, mv_stride, mb_stride);
 }
 
-void movest_init_algorithm(const char *algname) {
+void movest_init_algorithm(const char *algname, void* alg_params) {
     if(algorithm != nullptr) {
         delete algorithm;
     }
@@ -31,7 +31,7 @@ void movest_init_algorithm(const char *algname) {
         algorithm = new HideSeek();
     }
     else if(std::strcmp(algname, "rand-hidenseek") == 0) {
-        algorithm = new RandomisedHideSeek();
+        algorithm = new RandomisedHideSeek(reinterpret_cast<RandomisedHideSeek::AlgOptions*>(alg_params));
     }
     else if(std::strcmp(algname, "dumpmvs") == 0 || std::strcmp(algname, "dummypass") == 0) {
         algorithm = new DumpMvs();
@@ -49,7 +49,7 @@ void movest_init_algorithm(const char *algname) {
         algorithm = new MVSteg();
     }
     else if(std::strcmp(algname, "outguess1") == 0) {
-        algorithm = new OutGuess1();
+        algorithm = new OutGuess1(reinterpret_cast<RandomisedHideSeek::AlgOptions*>(alg_params));
     }
     else if(std::strcmp(algname, "xualg") == 0) {
         algorithm = new XuAlg();

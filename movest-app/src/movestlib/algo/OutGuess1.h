@@ -9,6 +9,7 @@
 
 class OutGuess1 : public RandomisedHideSeek {
 public:
+    using RandomisedHideSeek::RandomisedHideSeek;
     virtual void processMvComponentEmbed(int16_t *mv);
     virtual void processMvComponentExtract(int16_t val);
 };

@@ -18,6 +18,8 @@ public:
         uint32_t fileSize; // Decoder only
     };
 
+    RandomisedHideSeek(AlgOptions *algOptions);
+
     void initAsEncoder(movest_params *params);
     void initAsDecoder(movest_params *params);
     movest_result finalise();
@@ -38,8 +40,9 @@ private:
     uint fileSize, dataSize;
     unsigned char *data;
     Pair *bitToMvMapping;
+    AlgOptions opt;
 
-    void initialiseMapping(AlgOptions *algParams, uint dataSize);
+    void initialiseMapping(uint dataSize);
 };
 
 
