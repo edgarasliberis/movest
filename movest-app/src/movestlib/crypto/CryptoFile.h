@@ -104,7 +104,7 @@ private:
     void initCrypto(uint8_t key[KeyLength], uint8_t iv[BlockSize]);
     std::shared_ptr<CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption> enc;
     std::shared_ptr<CryptoPP::CTR_Mode<CryptoPP::AES>::Decryption> dec;
-    bool encrypt;
+    bool encrypt, fileStream = false;
     std::shared_ptr<std::iostream> stream;
 };
 
