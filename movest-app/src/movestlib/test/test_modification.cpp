@@ -166,7 +166,6 @@ TEST(ModificationTest, XuAlgEmbed)
     bool success[] = { 0,  1,  1,  1, 1,  1,  1,   1,  1,  1,  1,  1,  0,   1,   0 };
 
     for(uint i = 0; i < sizeof(mvx) / sizeof(mvx[0]); ++i) {
-        std::cout << i << std::endl;
         EXPECT_EQ(success[i], algo.doEmbedding(&mvx[i], &mvy[i], bits[i]));
         EXPECT_EQ(resultx[i], mvx[i]);
         EXPECT_EQ(resulty[i], mvy[i]);
