@@ -17,6 +17,8 @@ public:
     virtual bool embedIntoMvComponent(int16_t *mv, int bit);
     virtual bool extractFromMvComponent(int16_t mv, int *bit);
 
+    virtual movest_result finalise();
+
 protected:
     void getDataToEmbed();
     void writeRecoveredData();

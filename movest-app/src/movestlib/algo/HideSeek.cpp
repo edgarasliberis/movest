@@ -74,3 +74,10 @@ void HideSeek::writeRecoveredData() {
         index = 0;
     }
 }
+
+movest_result HideSeek::finalise() {
+    if(index > 0 && index / 8 > 0) {
+        datafile.write(symb, index / 8);
+    }
+    return Algorithm::finalise();
+}
