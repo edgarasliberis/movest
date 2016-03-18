@@ -25,6 +25,10 @@ void Algorithm::initAsDecoder(movest_params *params) {
 void Algorithm::initialiseAlgorithm(movest_params *params) {
     // Unpack parameters
     this->flags = params->flags;
+    if((this->flags & MOVEST_ENABLE_ENCRYPTION) && params->password == nullptr) {
+        std::cerr << "Using default password for encryption, "
+                     "please specify a password to secure your embedding." << std::endl;
+    }
     this->password = params->password == nullptr? DEFAULT_PASSWORD : params->password;
     auto iosFlags = std::ios::binary | ((this->encoder)? std::ios::in : std::ios::out);
 
