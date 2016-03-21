@@ -21,6 +21,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{array}
+\usepackage{afterpage}
 
 \usepackage{polyglossia}
 \setdefaultlanguage[variant=british]{english}
@@ -364,12 +365,13 @@ The steganalysis suite was integrated into the Matlab scientific computation pac
 \subsection{Risk analysis}
 FFmpeg is a complex piece of software, mostly written in a style of C that sacrifices clarity for performance. A potential risk for the project was the difficulty of proper integration with FFmpeg and hence inability to access or reliably modify motion vectors. Complete failure to do so was unlikely, but it could have consumed a significant amount of development time. To mitigate this, some ``catch-up'' time was allocated in the project timetable.  
 
-\subsection{Workflow}
+\subsection{Development choices}
 \begin{itemize}
 \item \emph{Git} was used for version control, allowing quick roll-back and managing multiple source trees using branches.
 \item \emph{Backups} were done by uploading the source tree and other relevant files to Dropbox. The git repository itself was hosted remotely on GitHub.
-\item \emph{Testing} \textbf{TODO}
-\item \emph{Interative (spiral) development model} was used to continuously add and test new embedding schemes and steganalysis methods.
+\item \emph{Testing} was done both manually and using unit tests to verify that software performs as intended. As a good practice, compiler warnings were treated as errors. Unit tests were implemented using Google Test framework and also served as a regression test suite.
+\item \emph{Interative (spiral) development model} was used, which allowed continuously adding and testing new embedding schemes and steganalysis methods.
+\item Software components have a \emph{modular design}, which enabled better maintainability and testability, and well-defined interfaces allowed changing internal implementation without breaking compatibility with other components.
 \end{itemize}
 
 \section{Starting Point}
@@ -384,8 +386,9 @@ During the development of this project I made use of some material covered in th
 \item \textit{Artificial Intelligence II} --- classifier evaluation.
 \end{itemize}
 
-\bigskip
-This chapter summarised relevant theoretical and practical background necessary to start the implementation. Next chapter will cover the design and features of the system, implemented steganographic algorithms and steganalysis methods, together with some in-line evaluation.
+\bigskip\bigskip
+\subsubsection*{Summary}
+This chapter summarised relevant theoretical and practical background necessary to start the implementation. The next chapter will cover the design and features of the system, implemented steganographic algorithms and steganalysis methods, together with some in-line evaluation.
 
 % Implementation
 \cleardoublepage
@@ -414,27 +417,32 @@ However, this leaves prediction errors unmodified. To evaluate how much this aff
 To achieve a modular design and decouple from FFmpeg, the implemented steganographic algorithms were separated into a standalone library \texttt{movestlib}\footnote{\texttt{movest} (\underline{mo}tion \underline{ve}ctor \underline {st}eganography) is the codename for this project.}. The library is implemented in C++, exposing a C API for integration with FFmpeg, and encoder and decoder applications (Figure \ref{fig:movest-c-api}). The exact operation of these methods is described in section \ref{enc-dec-bin} using these applications as examples.
 
 \begin{figure}[tbh]
-\centerline{\includegraphics[width=0.85\textwidth, height=\textheight, keepaspectratio]{img/movest_c_api.png}}
+\centering
+%\resizebox{0.9\textwidth}{!}{\input{img/movest-c-api.tex}}
+\includegraphics[width=0.9\textwidth]{img/movest_c_api.png}
 \caption{UML diagram of the C API provided by \texttt{movestlib}. (Some method parameters omitted for brevity.)}
 \label{fig:movest-c-api}
 \end{figure}
 
+A singleton instance of an embedding algorithm is kept active after initialisation. FFmpeg feeds motion vector data into the algorithm by calling C API methods \texttt{movest\_encode/decode}.  
+
+\begin{figure}[!htbp]
+\centering
+%\resizebox{\textwidth}{!}{\input{img/movest-alg-class-diag.tex}}
+\includegraphics[width=\textwidth]{img/movest_alg_class_diag.png}
+\caption{UML diagram of embedding algorithms implemented in \texttt{movestlib}. (Some unimportant fields, methods and method parameters omitted for brevity.)}
+\label{fig:movest_alg_class_diag}
+\end{figure}
+
 \subsubsection{Class hierarchy}
 
-The class hierarchy of the embedding algorithms is presented in Figure \ref{fig:movest_alg_class_diag}. \texttt{Algorithm} is the base class for all embedding algorithms, containing common functionality such as initialising the payload file or operating on every motion vector of a suitable type in turn. Most algorithms, however, extend \texttt{HideSeek} to benefit from the following more specific functionality:
+The class hierarchy of the embedding algorithms is presented in Figure \ref{fig:movest_alg_class_diag}. \texttt{Algorithm} is the base class for all embedding algorithms, containing common functionality such as initialising the payload file or operating on every motion vector of a suitable type in turn. Most algorithms, however, extend \texttt{HideSeek} or its subclasses to benefit from the following more specific functionality:
+
 \begin{itemize}
 \item Operating on a per-component basis. Motion vectors are stored as $x$ and $y$ components and many algorithms treat them independently (\texttt{RandomisedHideSeek, OutGuess1}).
 \item Sequential data fetching and stopping criteria. Some algorithms read and embed payload bits sequentially and require knowledge of when to stop embedding (\texttt{XuAlg, MVSteg}).
 \item Both of above (\texttt{MSteg, F3, F4}).
 \end{itemize}
-
-\begin{figure}[tbh]
-\centerline{\includegraphics[width=0.9\textwidth, height=\textheight, keepaspectratio]{img/movest_alg_class_diag.png}}
-\caption{UML diagram of embedding algorithms implemented in \texttt{movestlib}. (Some unimportant fields, methods and method parameters omitted for brevity.)}
-\label{fig:movest_alg_class_diag}
-\end{figure}
-
-A singleton instance of an embedding algorithm is kept active after initialisation. FFmpeg feeds motion vector data into the algorithm by calling C API methods \texttt{movest\_encode/decode}.  
 
 \subsubsection{Encryption}
 Encrypting the payload hides the structure of the data by making it indistinguishable from random noise, making it hard to detect in already-noisy regions, as well as causing it to remain unreadable by an adversary even if steganography was broken. \texttt{movestlib} achieves this by implementing a file-like object for accessing the payload, and encrypting or decrypting the data on the fly (\texttt{MOVEST\_ENCRYPTION} flag). Encryption is done using AES in counter (CTR) mode with a 256-bit key. The key and the initialisation vector are derived from the user-supplied password by performing key stretching using the industry-standard PBKDF2-HMAC-SHA1 key derivation function. Since implementing cryptographic primitives yourself is potentially error-prone, the Crypto++ library was used to provide them. 
@@ -506,8 +514,9 @@ This method can also estimate the size of the payload. From the expression for $
 \subsection{Reversion Technique}
 Cao \emph{et al.}~\cite{cao2012video} proved that decoding then re-encoding (transcoding) a video tends to remove the changes caused by embedding the payload. That is, motion vectors tend to revert to their original values. So, if a video does not contain a payload, we expect differences between respective motion vectors of the original and transcoded video to be near zero.
 
-\begin{wrapfigure}{R}{5.5cm}
-\includegraphics[scale=0.7]{img/movest_reversion_sketch.png}
+\begin{wrapfigure}[13]{R}{6cm}
+\vspace{-15pt}
+\includegraphics[width=5.5cm]{img/movest_reversion_sketch.png}
 \caption{Partitioning stego and non-stego videos.}
 \label{fig:movest-reversion-sketch}
 \end{wrapfigure}
@@ -534,8 +543,6 @@ This section presents the 7 LSB steganography algorithms implemented by this pro
 
 \emph{Hide \& Seek}~\cite{bateman} is the algorithm which was used as an example in the previous section. The algorithm embeds payload bits into both $x$ and $y$ components of each motion vector by setting their LSB to that of the payload. This achieves the optimal capacity for this type of embedding of 2 bits per macroblock, but is susceptible to all the attacks described in the previous section. 
 
-Since data is embedded into all possible macroblocks, visual analysis allows easily spotting it in a non-noisy region. Figure \ref{fig:visual-analysis-example} shows two 2D plots of the same frame: one without the embedding and one with data embedded at about 45\% of capacity. Unusual noise in the first half of the frame exposes the embedding.  
-
 \begin{figure}[tbh]
 \centerline{
 \begin{subfigure}[t]{0.4\textwidth}
@@ -549,6 +556,8 @@ Since data is embedded into all possible macroblocks, visual analysis allows eas
 \caption{An example of a frame prior to embedding (left) and after embedding at 45\% capacity (right).}
 \label{fig:visual-analysis-example}
 \end{figure}
+
+Since data is embedded into all possible macroblocks, visual analysis allows easily spotting it in a non-noisy region. Figure \ref{fig:visual-analysis-example} shows two 2D plots of the same frame: one without the embedding and one with data embedded at about 45\% of capacity. Unusual noise in the first half of the frame exposes the embedding.  
 
 \subsection{MSteg}
 \label{msteg}
@@ -583,14 +592,6 @@ Figure \ref{fig:msteg-visual} shows that MSteg performs better when subjected to
 
 \subsection{F3}
 
-\begin{wrapfigure}[15]{R}{6cm}
-\vspace{-15pt}
-\centering
-\includegraphics[width=5.5cm]{img/f3-hist.eps}
-\caption{Part of a histogram of motion vectors with F3 embedding. Note the unusually higher peaks corresponding to even numbers.}
-\label{fig:f3-hist}
-\end{wrapfigure}
-
 Another algorithm adapted from image steganography is \emph{F3}~\cite{f5}. F3 improves on previous approaches by decrementing the absolute value of an MV component if its LSB doesn't match the payload bit, breaking the even-odd correspondence exploited by the $\chi^2$ attack. Similarly to MSteg, 0-valued components are ignored by the encoder and decoder. F3's embedding procedure is summarised in Algorithm \ref{alg:f3-embed}. 
 
 \begin{algorithm}
@@ -617,6 +618,14 @@ Another algorithm adapted from image steganography is \emph{F3}~\cite{f5}. F3 im
 \end{algorithm}
 
 Procedure \textsc{F3-Embed} operates on both $x$ and $y$ components ($mv_C$) of each motion vector in turn and reports whether embedding has been successful, \emph{i.e.} $mv_C$ is a non-zero value. If so, the decoder will be able to use it, and if $mv_C$ was or has become zero, the same bit is re-embedded into a subsequent component. The extraction procedure simply reads the LSBs to reconstruct the data.
+
+\begin{wrapfigure}[13]{R}{6cm}
+\vspace{-15pt}
+\centering
+\includegraphics[width=5.5cm]{img/f3-hist.eps}
+\caption{Part of a histogram of motion vectors with F3 embedding. Note the unusually higher peaks corresponding to even numbers.}
+\label{fig:f3-hist}
+\end{wrapfigure}
 
 This embedding strategy leads to an interesting effect called \emph{shrinkage}. Whenever we try to embed a zero bit (\emph{steganographic zero}) into $mv_C = -1$ or $mv_C = 1$, the value of $mv_C$ will become 0, so the zero bit will have to be re-embedded again, meaning that F3 will embed more steganographic zeroes than ones. 
 
@@ -696,7 +705,7 @@ Some of the design decisions made by Xu's algorithm\footnote{\textbf{TODO: Do I 
 
 Therefore I chose to embed data into the maximal of the two components. If both $x$ and $y$ components are equal, the bit is embedded into both. 
 
-\item Incrementing the chosen component can cause issues if the new value points beyond the edge of the frame. Therefore I chose to decrement the absolute value of the component instead (like F3).
+\item Incrementing the chosen component can cause issues if the new value points beyond the edge of the frame. Therefore I chose to decrement the absolute value of the component instead in an F4 fashion.
 
 \item Embedding data four times can expose a pattern that may be detected by a steganalyst. I chose not to implement this approach and embed the data sequentially instead.
 \end{itemize}
@@ -705,50 +714,78 @@ The two algorithms are compared against each other in the Evaluation chapter.
 
 \section{Testing}
 
-\textbf{TODO: Discuss unit testing.}
+In addition to manual testing, unit tests were written to verify that parts of code  still perform correctly during further development (regression testing). Components of the system were tested independently though their public interfaces. I used Google Test framework, a standard testing solution for C++, to implement small and maintainable tests.
+
+Unit tests cover:
+\begin{itemize}
+\item Encrypted file access --- ensure data is correctly encrypted and decrypted during reads and writes. Tests use NIST-recommended AES-CTR test vectors.~\textbf{CITE/FOOTNOTE?}
+\item Embedding algorithms --- ensure they correctly modify and extract data from motion vectors. Tests cover both typical and edge cases of each algorithm.
+\item C API --- ensure the whole steganography library can be successfully driven though the API. Tests initialise the library, simulate FFmpeg calls and verify the results. 
+\end{itemize}
+
+\bigskip\bigskip
+\subsubsection*{Summary}
+This chapter described the design and the implementation details of the steganography and steganalysis software. The next chapter will cover... \textbf{TODO}
 
 % Evaluation
 \cleardoublepage
 \chapter{Evaluation}
 
+How many of the
+original goals were achieved? Were they proved to have been achieved? Did the program,
+hardware, or theory really work?
+
 Coherent summary of the following chapter, quickly outlining evaluation approaches.
 
-\section{Evaluation of embedding and decoding process}
+\section{Detectability of embedding algorithms}
 
-Say / evaluate what was done for embedding / decoding modules. Anything interesting? Difficulties encountered? Does app do what is expected, usability?
+Most of the detectability evaluation was done in the previous chapter to justify further design improvements. Remaining interesting aspects are covered in this section.
 
-\section{Evaluation of embedding algorithms}
+\subsection{Detecting Xu's algorithm's embedding}
 
-\subsection{Xu's algorithm vs MVSteg}
+As previously discussed in section \ref{xu-alg}, Xu's algorithm makes some questionable design choices, which led me to developing a different version of the algorithm. To justify this change, let us see how those original decisions affect detectability of the embedding produced by the original algorithm.
+
 
 Dubious thresholding on length, if threshold is on a plateau, see histograms. Which way to go?
+
 Detectable angle thresholding.
+
 Detectable embedding 4x.
+
+Incrementing on upper bounds?
+
 Potential attack using the reversion technique (and mention tools again here).
 
 \subsection{Reversion Technique}
 \label{rev-tech}
 
-What is the result on the dataset per algorithm?
-Hide and Seek, MSteg, MVSteg, 
+What is the result on the dataset per algorithm? How do you know your results are significant?
+Hide and Seek, MSteg, MVSteg.
 
-\subsection{Embedding capacity}
+\subsection{Varying embedding capacity}
+How does varying embedding capacity in Outguess1 affect detectability.
+
+\section{Embedding capacity}
 
 Talk about the differences (esp. randomised).
 
-\subsection{Speed}
+\section{Speed}
 
 Mention how fast transcoding is
 
-\subsection{Detectability by Humans (Study)}
+\section{Detectability by Humans (Study)}
 
-\subsubsection{Hypothesis}
+\subsection{Hypothesis}
 
-\subsubsection{Experimental procedure}
+\subsection{Experimental procedure}
 
-\subsubsection{Results}
+\subsection{Results}
 
 Was the study hypothesis confirmed?
+
+\section{Evaluation of embedding and decoding process}
+
+Say / evaluate what was done for embedding / decoding modules. Anything interesting? Difficulties encountered? Does app do what is expected, usability?
 
 % Conclusions
 \cleardoublepage
