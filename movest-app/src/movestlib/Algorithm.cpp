@@ -35,9 +35,9 @@ void Algorithm::initialiseAlgorithm(movest_params *params) {
     // Set up encryption
     if(this->flags & MOVEST_ENABLE_ENCRYPTION) {
         std::vector<uint8_t> bytes = deriveBytes(CryptoFile::KeyLength + CryptoFile::BlockSize, CRYPTO_SALT);
-        datafile = CryptoFile(params->filename, &bytes[0], &bytes[CryptoFile::KeyLength], iosFlags);
+        datafile = CryptoFile(params->datafile, &bytes[0], &bytes[CryptoFile::KeyLength], iosFlags);
     } else {
-        datafile = CryptoFile(params->filename, iosFlags);
+        datafile = CryptoFile(params->datafile, iosFlags);
     }
 }
 

@@ -24,7 +24,7 @@ typedef enum {
  * Parameters for a steganography algorithm.
  */
 typedef struct {
-    const char *filename; ///< Path to a file for data to be read from / written to.
+    const char *datafile; ///< Path to a file for data to be read from / written to.
     movest_flags flags;   ///< Flags @ref movest_flags
     const char *password; ///< Password for encryption
 } movest_params;
