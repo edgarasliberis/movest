@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 project(movestlib)
 include(ExternalProject)
 
-set(COMMON_FLAGS "-Wall -Wextra -Wpedantic")
+set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ${COMMON_FLAGS}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 ${COMMON_FLAGS}")
 
