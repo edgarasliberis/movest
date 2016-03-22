@@ -709,9 +709,9 @@ int main(int argc, char **argv)
 
     // Step 1. Run a dummy pass to determine embedding capacity, if the algorithm is two-pass.
     if(!singlePass) {
-        movest_init_algorithm(algorithm);
+        movest_init_algorithm(algorithm, NULL);
         movest_params p = {
-                dataFile, MOVEST_DUMMY_PASS | encFlag, password, NULL
+                dataFile, MOVEST_DUMMY_PASS | encFlag, password
         };
         movest_init_encoder(&p);
         av_log(NULL, AV_LOG_INFO, "Analysing the video for embedding capacity...\n");
@@ -731,15 +731,16 @@ int main(int argc, char **argv)
     }
 
     // Step 2. Do the actual embedding.
-    movest_init_algorithm(algorithm);
     struct algoptions {
         uint32_t byteCapacity;
         uint32_t fileSize; // Decoder only
     };
 
     struct algoptions algparams = { capacity, 0 };
+    movest_init_algorithm(algorithm, &algparams);
+
     movest_params p = {
-            dataFile, MOVEST_NO_PARAMS | encFlag, password, &algparams
+            dataFile, MOVEST_NO_PARAMS | encFlag, password
     };
     movest_init_encoder(&p);
 

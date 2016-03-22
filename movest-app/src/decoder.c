@@ -235,14 +235,15 @@ int main(int argc, char **argv)
         av_log(NULL, AV_LOG_INFO, "Output file size: %d\n", fileSize);
     }
 
-    movest_init_algorithm(algorithm);
     struct algoptions {
         uint32_t byteCapacity;
         uint32_t fileSize;
     };
-    struct algoptions algparams = { capacity, fileSize};
+    struct algoptions algparams = { capacity, fileSize };
+    movest_init_algorithm(algorithm, &algparams);
+
     movest_params p = {
-        dataOutFile, encryptFlag? MOVEST_ENABLE_ENCRYPTION : MOVEST_NO_PARAMS, password, &algparams
+        dataOutFile, encryptFlag? MOVEST_ENABLE_ENCRYPTION : MOVEST_NO_PARAMS, password
     };
     movest_init_decoder(&p);
 

@@ -59,7 +59,7 @@ typedef struct {
  * @param algname Name of the algorithm from the options above.
  * @param algParams Additional parameters for algorithm of your choice.
  */
-void movest_init_algorithm(const char *algname, void* alg_params = 0);
+void movest_init_algorithm(const char *algname, void* alg_params);
 
 /**
  * Initialise the library for encoding.
