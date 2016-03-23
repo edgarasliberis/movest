@@ -649,7 +649,20 @@ int main(int argc, char **argv)
                 password = optarg;
                 break;
             case 'h':
-                // Print some useful help.
+                av_log(NULL, AV_LOG_INFO, "MOVEST Encoder, (c) 2016\n"
+                "Usage: movest_enc -a <algorithm> -d <data_file> [--encrypt, -p <password>] <input_video> <output_video>\n"
+                        "\nCommand line arguments:\n"
+                        " --encrypt        Perform encryption of the data prior to embedding\n"
+                        " -a/--algorithm   An embedding algorithm to use\n"
+                        " -d/--data        Path to a file, containing the payload\n"
+                        " -p/--password    An encryption password to use\n"
+                        " -h/--help        Print this help message\n"
+                       "\nAvailable algorithm options:\n"
+                        " 'dummypass' (does not embed data)\n"
+                        " 'hidenseek' 'msteg' 'f3' 'f4'\n"
+                        " 'mvsteg' 'xualg'\n"
+                        " 'rand-hidenseek' 'outguess1'\n"
+                );
                 return 0;
             default:
                 av_log(NULL, AV_LOG_ERROR, "Unknown option provided\n");
@@ -661,8 +674,8 @@ int main(int argc, char **argv)
     char* outputFile = argv[optind++];
     if(optind != argc) {
         av_log(NULL, AV_LOG_ERROR, "Incorrect number of arguments provided.\n"
-        "Usage:\n"
-        "%s [options] <input_video> <output_video>\n", argv[0]);
+        "Usage: movest_enc -a <algorithm> -d <data_file> [--encrypt, -p <password>] <input_video> <output_video>\n"
+        "Use --help for more information.");
         return 1;
     }
 
