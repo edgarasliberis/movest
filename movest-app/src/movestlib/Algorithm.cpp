@@ -8,6 +8,7 @@
 #include <cryptopp/pwdbased.h>
 
 #include "Algorithm.h"
+#include "movest_connector.h"
 
 #define CRYPTO_SALT "MovestEncryption"
 #define DEFAULT_PASSWORD "MovestDefaultPassword"
@@ -33,11 +34,13 @@ void Algorithm::initialiseAlgorithm(movest_params *params) {
     auto iosFlags = std::ios::binary | ((this->encoder)? std::ios::in : std::ios::out);
 
     // Set up encryption
-    if(this->flags & MOVEST_ENABLE_ENCRYPTION) {
-        std::vector<uint8_t> bytes = deriveBytes(CryptoFile::KeyLength + CryptoFile::BlockSize, CRYPTO_SALT);
-        datafile = CryptoFile(params->datafile, &bytes[0], &bytes[CryptoFile::KeyLength], iosFlags);
-    } else {
-        datafile = CryptoFile(params->datafile, iosFlags);
+    if(params->datafile != nullptr) {
+        if(this->flags & MOVEST_ENABLE_ENCRYPTION) {
+            std::vector<uint8_t> bytes = deriveBytes(CryptoFile::KeyLength + CryptoFile::BlockSize, CRYPTO_SALT);
+            datafile = CryptoFile(params->datafile, &bytes[0], &bytes[CryptoFile::KeyLength], iosFlags);
+        } else {
+            datafile = CryptoFile(params->datafile, iosFlags);
+        }
     }
 }
 
