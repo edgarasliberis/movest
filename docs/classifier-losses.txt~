@@ -58,14 +58,3 @@ stddev_ci =
      0
      0
 
->> xualgsvmtraining
-mean = 0.2109
-stddev = 0.0390
-
-mean_ci =
-    0.2032
-    0.2187
-
-stddev_ci =
-    0.0343
-    0.0453
