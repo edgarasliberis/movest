@@ -2,6 +2,7 @@
 // Created by el398 on 10/12/15.
 //
 
+#include <algorithm>
 #include <iostream>
 #include "RandomisedHideSeek.h"
 
@@ -35,10 +36,12 @@ void RandomisedHideSeek::initAsEncoder(movest_params *params) {
         // Fill the data buffer with blocks of file data & parity bytes
         data = new unsigned char[dataSize];
         unsigned char fileData[BLOCKSIZE - NPAR];
-        uint currentPos = 0;
-        while(!datafile.eof() && currentPos < dataSize) {
-            auto read = datafile.read(&fileData[0], BLOCKSIZE - NPAR);
+        uint currentPos = 0, fileRead = 0;
+        while(fileRead < fileSize && currentPos < dataSize) {
+            uint toRead = std::min(fileSize - fileRead, (uint)BLOCKSIZE - NPAR);
+            int read = (int)datafile.read(&fileData[0], toRead);
             encode_data(fileData, read, data + currentPos);
+            fileRead += read;
             currentPos += read + NPAR;
         }
     }
@@ -126,19 +129,21 @@ void RandomisedHideSeek::processMvComponentExtract(int16_t mv) {
 }
 
 movest_result RandomisedHideSeek::finalise() {
-    if(!encoder && !(flags & MOVEST_DUMMY_PASS)) {
-        uint currentPos = 0;
-        while(currentPos < dataSize) {
-            uint blockSize = std::min((uint)BLOCKSIZE, dataSize - currentPos);
-            decode_data(data + currentPos, blockSize);
-            if (check_syndrome() != 0) {
-                correct_errors_erasures(data + currentPos, blockSize, 0, NULL);
+    if(!(flags & MOVEST_DUMMY_PASS)) {
+        if(!encoder) {
+            uint currentPos = 0;
+            while(currentPos < dataSize) {
+                uint blockSize = std::min((uint)BLOCKSIZE, dataSize - currentPos);
+                decode_data(data + currentPos, blockSize);
+                if (check_syndrome() != 0) {
+                    correct_errors_erasures(data + currentPos, blockSize, 0, NULL);
+                }
+                datafile.write(&data[0] + currentPos, blockSize - NPAR);
+                currentPos += blockSize;
             }
-            datafile.write(&data[0] + currentPos, blockSize - NPAR);
-            currentPos += blockSize;
         }
+        delete[] data;
+        delete[] bitToMvMapping;
     }
-    delete data;
-    delete bitToMvMapping;
     return Algorithm::finalise();
 }
