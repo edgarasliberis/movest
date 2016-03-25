@@ -44,5 +44,6 @@ bool XuAlg::usableMv(int16_t mvX, int16_t mvY) {
     double mvValY = double(mvY) / 2;
     double length = std::hypot(mvValX, mvValY);
 
+    // Mitigate macroblock corruption
     return !(length < THRESH || abs(mvX) > MAX_THRESH || abs(mvY) > MAX_THRESH);
 }
