@@ -33,7 +33,7 @@ std::streamsize CryptoFile::read(uint8_t *out, ulong size) {
         uint8_t* buf = new uint8_t[size];
         stream->read(reinterpret_cast<char*>(buf), size);
         enc->ProcessData(out, buf, (size_t)stream->gcount());
-        delete buf;
+        delete[] buf;
     } else {
         stream->read(reinterpret_cast<char*>(out), size); // Should never fail to read less, really
     }
@@ -45,7 +45,7 @@ std::streamsize CryptoFile::write(const uint8_t *out, ulong size) {
         uint8_t* buf = new uint8_t[size];
         dec->ProcessData(buf, out, size);
         stream->write(reinterpret_cast<char*>(buf), size);
-        delete buf;
+        delete[] buf;
     } else {
         stream->write(reinterpret_cast<const char*>(out), size);
     }
