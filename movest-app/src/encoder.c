@@ -733,7 +733,7 @@ int main(int argc, char **argv)
         if(ret != 0) return ret;
 
         movest_result result = movest_finalise();
-        int fits = 1;//datafileinfo.st_size <= result.bytes_processed;
+        int fits = datafileinfo.st_size <= result.bytes_processed;
         av_log(NULL, AV_LOG_INFO, "Analysed. Embedding capacity is %d byte(s).\n", result.bytes_processed);
         if(!fits) {
             av_log(NULL, AV_LOG_INFO, "File can't be embedded fully, video's capacity is %d byte(s) short"
@@ -746,10 +746,10 @@ int main(int argc, char **argv)
     // Step 2. Do the actual embedding.
     struct algoptions {
         uint32_t byteCapacity;
-        uint32_t fileSize;
+        uint32_t fileSize; // Optional
     };
 
-    struct algoptions algparams = { capacity, 500 };
+    struct algoptions algparams = { capacity, (uint32_t)datafileinfo.st_size };
     movest_init_algorithm(algorithm, &algparams);
 
     movest_params p = {
