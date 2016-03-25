@@ -91,7 +91,7 @@ static int open_input_file(const char *filename)
         }
     }
 
-    av_dump_format(ifmt_ctx, 0, filename, 0);
+    //av_dump_format(ifmt_ctx, 0, filename, 0);
     return 0;
 }
 
@@ -177,7 +177,7 @@ static int open_output_file(const char *filename)
             enc_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
     }
-    av_dump_format(ofmt_ctx, 0, filename, 1);
+    //av_dump_format(ofmt_ctx, 0, filename, 1);
 
     if (!(ofmt_ctx->oformat->flags & AVFMT_NOFILE)) {
         ret = avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
@@ -406,7 +406,7 @@ static int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
                          ofmt_ctx->streams[stream_index]->codec->time_base,
                          ofmt_ctx->streams[stream_index]->time_base);
 
-    av_log(NULL, AV_LOG_DEBUG, "Muxing frame\n");
+    //av_log(NULL, AV_LOG_DEBUG, "Muxing frame\n");
     /* mux encoded frame */
     ret = av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
     return ret;
@@ -544,7 +544,7 @@ int run_embedding(char *inputFile, char *outputFile) {
             if (ret < 0)
                 goto end;
         }
-        av_free_packet(&packet);
+        av_packet_unref(&packet);
     }
 
     /* flush filters and encoders */
@@ -568,7 +568,7 @@ int run_embedding(char *inputFile, char *outputFile) {
 
     av_write_trailer(ofmt_ctx);
     end:
-    av_free_packet(&packet);
+    av_packet_unref(&packet);
     av_frame_free(&frame);
     for (i = 0; i < ifmt_ctx->nb_streams; i++) {
         avcodec_close(ifmt_ctx->streams[i]->codec);
@@ -707,7 +707,7 @@ int main(int argc, char **argv)
     bool singlePass = is_single_pass(algorithm);
     if(!singlePass) {
         if(!password) {
-            av_log(NULL, AV_LOG_INFO, "Password is required by the algorithm. Using default.");
+            av_log(NULL, AV_LOG_INFO, "Password is required by the algorithm. Using default.\n");
             password = "MovestDefaultPassword";
         }
         av_log(NULL, AV_LOG_INFO, "Password: *set*\n");
@@ -733,7 +733,7 @@ int main(int argc, char **argv)
         if(ret != 0) return ret;
 
         movest_result result = movest_finalise();
-        int fits = datafileinfo.st_size <= result.bytes_processed;
+        int fits = 1;//datafileinfo.st_size <= result.bytes_processed;
         av_log(NULL, AV_LOG_INFO, "Analysed. Embedding capacity is %d byte(s).\n", result.bytes_processed);
         if(!fits) {
             av_log(NULL, AV_LOG_INFO, "File can't be embedded fully, video's capacity is %d byte(s) short"
@@ -746,10 +746,10 @@ int main(int argc, char **argv)
     // Step 2. Do the actual embedding.
     struct algoptions {
         uint32_t byteCapacity;
-        uint32_t fileSize; // Decoder only
+        uint32_t fileSize;
     };
 
-    struct algoptions algparams = { capacity, 0 };
+    struct algoptions algparams = { capacity, 500 };
     movest_init_algorithm(algorithm, &algparams);
 
     movest_params p = {
