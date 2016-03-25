@@ -1,7 +1,5 @@
-c = computeSadFreqs('f4-vectors/clean/received', ...
-    'hidenseek-vectors/clean/transcoded');
-d = computeSadFreqs('f4-vectors/dirty/received', ...
-    'hidenseek-vectors/dirty/transcoded');
+c = computeSadFreqs('clean/received', 'clean/transcoded');
+d = computeSadFreqs('f4-vectors/received', 'f4-vectors/transcoded');
 
 truth_c = zeros(size(c, 1), 1);
 truth_d = ones(size(d, 1), 1);

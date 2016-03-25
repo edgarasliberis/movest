@@ -1,7 +1,5 @@
-c = computeSadFreqs('mvsteg-vectors/clean/received', ...
-    'hidenseek-vectors/clean/transcoded');
-d = computeSadFreqs('mvsteg-vectors/dirty/received', ...
-    'hidenseek-vectors/dirty/transcoded');
+c = computeSadFreqs('clean/received', 'clean/transcoded');
+d = computeSadFreqs('mvsteg-vectors/received', 'mvsteg-vectors/transcoded');
 
 truth_c = zeros(size(c, 1), 1);
 truth_d = ones(size(d, 1), 1);
