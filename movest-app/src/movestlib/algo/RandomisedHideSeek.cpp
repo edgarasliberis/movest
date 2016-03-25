@@ -146,7 +146,7 @@ movest_result RandomisedHideSeek::finalise() {
         delete[] data;
         delete[] bitToMvMapping;
     }
-    
+
     return movest_result {
             uint(bitsProcessed / 8), 0
     };
