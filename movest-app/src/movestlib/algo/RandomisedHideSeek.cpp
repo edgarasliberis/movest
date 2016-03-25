@@ -141,9 +141,13 @@ movest_result RandomisedHideSeek::finalise() {
                 datafile.write(&data[0] + currentPos, blockSize - NPAR);
                 currentPos += blockSize;
             }
+            datafile.close();
         }
         delete[] data;
         delete[] bitToMvMapping;
     }
-    return Algorithm::finalise();
+    
+    return movest_result {
+            uint(bitsProcessed / 8), 0
+    };
 }
