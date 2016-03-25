@@ -2,6 +2,7 @@
 // Created by el398 on 10/12/15.
 //
 
+#include <iostream>
 #include "RandomisedHideSeek.h"
 
 extern "C" {
@@ -22,7 +23,8 @@ void RandomisedHideSeek::initAsEncoder(movest_params *params) {
     if(!(flags & MOVEST_DUMMY_PASS)) {
         initialize_ecc();
 
-        fileSize = datafile.remainingData();
+        fileSize = opt.fileSize != 0? opt.fileSize : datafile.remainingData();
+
         // Total size of embedded data:
         // fileSize + NPAR parity bytes for every (BLOCKSIZE - NPAR) bytes of the file
         uint blocks = (fileSize / (BLOCKSIZE - NPAR)) + (fileSize % (BLOCKSIZE - NPAR) != 0);
