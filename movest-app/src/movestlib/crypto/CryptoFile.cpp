@@ -15,6 +15,7 @@ CryptoFile::CryptoFile(const std::string &path, std::ios_base::openmode mode): e
         std::cerr << "Can't open " << path << std::endl;
         exit(0);
     }
+    this->opened = true;
 }
 
 CryptoFile::CryptoFile(const std::string &path, uint8_t key[KeyLength], uint8_t iv[BlockSize],
@@ -24,6 +25,7 @@ CryptoFile::CryptoFile(const std::string &path, uint8_t key[KeyLength], uint8_t 
         std::cerr << "Can't open " << path << std::endl;
         exit(0);
     }
+    this->opened = true;
     initCrypto(key, iv);
 }
 
@@ -53,10 +55,12 @@ std::streamsize CryptoFile::write(const uint8_t *out, ulong size) {
 }
 
 void CryptoFile::flush() {
+    if(!opened) return;
     stream->flush();
 }
 
 void CryptoFile::close() {
+    if(!opened) return;
     stream->flush();
     if(fileStream) {
         std::iostream& fStream = this->exposeStream();
@@ -65,6 +69,7 @@ void CryptoFile::close() {
 }
 
 bool CryptoFile::eof() {
+    if(!opened) return true;
     return stream->eof();
 }
 
@@ -82,10 +87,10 @@ uint CryptoFile::remainingData() {
 }
 
 CryptoFile::CryptoFile(std::iostream *stream):
-        encrypt(false), fileStream(false), stream(stream) {}
+        encrypt(false), fileStream(false), opened(true), stream(stream) {}
 
 CryptoFile::CryptoFile(std::iostream *stream, uint8_t key[KeyLength], uint8_t iv[BlockSize]):
-        encrypt(true), fileStream(false), stream(stream) {
+        encrypt(true), fileStream(false), opened(true), stream(stream) {
     initCrypto(key, iv);
 }
 
