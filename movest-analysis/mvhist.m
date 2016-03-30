@@ -1,13 +1,9 @@
-function mvhist(mvs, granularity)
-%MVHIST Displays histogram of the motion vectors
-%   Handy shortcut for a log-scale histogram. 'granularity' parameter
-%   allows to specify number of buckets used.
-if ~exist('granularity', 'var')
-    granularity = 200;
-end
+function mvhist(mvs)
+%MVHIST Displays histogram of the motion vectors.
+%   Handy shortcut for a log-scale bin-width-of-1 histogram.
 
 figure;
-histogram(reshape(mvs, [], 1), granularity);
+histogram(reshape(mvs, [], 1), granularity, 'BinWidth', 1);
 xlim([-512 512])
 set(gca,'yscale','log');
 % TODO: make y-axis log-scaled, tweak other bits
