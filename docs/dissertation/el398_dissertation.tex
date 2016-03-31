@@ -668,6 +668,7 @@ This embedding strategy leads to an interesting effect called \emph{shrinkage}. 
 This is the main weakness of the algorithm. A typical encrypted payload has the same number of steganographic zeroes and ones, but since F3 embeds more zeros, values with LSB 0 will be more common (Figure \ref{fig:f3-hist}). 
 
 \subsection{F4}
+\label{f4}
 
 F4~\cite{f5} eliminates the weakness of F3 by using a different strategy for embedding into negative values of $mv_C$. Like F3, $mv_C$ is changed (if required) by decrementing its absolute value. When $mv_C$ is positive, the algorithm ensures its LSB matches that of the payload (just like F3), but when $mv_C$ is negative, the algorithm ensures its LSB \emph{does not} match that of the payload. This mapping is visualised in Figure \ref{fig:f4-mapping} and the pseudocode is listed in Algorithm \ref{alg:f4-embed}.
 
@@ -718,6 +719,7 @@ Extracting the data using this algorithm requires the receiving party's PRNG to 
 For small payload sizes, the algorithm does not produce equal even-odd pairs in the histogram, making many previous attacks ineffective.
 
 \subsection{Outguess 0.1}
+\label{outguess1}
 
 \emph{Outguess 0.1}~\cite{bateman} is essentially the same algorithm as Randomised Hide \& Seek, but it addresses the issue of embedding into ``still'' regions by choosing not to embed into components with value 0 or 1. This is done to avoid the visual analysis attack, which we previously looked at in MSteg design (Section \ref{msteg}). The footprint is further evaluated in the Evaluation chapter, section \ref{eval-var-emb-cap}.
 
@@ -751,64 +753,66 @@ The two algorithms---the original and my modification---are compared against eac
 
 \section{Testing}
 
-In addition to manual testing, unit tests were written to verify that implemented parts still function correctly during further development (regression testing). Components of the system were tested independently though their public interfaces. I used Google Test framework, a mainstream testing solution for C++, to implement small and maintainable tests.
+In addition to manual testing, unit tests were written to provide automated regression and integration testing. I used Google Test framework, a mainstream testing solution for C++, to implement small and maintainable tests, which test components of the system independently though their public interfaces.
 
-Unit tests cover:
+Tests cover:
 \begin{itemize}
-\item Encrypted file access --- ensure that data is correctly encrypted and decrypted during reads and writes, when necessary. Tests use NIST-recommended AES-CTR test vectors\footnote{\url{http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf}, Appendix F, Sect. 5.5}.
-\item Embedding algorithms --- ensure algorithms correctly modify and extract data from motion vectors. Tests cover both typical and edge cases for each algorithm.
-\item C API --- ensure the whole steganography library can be successfully used though the API. Tests initialise the library, simulate FFmpeg calls and verify the results. 
+\item Encrypted file access --- ensures that data is correctly encrypted and decrypted during reads and writes, when enabled. Tests use the NIST-recommended AES-CTR test vectors\footnote{\url{http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf}, Appendix F, Sect. 5.5}.
+\item Embedding algorithms --- ensure algorithms correctly modify and extract data from motion vectors, including typical edge cases for each algorithm.
+\item C API --- ensure the whole steganography library can be successfully used though the API. Tests initialise the library, simulate FFmpeg calls and verify the results.
 \end{itemize}
 
 \bigskip\bigskip
 \subsubsection*{Summary}
-This chapter described the design and the implementation details of the steganography and steganalysis software. The next chapter will review project's achievements, cover remaining aspects of detectability evaluation, and discuss the embedding capacity and speed properties of the system. 
+This chapter described the design and the implementation details of the steganography and steganalysis software. The next chapter will review the project's achievements, cover remaining aspects of detectability evaluation, and evaluate the embedding capacity and speed properties of the system.
 
 % Evaluation
 \cleardoublepage
 \chapter{Evaluation}
 
-\textit{This chapter evaluates the software against the initial requirements and presents more steganalytic results. In particular, detectability properties of Xu's algorithm, accuracy of the reversion technique classifier and effectiveness of varying the embedding capacity are covered. I also discuss secondary properties of steganographic systems, such as the embedding capacity and speed.
+\textit{This chapter evaluates the software against the initial requirements and presents more steganalytic results. The detectability properties using Xu's algorithm, accuracy of the reversion technique classifier, and effectiveness of varying the embedding capacity are discussed. I also discuss secondary properties of steganographic systems, such as the embedding capacity and speed.
 }
 
 \section{Satisfaction of Requirements}
 
-Overall, the project was a success, and all requirements described in sections \ref{req-steg-app} and \ref{req-steg-suite} were met. The following sections present a quick review of the software, having these requirements in mind.
+Overall, the project was a success. All requirements described in sections \ref{req-steg-app} and \ref{req-steg-suite} were met. The following sections present a quick review of the software, having these requirements in mind.
 
 \subsection{Steganographic Application}
 
-The developed steganography software is able to reliably modify and extract motion vector data from MPEG video files. I avoided the need to implement my own video codec by successfully integrating it with FFmpeg, as discussed in section \ref{integrate-ffmpeg}. The software consists of 3 deliverables: encoder and decoder applications for the user to perform embedding, and a steganography library that can be used separately though an API. The library implements 8 LSB embedding algorithms; the full discussion on their properties was presented in section \ref{emb-alg}. The payload can be encrypted with 256-bit AES--CTR encryption using a user-supplied password. 
+The developed steganography software is able to reliably modify and extract motion vector data from MPEG video files. I avoided the need to implement my own video codec by successfully integrating with FFmpeg (see section \ref{integrate-ffmpeg}). The software consists of 3 deliverables: encoder and decoder applications for the user to perform embedding, and a steganography library that can be used separately though an API. The library implements 8 LSB embedding algorithms (see section \ref{emb-alg}). The payload can be encrypted with 256-bit AES--CTR encryption using a user-supplied password. 
 
 \subsection{Steganalysis Suite}
 
-The steganalysis suite provides facilities to extract and process motion vector data, and a variety of general attacks for detecting embedding, all implemented in Matlab. The following functionality is available:
+The steganalysis suite provides, in MATLAB, facilities for extracting and processing motion vector data, as well as a variety of general attacks for detecting embedded payloads. The following functionality is available:
 
 \begin{multicols}{2}
 \begin{itemize}
 \item \texttt{loadmvs}, \texttt{typedmvs} --- extraction and filtering of motion vector data;
 \item \texttt{lsbplane}, \texttt{plot2d} --- extraction and visualisation of the LSB plane;
-\item \texttt{aggregateIntoBytes}, \texttt{seqbytes} --- grouping extracted bits into bytes;
-\item \texttt{mvhist} --- histogram pre-set up to view motion vector data;
+\item \texttt{aggregateIntoBytes}, \texttt{seqbytes} --- groups extracted bits into bytes;
+\item \texttt{mvhist} --- pre-adjusted histogram to view motion vector data;
 \item \texttt{chiSquareAttack} --- compute the embedding probability in the first 1-100\% of the data;
-\item \texttt{patternSearch} --- the most likely locations of the pattern in the data;
-\item \texttt{known-attacks/} --- a collection of examples how to attack implemented algorithms;
-\item \texttt{*svmtraining} --- a collection of the reversion technique SVM training scripts.
+\item \texttt{patternSearch} --- find the most likely locations of the pattern in the data;
+\item \texttt{known-attacks/} --- examples attacks on implemented algorithms;
+\item \texttt{*svmtraining} --- reversion technique SVM training scripts.
 \end{itemize}
 \end{multicols}
 
-Exact implementation details are discussed in section \ref{steg-tech}, and the effectiveness of methods is demonstrated in sections \ref{emb-alg} and \ref{rem-detect-eval}. To make the suite more user-friendly, methods have the documentation on how to use them and how to interpret the results. 
+Implementation details are discussed in section \ref{steg-tech}, and the effectiveness of the attacks is demonstrated in sections \ref{emb-alg} and \ref{rem-detect-eval}. Documentation is provided on how to use the implemented methods and interpret the results. 
 
 \section{Detectability of Embedding}
 \label{rem-detect-eval}
 
-Perhaps the most important aspect to consider when evaluating a steganographic system is detectability of the embedding. Most of the detectability evaluation was done in the previous chapter to justify further algorithm design improvements, which also allowed to evaluate how effective implemented steganalysis techniques are. This section covers remaining steganalysis.
+Perhaps the most important aspect to consider when evaluating a steganographic system is whether the embedding is detectable. Most of the detectability evaluation was done in the previous chapter to justify further algorithm design improvements, also allowing to evaluate the effectiveness of the implemented steganalysis techniques. This section covers remaining steganalysis.
 
 \subsection{Detecting Xu's algorithm's embedding}
 \label{breaking-xu}
 
-As previously discussed in section \ref{xu-alg}, Xu's algorithm makes some questionable design choices, which led me to developing a different version of the algorithm (which I called \texttt{MVSteg}). To justify this, let us see how those original decisions affect detectability of the embedding produced by Xu's algorithm.
+I discovered a number of apparent flaws in Xu's algorithm (see section \ref{xu-alg}), so I implemented an improved version of the algorithm, which I called \texttt{MVSteg}.
 
-One of such decisions is choosing whether to embed into the $x$ or $y$ component based on the phase of the motion vector. Xu's algorithm will embed into the $x$ component if the phase is an acute angle, and into the $y$ component otherwise, claiming it results in less disturbance to the motion. However, if, for example, a motion vector consists of a large $y$ component and a small $x$ component (phase is an acute angle), incrementing the small $x$ component would result in more relative disturbance to the motion, so the motivation behind such decision is unclear.
+One of improvements is the component selection policy. If the phase of a motion vector is acute, Xu's algorithm will embed its payload into the $x$ component, otherwise it uses the $y$ component, claiming that this results in less disturbance to the motion. However, for instance, in the presence of a motion vector with a large $y$ component and a small $x$ component (yielding an acute phase), a small marginal change in $x$ results in a large relative disturbance to the motion. \texttt{MVSteg} always modifies the largest component of the motion vector, making the relative change less significant.
+
+Figure \ref{fig:xualg-mvsteg-visual} shows an example of some visual artefacts\footnote{Movest does not modify the prediction error, which makes detecting such artefacts easier. However, if it did, it would still be possible to spot this, because the prediction error would have been unusually large.} produced by Xu's algorithm which are not present when using \texttt{MVSteg}.
 
 \begin{figure}[tbh]
 \centerline{
@@ -824,53 +828,60 @@ One of such decisions is choosing whether to embed into the $x$ or $y$ component
 \label{fig:xualg-mvsteg-visual}
 \end{figure}
 
-Figure \ref{fig:xualg-mvsteg-visual} shows how, perhaps due to this selection policy, Xu's algorithm's embedding produces artefacts. Since Movest does not modify the prediction error, these artefacts leave a visual footprint, saving the effort of trying to spot suspiciously odd motion vector component values manually. \texttt{MVSteg} always modifies the largest component which makes the relative change negligible and does not leave a similarly noticeable footprint.
+Xu \emph{et al.} also suggest embedding the same chunk of payload data four times at different locations to provide resilience against data corruption. To guide decoding, these locations are stored an I-frame using classical image steganography methods. Unfortunately, this creates a recurring pattern in the LSBs of the used motion vectors, providing an opportunity for attack. I simulated such embedding in the presence some bit corruptions in an attempt to find such repetition. Figure \ref{fig:4xembed} shows a successful result of finding a repeating pattern at four locations, with peaks corresponding to the positions where the pattern closely matches the recovered string\footnote{The sum of squared differences between a pattern and the recovered string is close to zero.}. \texttt{MVSteg} embeds data only once, and hence does not contain exploitable data repetition patterns.
 
-\begin{wrapfigure}{R}{6cm}
+\begin{figure}[tbh]
 \centering
-\includegraphics[scale=0.75]{img/4xembed.eps}
-\caption{Positions of repeated embedding. Lower bar corresponds to an inexact match.}
-\label{fig:4xembed}
-\end{wrapfigure}
+\begin{minipage}[t]{.45\textwidth}
+  \centering
+  \includegraphics[scale=0.9]{img/4xembed.eps}
+  \caption{Positions of repeated embedding. Lower bar corresponds to an inexact match.}
+  \label{fig:4xembed}
+\end{minipage}%
+\quad
+\begin{minipage}[t]{.45\textwidth}
+  \vspace{-5.2em}
+  \begingroup
+    \fontsize{11pt}{12pt}\selectfont
+    \centering
+    \begin{alltt}
+ {\color{blue}[mpeg4 @ 0x7fc9dc247380]}
+            {\color{red}ac-tex damaged at 53 0}
+ {\color{blue}[mpeg4 @ 0x7fc9dc247380]}
+                   {\color{red}Error at MB: 53}
 
-Authors of the algorithm suggest embedding the same chunk of data four times at different locations to increase resilience against possible data corruption. To guide the decoding process, locations are stored an I-frame using classical image steganography methods. This, however, implies that LSBs of used motion vectors will have a recurring pattern, so I simulated this embedding together with some bit corruptions in an attempt to find such repetition. Figure \ref{fig:4xembed} shows a successful result of finding a similar pattern at four locations, with peaks corresponding to positions where the pattern closely matches the recovered string: the sum of squared differences between a pattern and the recovered string is close to zero. \texttt{MVSteg} is not vulnerable to this, since it embeds data once.
+    \end{alltt}
+  \endgroup
+  \caption{Macroblock corruption reported by the \texttt{vlc} media player.}
+  \label{fig:vlc-corruption}
+\end{minipage}
+\end{figure}
 
-\begin{wrapfigure}{R}{8cm}
-\begingroup
-    \fontsize{10pt}{12pt}\selectfont
-\centering
-\begin{alltt}
-{\color{blue}[mpeg4 @ 0x7fc9dc247380]} {\color{red}ac-tex damaged at 53 0}
-{\color{blue}[mpeg4 @ 0x7fc9dc247380]} {\color{red}Error at MB: 53}
-\end{alltt}
-\endgroup
-\caption{Macroblock corruption reported by the \texttt{vlc} media player.}
-\label{fig:vlc-corruption}
-\end{wrapfigure}
-
-Another interesting decision made by the algorithm is to modify motion vector components by incrementing them. This introduces a special case when motion vector points to the edge of the frame, so incrementing it would make it point beyond the edge and hence invalid. If sufficient checks to prevent this not in place, it can give out the fact that the video has been tampered with. Figure \ref{fig:vlc-corruption} shows that such corruption can be reported by a media player. \texttt{MVSteg}'s embedding does not have this drawback because it decrements motion vector components in an F4 fashion, which also makes it resistant to $\chi^2$ and histogram attacks, described earlier in section \ref{steg-tech}.
+Xu's algorithm embeds payload bits in motion vectors by incrementing the targeted vector component. For motion vectors near the edge of the frame, such increments can cause the vector to point outside the frame, causing decoding errors and revealing that the video has been tampered with. Figure \ref{fig:vlc-corruption} shows the error that the codec reports when playing such a damaged video. \texttt{MVSteg}'s use of F4's decrementing motion vector scheme avoids this problem, which also makes it resistant to $\chi^2$ and histogram attacks (see sections \ref{steg-tech}, \ref{f4}).
 
 \subsection{Reversion Technique}
 \label{rev-tech}
 
-As explained in section \ref{rev-tech-theory}, the reversion technique considers differences between respective motion vectors of the original and the re-encoded (transcoded) video. Evaluating the effectiveness of this technique requires training a linear SVM classifier. In this situation, SVM does not require large datasets to give good results~\cite{cao2012video}, so I have obtained a dataset of 56 freely-available stock videos with various degrees of motion, such as slow cloud movements or chaotic city timelapses. Half of those were chosen to become stego videos, so that the ratio between stego and non-stego videos is 50:50 (balanced dataset).
+The reversion technique (see section \ref{rev-tech-theory}) considers differences between respective motion vectors of the original and the re-encoded (transcoded) video. Evaluating the effectiveness of this technique requires training a linear SVM classifier. In this situation, SVM does not require large datasets to give good results~\cite{cao2012video}, so I have obtained a dataset of 56 freely-available stock videos. Collected videos exhibit various degrees of motion, such as slow cloud movements or chaotic city timelapses. Half of those were chosen to become stego videos, so that the ratio between stego and non-stego videos is 50:50 (balanced dataset).
 
-For each sequential (non-randomised) embedding algorithm, the training and evaluation is done as follows:
+For each embedding algorithm, the training and evaluation is done as follows:
 \begin{itemize}
-\item To generate the initial dataset of videos, Movest encoder is used to embed random data into the 28 stego videos at their full capacity. The remaining 28 non-stego videos are also passed though the encoder, but no data is embedded (dummy pass).
+\item To generate the initial dataset of videos, Movest's encoder is used to embed random data into the 28 stego videos at their full capacity. The remaining 28 non-stego videos are also passed though the encoder without embedding data.
 \item To obtain transcoded videos, all previously created videos are passed through the encoder again, letting FFmpeg recompute motion vectors.
 \item Motion vectors are extracted from both sets of videos.
-\item Motion vector data is imported into Matlab and frequencies of SAD values are computed using steganalysis suite's \texttt{computeSadFreqs.m} function.
+\item Motion vector data is imported into Matlab and frequencies of SAD values are computed using the steganalysis suite's \texttt{computeSadFreqs.m} function.
 \item Frequency data, together with a labelling whether it came from a stego or a non-stego video, is passed into Matlab's \texttt{fitcsvm} function to train an SVM.
-\item To estimate the classification accuracy, the system performs 100 runs of \emph{k-fold cross validation}~\cite{ai2-notes}, with $k = 8$, as explained below. This is a common technique of evaluating classifiers' performance and it is available in Matlab (\texttt{crossval}).
-
-\textbf{8-fold cross validation:} the data set is randomly partitioned into 8 bins (7 videos each), and the algorithm performs 8 iterations, selecting each bin in turn. On every iteration, remaining 7 bins are used to train the classifier and the selected bin is used to evaluate its accuracy\footnote{Using $k = 8$ (close to recommended $k = 10$) allows having 7 videos in each bin, making each iteration's result more granular.}. The accuracy result, averaged over 8 iterations, is reported back.
-
-The reported value depends on how favourable the random partitioning was, so the system runs the 8-fold cross validation algorithm 100 times to obtain a narrow 95\% confidence interval for the mean accuracy.  
+\item Since the dataset is relatively small, the system performs 100 runs of \emph{k-fold cross validation}~\cite{ai2-notes}, with $k = 8$, to estimate the classification accuracy. This is a common technique for evaluating classifiers, provided by Matlab's \texttt{crossval} function.
 
 \end{itemize}
 
-Table \ref{tbl:rev-tech} presents obtained classification accuracy for each embedding algorithm.
+\subsubsection*{8-fold cross validation} 
+
+The data set is randomly partitioned into 8 bins of 7 videos each. For each bin, the other remaining 7 bins are used to train the classifier, which is then applied to the videos in the target bin and the accuracy is computed.\footnote{Using $k = 8$ (close to recommended $k = 10$) allows having a sufficiently large test set for every iteration.}. The average accuracy over all iterations is the result.
+
+Since the resulting accuracy measure is susceptible to unusually favourable random partitioning, the process is repeated 100 times to obtain a 95\% confidence interval for the mean accuracy.
+
+Table \ref{tbl:rev-tech} presents the obtained classification accuracy for each embedding algorithm.
 
 \begin{table}[tbh]
 \bgroup
@@ -895,14 +906,14 @@ MVSteg & $62.96\% \pm 0.57\%$ \\
 \label{tbl:rev-tech}
 \end{table}
 
-The results are surprisingly good. My interpretation of the trend in the data is that the accuracy result for each algorithm is similar to the proportion of motion vectors it modifies. 
+The results are surprisingly good, which means this technique is suitable for automated steganalysis. It appears that the accuracy result for each algorithm is similar to the proportion of motion vectors it modifies. 
 
 \subsection{Varying embedding capacity}
 \label{eval-var-emb-cap}
 
-Many of the previous attacks, such as the $\chi^2$ attack, rely on payload bits being embedded close together, because the cumulative effect makes it easier to expose the embedding. This weakness can be addressed by using algorithms that spread the payload uniformly across the cover video.
+Many of the previous attacks, such as the $\chi^2$ attack, exploit the cumulative effect produced when payload bits are embedded close together. Such attacks can be thwarted by spreading the payload uniformly across the cover video.
 
-To evaluate how effective this approach is, I tested the $\chi^2$ attack and the reversion technique classifier for MSteg against the Outguess 1.0\footnote{Outguess 1.0 is the randomised version of MSteg.} algorithm at different embedding capacity settings. Table \ref{tbl:detect-outguess} presents findings obtained on a fresh dataset (\emph{i.e.} not used for classifier training) of 10 videos; entries show how many videos were picked up as stego by both steganalysis methods.
+To evaluate this approach, I tested the $\chi^2$ attack and the reversion technique classifier for MSteg (see \ref{msteg}) against Outguess 1.0\footnote{As discussed in \ref{outguess1}, Outguess 1.0 is the randomised version of MSteg.} algorithm at different embedding capacity settings. A fresh dataset (\emph{i.e.} not used for classifier training) containing 10 videos was used. Table \ref{tbl:detect-outguess} shows how many videos were picked up as stego by both steganalysis methods. 
 
 \begin{table}[tbh]
 \bgroup
@@ -931,34 +942,34 @@ To evaluate how effective this approach is, I tested the $\chi^2$ attack and the
 \label{tbl:detect-outguess}
 \end{table}
 
-As we see from the data, the reversion technique classifier starts being effective at 50--60\% capacity setting and $\chi^2$ attack is only effective starting at 90\%.
+These data suggest that the reversion technique classifier starts being effective at 50--60\% embedding capacity and the $\chi^2$ attack is only effective from 90\%.
 
 \section{Detectability by Humans (Study)}
 \label{exp-human-subj}
 
 \subsection{Study Hypothesis}
 
-A study was conducted to test whether human participants are able to distinguish between a stego and a non-stego video when the prediction error is not modified. To test this, I looked into the numbers of times the participants were right or wrong when asked to identify the stego video out of the three ostensibly identical videos. I hypothesise that humans are not able to tell videos apart (null hypothesis); this hypothesis will be rejected if experimental data supports the opposite claim to a statistically significant level.
+A study was conducted to test whether human participants are able to distinguish between a stego and a non-stego video when the prediction error is not modified. To test this, I measured how often participants could correctly select the stego video given three ostensibly identical videos. I hypothesise that humans are not able to tell the videos apart (null hypothesis).
 
 \subsection{Experimental Procedure}
 
-The experiment consisted of 10 trials. In each trial, the participant was given three ostensibly identical videos, each up to 30 seconds long, one of which has been modified to contain a hidden payload\footnote{Experiment description is the project proposal originally stated that 2 videos will be used. However, this can introduce a problematic situation when the participant sees that videos are different, but is unable to tell which one actually contains embedding. Using three videos and asking to pick the odd one out eliminates this issue.}. They had to choose which video they thought was modified and write its letter (\textsb{A}, \textsb{B} or \textsb{C}) into the experiment answer sheet.
+In each of the 10 trials, the participant was given three ostensibly identical videos under 30 seconds in length, one of which with a hidden payload. They had to choose which video they thought was modified and write its letter into the experiment answer sheet. Using three videos, as opposed to two, eliminates a problematic situation when the participant sees that videos are different, but is unable to tell which one actually contains embedding\footnote{The original experiment description in the project proposal overlooked this issue and stated that 2 videos will be used.}.
 
-To increase chances of successful detection and more closely simulate steganalysis, the following measures were taken:
+To increase chances of successful detection and more closely simulate a real-life steganalysis setting, the following measures were taken:
 \begin{itemize}
-\item Test subjects were computer-literate students, most of them were fellow computer scientists.
-\item Embedding has been done using the Hide \& Seek algorithm, which leaves a significant footprint by modifying every motion vector. The full embedding capacity of every video was used up to embed random data.  
-\item Participants had full control over the playback, which meant they could watch videos however they liked: sequentially, side-by-side, repeatedly replay certain parts, inspect file sizes, zoom into certain regions of a video, use either their own or my screen \emph{etc.}
-\item First trial contained an artificially corrupted video (motion vectors were changed more drastically) to give participants an idea of what kind of visual footprint to expect. 
+\item Test subjects were computer-literate. Most were computer science undergraduates.
+\item Embedding was done using the Hide \& Seek algorithm, which leaves a significant footprint by modifying every motion vector. The full embedding capacity of every video was used up to embed random data.  
+\item Participants had full control over the playback, meaning they could watch videos however they liked: sequentially, side-by-side, repeatedly replay certain parts, inspect file sizes, zoom into certain regions of a video, use either their own or my screen \emph{etc.}
+\item The first trial contained an artificially corrupted video (motion vectors were changed more drastically) to give participants an idea of what kind of visual footprint to expect. 
 \end{itemize} 
 
 As a precaution, videos did not contain flashing images, were emotionally neutral, and free from distressful, disturbing, offensive or otherwise unsettling images. No personal data about the participants was collected.
 
 \subsection{Results}
 
-To be able to interpret the data, I defined a theoretical model that would fit the experiment. Let $n$ be the number of answers that participants gave and $X_i$ ($i \in [1, n]$) denote whether an answer was correct, \emph{i.e.} $X_i = 1$ if a participant correctly picked out a stego video in a trial and 0 otherwise. If the null hypothesis holds, participants' answers will be indistinguishable from random guesses. Therefore $X_i$'s can be modelled as random variables with $\mathbb{P}(X_i = 1) = 1/3$, or, in other words, $X_i$'s follow Bernoulli distribution with $p = 1/3$. 
+To be able to interpret the data, I defined a theoretical model to fit the experiment. Let $n$ be the number of answers that participants gave and $X_i$ ($i \in [1, n]$) denote whether an answer was correct, \emph{i.e.} $X_i = 1$ if a participant correctly identified the stego video in a trial and $0$ otherwise. If the null hypothesis holds, the participants' answers will be indistinguishable from random guesses, meaning the $X_i$ can be modelled as a random variable with $\mathbb{P}(X_i = 1) = 1/3$. That is, the $X_i$'s follow Bernoulli distribution with $p = 1/3$. 
 
-To consider the overall data, I compute the sum of all $X_i$: $Y = \sum^n_{i=1} X_i$. For sufficiently large $n$, $Y$ follows the Binomial distribution with parameters $(n, p)$~\cite[p.~53]{papoulis2002probability}. Then, by de Moivre--Laplace theorem, $Y$ can be approximated by the normal distribution with mean $np$ and variance $np(1-p)$~\cite[p.~105]{papoulis2002probability}. This allows us to put 95\% confidence bounds on the value of $Y$~\cite[p.~316--318]{ai2-notes}:
+To aggregate, I compute the sum of all $X_i$: $Y = \sum^n_{i=1} X_i$. For sufficiently large $n$, $Y$ follows the Binomial distribution with parameters $(n, p)$~\cite[p.~53]{papoulis2002probability}. Then, by the de Moivre--Laplace theorem, $Y$ can be approximated by a normal distribution with mean $np$ and variance $np(1-p)$~\cite[p.~105]{papoulis2002probability}. This allows us to put 95\% confidence bounds on the value of $Y$~\cite[p.~316--318]{ai2-notes}:
 \[ np - 1.96 \sqrt{np(1-p)}  \leq Y \leq  np + 1.96 \sqrt{np(1-p)} \]
 
 If $Y$, obtained from the data set, does not lie in this range, the null hypothesis can be rejected with 95\% confidence.
@@ -968,7 +979,7 @@ The data obtained from the experiment is presented in Table \ref{tbl:detect-exp-
 \begin{table}[tbh]
 \centering
 \bgroup
-\def\arraystretch{1.3}%  1 is the default, change whatever you need
+\def\arraystretch{1.3}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|}
 \hline
 \textbf{Video \#} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{10}\\
@@ -990,18 +1001,18 @@ Participant \#12 & B & C & A & A & B & B & B & A & B & B \\
 \hline
 \end{tabular}
 \egroup
-\caption{Results of the distinguishability of video steganography experiment. Column one corresponds to the demo trial with an evidently corrupted video, so it is excluded from the analysis.}
+\caption{Results of the distinguishability of video steganography experiment. Column 1 corresponds to the demo trial with an evidently corrupted video, so it is excluded from the analysis.}
 \label{tbl:detect-exp-res}
 \end{table}
 
 \textbf{TODO: Comment on potentially small n?}
-The data contains 108 answers ($n = \text{\# of participants} \times \text{\# of trials}$), so, according to the formula above, I expect $Y$ to be within the range $36 \pm 5$. The data has 32 correct answers, which is within that range, so it \emph{cannot} be concluded that humans \emph{are} able to identify implemented video steganography. This means that the visual footprint, left in as a result of not modifying prediction error, is not noticeable.
+The data contains 108 answers ($n = \text{\# of participants} \times \text{\# of trials}$), so, according to the formula above, I expect $Y$ to be within the range $36 \pm 5$. The data has 32 correct answers, which is within that range, so it \emph{cannot} be concluded that humans \emph{are} able to identify implemented video steganography. This suggests that the visual footprint produced by not modifying prediction error is not detectable by humans.
 
 \section{Embedding Capacity and Speed}
 
-A steganographic system also has secondary characteristics worth of evaluating: the embedding capacity and embedding speed. As previously mentioned in \ref{mv-emb-space}, embedding capacity depends on the number of P-frames, number of macroblocks (defined by the resolution) and the number of suitable motion vectors. The proportion of suitable motion vectors can vary significantly depending on the type of motion a video exhibits and what algorithm is used: for example, \texttt{MVSteg} will perform worse on videos with little or slow motion, because it only embeds into long motion vectors. 
+A steganographic system also has secondary characteristics worthy of evaluation: embedding capacity and speed. Capacity depends on the number of P-frames, macroblocks (defined by the resolution), and suitable motion vectors (see \ref{mv-emb-space}). The proportion of suitable motion vectors can vary significantly depending on the type of motion in a video, and on what algorithm is used. For instance, \texttt{MVSteg} performs worse on videos with little or slow motion because it only embeds into sufficiently long motion vectors (see \ref{xu-alg}).
 
-To give an estimate of what embedding capacities a user might reasonably expect, I measured capacities per second on a dataset of 53 HD ($1280 \times 720$) videos with various degrees of motion, averaged over the first 15 seconds. Figure \ref{fig:capacities} presents a box plot of measured capacities for each embedding algorithm: Hide \& Seek achieves an impressive 20~KB/s median embedding capacity; MSteg's, F3's and F4's median result is 6--8~KB/s, and Xu's algorithm and MVSteg have the lowest values of 1~KB/s. 
+To estimate the capacities a user might reasonably expect, I measured embedding capacity per second on a dataset of 53 HD ($1280 \times 720$) videos with varying degrees of motion, averaged over the first 15 seconds. Figure \ref{fig:capacities} presents a box plot of measured capacities for each embedding algorithm. Hide \& Seek achieves an impressive 20~KB/s median embedding capacity; MSteg's, F3's and F4's median result is 6--8~KB/s, and Xu's algorithm and MVSteg have the lowest values of 1~KB/s. 
 
 \begin{figure}[tbh]
 \centerline{\includegraphics{img/capacities.eps}}
@@ -1009,11 +1020,11 @@ To give an estimate of what embedding capacities a user might reasonably expect,
 \label{fig:capacities}
 \end{figure}
 
-Encoding the video is the most computationally expensive part of the Movest encoder, so the time taken by steganography routines is relatively negligible. I did not observe any significant decrease in the encoding speed, even when using payload encryption. The most noticeable slowdown in the encoder is the initialisation overhead of the Randomised Hide \& Seek algorithm to build the payload bit to MV component mapping (section \ref{rand-hidenseek}).
+Video encoding is the most computationally expensive part of the Movest encoder, so the time taken by steganography routines is relatively negligible. I did not observe any significant decrease in the encoding speed, even when using payload encryption. The most noticeable slowdown in the encoder is the initialisation overhead of the Randomised Hide \& Seek algorithm to build the payload bit to MV component mapping (see section \ref{rand-hidenseek}).
 
 \bigskip\bigskip
 \subsection*{Summary}
-This chapter evaluated implemented software with respect to initial requirements, and covered detectability, capacity and speed properties of steganographic systems. The following chapter summarises the undertaken work and suggests ways for further improvement. 
+This chapter evaluated the implementation with respect to initial requirements, detectability, capacity, and speed of steganographic systems. The following chapter summarises the undertaken work and suggests future work.
 
 % Conclusions
 \cleardoublepage
@@ -1021,19 +1032,19 @@ This chapter evaluated implemented software with respect to initial requirements
 
 \section{Accomplishments}
 
-Overall, the project successfully achieved it's aim of implementing and evaluating existing LSB steganography methods applied to motion vectors. Steganographic systems were evaluated based on aspects such as embedding capacity, speed and detectability. The latter was evaluated using implemented steganalysis methods and by carrying out an experiment on human subjects.
+Overall, the project achieved its aim of implementing and evaluating existing LSB steganography methods using motion vectors. Steganographic systems were evaluated based on embedding capacity, speed, and detectability. Detectability was evaluated using implemented steganalysis methods and by carrying out an experiment on human subjects.
 
-To achieve this, a library for performing steganography and video-processing applications for accessing and modifying motion vectors were developed. The steganalysis suite, implemented using Matlab, has facilities to extract and analyse motion vectors and offers classic and motion-vector-specific attacks against embedding algorithms.
+A library for performing steganography and related video processing (such as accessing and modifying motion vectors) was developed. The steganalysis suite, implemented using Matlab, provides facilities for extraction and analysis of motion vectors and offers classic and motion-vector-specific attacks against embedding algorithms.
 
-With the benefit of hindsight, I would have implemented integration with FFmpeg prior to starting the project and used it as a starting point. This would have allowed focusing entirely on steganography, giving more time to explore useful extensions.
+With the benefit of hindsight, I would have implemented the FFmpeg integration prior to starting the project and used it as a starting point. This would have allowed focusing entirely on steganography, giving more time to explore useful extensions.
 
 \section{Future Directions}
 
-Many promising avenues for further improvement were not explored due to timing constraints of the project:
+Many promising avenues for further improvement were not explored due to time constraints:
 \begin{itemize}
-\item \textit{Non-LSB embedding algorithms.} For example, Fang \emph{et al.}~\cite{fang2006data} propose to restrict motion vector search to the one of 4 quadrants, which allows conveying 2 bits of data per MV. This, however, requires a deeper integration with a video codec compared to the current implementation.
-\item \textit{Withstanding transcoding.} Embedding that withstands transcoding would have an immediately useful application of communicating over social media: currently, serves such as YouTube, Facebook and Tumblr transcode user-uploaded videos before presenting them to other users. This destroys the payload hidden in motion vectors, so more aggressive embedding algorithms could be developed, possibly using some error-correction codes or redundant embedding.
-\item \textit{Explore MV-specific steganalysis further.} In addition to the reversion technique, described in \ref{rev-tech}, the project could benefit from more motion vector-specific steganalysis methods. A few potential candidates were mentioned in the Introduction chapter: Deng \emph{el al.}~\cite{deng2012digital} argues that neighbouring MVs often have the same motion vectors, making it easy to spot an abnormal motion vector, and Xu \emph{et al.}~\cite{xu2013video} proposed to build a set of vector algebra constraints between MVs across several frames and check for this purpose.
+\item \textit{Non-LSB embedding algorithms.} Fang \emph{et al.}~\cite{fang2006data} propose to restrict motion vector search to the one of 4 quadrants, allowing conveyance of 2 bits of data per MV. This requires a deeper integration with a video codec than I have so far implemented.
+\item \textit{Transcoding resilience.} Embedding schemes that withstand transcoding would be useful for things like communication over social media. Services such as YouTube, Facebook and Tumblr transcode user-uploaded videos before presenting them to other users, destroying any payload hidden in motion vectors. Embedding algorithms that make use of error correcting codes or redundant encoding may be better able to resist this.
+\item \textit{Explore MV-specific steganalysis further.} In addition to the reversion technique, described in \ref{rev-tech}, the project would benefit from more motion vector-specific steganalysis methods. A few potential candidates were mentioned in the Introduction chapter: Deng \emph{el al.}~\cite{deng2012digital} argues that neighbouring MVs often have the same motion vectors, making it easy to spot an abnormal motion vector, and Xu \emph{et al.}~\cite{xu2013video} proposed to build a set of vector algebra constraints between MVs across several frames for this purpose.
 \end{itemize}
 
 \subsection*{Closing Remarks}
