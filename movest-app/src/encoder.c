@@ -608,17 +608,17 @@ bool is_single_pass(const char* algorithm) {
 
 int main(int argc, char **argv)
 {
-    static int encryptFlag = 0;
-    char* algorithm = NULL;
-    char* dataFile = NULL;
-    char* password = NULL;
+    static int encrypt_flag = 0;
+    char *algorithm = NULL;
+    char *data_file = NULL;
+    char *password = NULL;
     static struct option long_options[] =
         {
-            {"encrypt", no_argument, &encryptFlag, 1},
-            {"algorithm", required_argument, 0, 'a'},
-            {"data", required_argument, 0, 'd'},
-            {"password", required_argument, 0, 'p'},
-            {"help", no_argument, 0, 'h'}
+            {"encrypt", no_argument, &encrypt_flag, 1},
+            {"algorithm", required_argument, 0,     'a'},
+            {"data", required_argument, 0,          'd'},
+            {"password", required_argument, 0,      'p'},
+            {"help", no_argument, 0,                'h'}
         };
 
     int option_index = -1, c;
@@ -639,7 +639,7 @@ int main(int argc, char **argv)
                     av_log(NULL, AV_LOG_ERROR, "-d/--data requires a path to a payload file as an argument.\n");
                     return 1;
                 }
-                dataFile = optarg;
+                data_file = optarg;
                 break;
             case 'p':
                 if(!optarg) {
@@ -670,8 +670,8 @@ int main(int argc, char **argv)
         }
     }
 
-    char* inputFile = argv[optind++];
-    char* outputFile = argv[optind++];
+    char *input_file = argv[optind++];
+    char *output_file = argv[optind++];
     if(optind != argc) {
         av_log(NULL, AV_LOG_ERROR, "Incorrect number of arguments provided.\n"
         "Usage: movest_enc -a <algorithm> -d <data_file> [--encrypt, -p <password>] <input_video> <output_video>\n"
@@ -684,24 +684,24 @@ int main(int argc, char **argv)
         algorithm = "mvsteg";
     }
 
-    if(!dataFile && strcmp(algorithm, "dummypass") != 0) {
+    if(!data_file && strcmp(algorithm, "dummypass") != 0) {
         av_log(NULL, AV_LOG_ERROR,
                "Algorithm requires a data file with payload data, that would get embedded. "
                "Use --data <payload_file> to specify a data file.");
         return 1;
     }
 
-    if (encryptFlag && !password){
+    if (encrypt_flag && !password){
         av_log(NULL, AV_LOG_ERROR, "You must provide a password if you want to use crypto. Use -p/--password. \n");
         return 1;
     }
 
-    av_log(NULL, AV_LOG_INFO, "Input file: %s\n", inputFile);
-    av_log(NULL, AV_LOG_INFO, "Output file: %s\n", outputFile);
+    av_log(NULL, AV_LOG_INFO, "Input file: %s\n", input_file);
+    av_log(NULL, AV_LOG_INFO, "Output file: %s\n", output_file);
     av_log(NULL, AV_LOG_INFO, "Algorithm: %s\n", algorithm);
-    av_log(NULL, AV_LOG_INFO, "Crypto: %s\n", encryptFlag? "ON" : "OFF");
-    if(dataFile) {
-        av_log(NULL, AV_LOG_INFO, "Data file: %s\n", dataFile);
+    av_log(NULL, AV_LOG_INFO, "Crypto: %s\n", encrypt_flag ? "ON" : "OFF");
+    if(data_file) {
+        av_log(NULL, AV_LOG_INFO, "Data file: %s\n", data_file);
     }
 
     bool singlePass = is_single_pass(algorithm);
@@ -715,25 +715,28 @@ int main(int argc, char **argv)
 
     // Get some information about the file.
     struct stat datafileinfo;
-    stat(dataFile, &datafileinfo);
+    stat(data_file, &datafileinfo);
     uint32_t capacity = 0;
 
-    movest_flags encFlag = encryptFlag? MOVEST_ENABLE_ENCRYPTION : MOVEST_NO_PARAMS;
+    movest_flags encFlag = encrypt_flag ? MOVEST_ENABLE_ENCRYPTION : MOVEST_NO_PARAMS;
 
     // Step 1. Run a dummy pass to determine embedding capacity, if the algorithm is two-pass.
     if(!singlePass) {
         movest_init_algorithm(algorithm, NULL);
         movest_params p = {
-                dataFile, MOVEST_DUMMY_PASS | encFlag, password
+                data_file, MOVEST_DUMMY_PASS | encFlag, password
         };
         movest_init_encoder(&p);
         av_log(NULL, AV_LOG_INFO, "Analysing the video for embedding capacity...\n");
 
-        int ret = run_embedding(inputFile, outputFile);
+        int ret = run_embedding(input_file, output_file);
         if(ret != 0) return ret;
 
         movest_result result = movest_finalise();
-        int fits = datafileinfo.st_size <= result.bytes_processed;
+        unsigned int blockSize = 255 - 16; // ECC block size - parity bytes
+        unsigned int numBlocks = (unsigned int)(datafileinfo.st_size + (blockSize - 1)) / blockSize;
+        unsigned int dataSize = (unsigned int)datafileinfo.st_size + numBlocks * 16;
+        bool fits = dataSize < result.bytes_processed;
         av_log(NULL, AV_LOG_INFO, "Analysed. Embedding capacity is %d byte(s).\n", result.bytes_processed);
         if(!fits) {
             av_log(NULL, AV_LOG_INFO, "File can't be embedded fully, video's capacity is %d byte(s) short"
@@ -744,22 +747,22 @@ int main(int argc, char **argv)
     }
 
     // Step 2. Do the actual embedding.
-    struct algoptions {
-        uint32_t byteCapacity;
-        uint32_t fileSize; // Optional
+    struct alg_options {
+        uint32_t byte_capacity;
+        uint32_t file_size; // Optional
     };
 
-    struct algoptions algparams = { capacity, (uint32_t)datafileinfo.st_size };
+    struct alg_options algparams = { capacity, (uint32_t)datafileinfo.st_size };
     movest_init_algorithm(algorithm, &algparams);
 
     movest_params p = {
-            dataFile, MOVEST_NO_PARAMS | encFlag, password
+            data_file, MOVEST_NO_PARAMS | encFlag, password
     };
     movest_init_encoder(&p);
 
     av_log(NULL, AV_LOG_INFO, "Embedding...\n ");
 
-    int ret = run_embedding(inputFile, outputFile);
+    int ret = run_embedding(input_file, output_file);
     if(ret != 0) return ret;
 
     movest_result res = movest_finalise();
