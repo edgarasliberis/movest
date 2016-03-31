@@ -22,7 +22,7 @@ const int numAlgorithms = sizeof(algorithms) / sizeof(algorithms[0]);
  * Test that initialisation as encoder doesn't fail.
  */
 TEST(MovestAPI, InitLibraryAsEncoder) {
-    uint32_t algoptions[2] = { 32, 64 };
+    uint32_t algoptions[2] = { 64, 32 };
     movest_params p = {
             "/dev/zero", MOVEST_NO_PARAMS, NULL
     };

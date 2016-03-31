@@ -6,7 +6,7 @@
 TEST(CryptoFileTest, ReadNoEncryption)
 {
     std::string input("This is the input test string.");
-    uint8_t buff[input.length()];
+    uint8_t *buff = new uint8_t[input.length()];
 
     // CryptoFile will take ownership
     std::stringstream *stream = new std::stringstream(input);
@@ -15,6 +15,7 @@ TEST(CryptoFileTest, ReadNoEncryption)
 
     auto actual = std::string(reinterpret_cast<char*>(buff), input.size());
     EXPECT_EQ(input, actual);
+    delete[] buff;
 }
 
 TEST(CryptoFileTest, WriteNoEncryption)
