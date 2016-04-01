@@ -1,4 +1,10 @@
 function sads = computeSadFreqs(stegoDir, transDir)
+%COMPUTESADFREQS Computes SADs frequencies given two sets of MV data.
+%    Given a folder with motion vector data of "original" videos
+%    (@stegoDir) and those of transcoded videos (@transdir), for every
+%    corresponding pair computes frequencies of sums of absolute
+%    differences (SADs). Returns frequencies of SADs up to 32, one row per
+%    pair.
     maxframes = Inf;
     filelist = dir(strcat(stegoDir,'/*.txt'));
     sads = zeros(length(filelist), 32);

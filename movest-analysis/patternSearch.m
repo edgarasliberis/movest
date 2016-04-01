@@ -1,6 +1,8 @@
 function out = patternSearch(str, pattern)
-%PATTERNSEARCH Summary of this function goes here
-%   Detailed explanation goes here
+%PATTERNSEARCH Confidence of @pattern occurring at a position in @str.
+%   Returns "confidence" of a substring closely matching @pattern for 
+%   every position in @str, r. Values are inverse sum of square differences
+%   between @pattern and @str's substring.
 
 out = zeros(1, length(str)-length(pattern));
 for i = 1:(length(str)-length(pattern))

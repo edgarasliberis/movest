@@ -1,6 +1,6 @@
 function bytes = aggregateIntoBytes(mvs, types)
 %AGGREGATEINTOBYTES Groups LSBs of the input matrix into bytes, filtering
-%according to the 'types' parameter.
+%   according to the 'types' parameter.
 
 bitlist = lsbplane(typedMvs(mvs, types));
 bitsToTake = size(bitlist, 1) - mod(size(bitlist, 1), 8);

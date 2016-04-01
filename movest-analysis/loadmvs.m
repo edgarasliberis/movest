@@ -1,8 +1,8 @@
 function [mv_x, mv_y, type] = loadmvs(input_file, varargin)
 % LOADMVS Imports motion vectors extracted by Movest Decoder
-% Specify file name as the first argument and the number of frames to
-% to process (Inf if unsure). Function can interleave x and y values
-% (although not very efficiently) if 'Interleave' vararg is set to true.
+%    Specify file name as the first argument and the number of frames to
+%    to process (Inf if unsure). Function can interleave x and y values
+%    (although not very efficiently) if 'Interleave' vararg is set to true.
 
 p = inputParser;
 addRequired(p, 'input_file', @ischar);
