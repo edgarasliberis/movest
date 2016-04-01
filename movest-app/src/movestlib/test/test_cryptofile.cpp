@@ -3,6 +3,9 @@
 #include "gtest/gtest.h"
 #include "../crypto/CryptoFile.h"
 
+/**
+ * Verify that reads do not perform encryption.
+ */
 TEST(CryptoFileTest, ReadNoEncryption)
 {
     std::string input("This is the input test string.");
@@ -18,7 +21,10 @@ TEST(CryptoFileTest, ReadNoEncryption)
     delete[] buff;
 }
 
-TEST(CryptoFileTest, WriteNoEncryption)
+/**
+ * Verify that writes do not perform decryption.
+ */
+TEST(CryptoFileTest, WriteNoDecryption)
 {
     std::string input("This is the input test string.");
     const uint8_t *inputBuffer = reinterpret_cast<const uint8_t*>(input.c_str());
@@ -56,6 +62,9 @@ uint8_t iv[CryptoFile::BlockSize] = { 0x00, 0x00, 0x00, 0x60, 0xDB, 0x56, 0x72, 
 uint8_t ciphertext[] = {0x14, 0x5A, 0xD0, 0x1D, 0xBF, 0x82, 0x4E, 0xC7,
                         0x56, 0x08, 0x63, 0xDC, 0x71, 0xE3, 0xE0, 0xC0 };*/
 
+/**
+ * Verify that reads do perform encryption.
+ */
 TEST(CryptoFileTest, ReadAESCTREncryption)
 {
     // CryptoFile will take ownership
@@ -68,13 +77,16 @@ TEST(CryptoFileTest, ReadAESCTREncryption)
         EXPECT_EQ(ciphertext[i], buff[i]);
 }
 
-TEST(CryptoFileTest, WriteAESCTREncryption)
+/**
+ * Verify that writes do perform decryption.
+ */
+TEST(CryptoFileTest, WriteAESCTRDecryption)
 {
     // CryptoFile will take ownership
     std::stringstream *stream = new std::stringstream();
     CryptoFile cfile(stream, key, iv);
     cfile.write(ciphertext, sizeof(ciphertext));
-    auto written = stream->str();
+    std::string written = stream->str();
 
     for(uint i = 0; i < sizeof(plaintext); i++)
         EXPECT_EQ(plaintext[i], (uint8_t)written[i]);

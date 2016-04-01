@@ -10,7 +10,7 @@
 #include <cryptopp/modes.h>
 
 /**
- * A file-like object to encrypt and decrypt data on the fly.
+ * A file-like object to encrypt and decrypt data on the fly, if necessary.
  */
 class CryptoFile {
 public:

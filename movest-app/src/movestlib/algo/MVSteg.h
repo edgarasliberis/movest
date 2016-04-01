@@ -8,6 +8,10 @@
 #include "HideSeek.h"
 #include "F4.h"
 
+/**
+ * MVSteg algorithm.
+ * Modifies the largest of the two MV components in an F4 fashion.
+ */
 class MVSteg : public F4 {
 public:
     virtual void extractFromMv(int16_t mvX, int16_t mvY);

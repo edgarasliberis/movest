@@ -9,8 +9,13 @@
 #include "HideSeek.h"
 #include <random>
 
-#define SEED_SIZE 16
+#define SEED_SIZE 16 // Number of bytes to be extracted from the password for PRNG seed.
 
+/**
+ * Randomised Hide & Seek algorithm.
+ * An implementation of Hide & Seek algorithm, which spreads
+ * the payload data uniformly across the motion vector data.
+ */
 class RandomisedHideSeek : public HideSeek {
 public:
     struct AlgOptions {

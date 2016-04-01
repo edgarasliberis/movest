@@ -7,6 +7,11 @@
 
 #include "../Algorithm.h"
 
+/**
+ * Dummy class which implements helper algorithms.
+ * Encoding pass does not modify motion vectors.
+ * Decoding pass dumps motion vector data to the output data file.
+ */
 class DumpMvs : public Algorithm {
 public:
     virtual void encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride);

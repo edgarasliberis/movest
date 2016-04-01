@@ -187,6 +187,7 @@ int main(int argc, char **argv)
     uint32_t capacity = 0;
     uint32_t file_size = 0;
 
+    // Parse user options
     static struct option long_options[] =
     {
         {"decrypt", no_argument, &encrypt_flag, 1},

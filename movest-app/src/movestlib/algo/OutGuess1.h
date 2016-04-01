@@ -7,6 +7,11 @@
 
 #include "RandomisedHideSeek.h"
 
+/**
+ * Outguess 1.0 algorithm.
+ * An implementation of MSteg, which spreads
+ * the payload data uniformly across the motion vector data.
+ */
 class OutGuess1 : public RandomisedHideSeek {
 public:
     using RandomisedHideSeek::RandomisedHideSeek;

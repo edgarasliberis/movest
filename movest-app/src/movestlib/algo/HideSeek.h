@@ -7,6 +7,10 @@
 
 #include "../Algorithm.h"
 
+/**
+ * Hide & Seek algorithm. Sets both motion vector
+ * component LSBs to those of the payload.
+ */
 class HideSeek : public Algorithm {
 public:
     virtual void initAsDecoder(movest_params *params);

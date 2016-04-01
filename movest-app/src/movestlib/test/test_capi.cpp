@@ -81,6 +81,9 @@ TEST(MovestAPI, EncodeSeq) {
     EXPECT_EQ(1, result.error_code); // /dev/zero never depletes
 }
 
+/**
+ * Full decoding path.
+ */
 TEST(MovestAPI, DecodeSeq) {
     char *file = strdup("/tmp/movest_testXXXXXX");
     close(mkstemp(file));
@@ -116,6 +119,4 @@ TEST(MovestAPI, DecodeSeq) {
     EXPECT_EQ(expected[1], received[1]);
     EXPECT_EQ(expected[2], received[2]);
     EXPECT_EQ(expected[3], received[3]);
-
-    //free(file);
 }

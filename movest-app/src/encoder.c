@@ -612,6 +612,8 @@ int main(int argc, char **argv)
     char *algorithm = NULL;
     char *data_file = NULL;
     char *password = NULL;
+
+    // User option parser
     static struct option long_options[] =
         {
             {"encrypt", no_argument, &encrypt_flag, 1},
@@ -713,7 +715,7 @@ int main(int argc, char **argv)
         av_log(NULL, AV_LOG_INFO, "Password: *set*\n");
     }
 
-    // Get some information about the file.
+    // Get file size information about the file.
     struct stat datafileinfo;
     stat(data_file, &datafileinfo);
     uint32_t capacity = 0;
@@ -749,7 +751,7 @@ int main(int argc, char **argv)
     // Step 2. Do the actual embedding.
     struct alg_options {
         uint32_t byte_capacity;
-        uint32_t file_size; // Optional
+        uint32_t file_size; // Optional for encoder
     };
 
     struct alg_options algparams = { capacity, (uint32_t)datafileinfo.st_size };

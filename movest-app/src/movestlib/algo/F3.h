@@ -7,6 +7,10 @@
 
 #include "HideSeek.h"
 
+/**
+ * F3 embedding algorithm. Modifies motion vectors by decrementing
+ * its absolute value when LSB doesn't match that of the payload.
+ */
 class F3 : public HideSeek {
 public:
     virtual bool embedIntoMvComponent(int16_t *mv, int bit);

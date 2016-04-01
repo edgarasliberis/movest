@@ -7,6 +7,11 @@
 
 #include "HideSeek.h"
 
+/**
+ * F4 embedding algorithm. Modifies motion vectors by decrementing
+ * its absolute value when LSB doesn't match that of the payload for
+ * positive values and when it does match, for negative values.
+ */
 class F4 : public HideSeek {
 public:
     bool embedIntoMvComponent(int16_t *mv, int bit);

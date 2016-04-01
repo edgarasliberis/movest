@@ -7,6 +7,12 @@
 
 #include "MVSteg.h"
 
+/**
+ * Xu's algorithm.
+ * Embeds into x component if MV phase is acute, and into y otherwise.
+ * Values are modified by incrementing them until
+ * their LSBs match that of the payload.
+ */
 class XuAlg : public MVSteg {
 public:
     virtual bool doEmbedding(int16_t *mvX, int16_t *mvY, int bit);
