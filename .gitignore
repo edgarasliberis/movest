@@ -7,3 +7,4 @@ movest-analysis/**/*.m~
 docs/Trial Videos/*
 docs/**/*.swp
 docs/**/*.log
+docs/dissertation/data/*
