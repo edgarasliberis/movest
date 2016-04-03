@@ -116,8 +116,8 @@ Homerton College \\
 \cleardoublepage
 
 %% Proforma
-\setcounter{page}{1}
-\pagenumbering{roman}
+\pagenumbering{arabic}
+\setcounter{page}{3}
 \pagestyle{plain}
 
 {\section*{\Huge Proforma}}
@@ -173,9 +173,7 @@ I, Edgaras Liberis of Homerton College, being a candidate for Part II of the Com
 % Introduction
 \cleardoublepage
 \chapter{Introduction}
-\pagenumbering{arabic}
 \pagestyle{headings}
-\setcounter{page}{1}
 
 \emph{Steganography} is the art of concealing information within ostensibly innocent carrier data \cite[p.~3]{fridrich}, usually with the intention of creating a covert channel. Its applications include bypassing government censorship, avoiding law enforcement or military intelligence, and other situations in which detection of the communication may be harmful to the communicating parties (such as by revealing their location~\cite{infohiding-survey}). 
  
@@ -192,7 +190,7 @@ To evaluate a steganographic algorithm, we need to determine if its use is detec
 
 This project explores hiding data in the motion vectors of \texttt{MPEG} videos by applying LSB embedding to the $x$ or $y$ components of the vector. A tool was developed to offer several high-capacity data embedding algorithms and encryption with a user-provided password. These algorithms were evaluated based on embedding capacity, speed, and detectability (using statistical steganalytic methods implemented in Matlab).
 
-\section{Existing Work}
+\section{Existing work}
 
 Traditionally, image steganography has received more research attention than video steganography, so early attempts tried to directly use existing image (JPEG) steganography techniques~\cite{bateman, jpegdctcoding}.
 
@@ -205,13 +203,12 @@ One of the main deliverables of this project is a simple tool for doing MV-based
 
 Meanwhile, steganalysis exploited properties specific to motion vectors to create novel steganalysis methods. A recurrent approach in these methods is developing a system to extract certain statistical features from videos and use them to train a classifier. Xu \emph{et al.}~\cite{xu2013video} proposed to build a set of vector algebra constraints between MVs across several frames for this purpose. Deng \emph{el al.}~\cite{deng2012digital} observes that neighbouring MVs often have the same motion vectors, so an abnormal MV can be spotted. Surprisingly, Cao \emph{et al.}~\cite{cao2012video} argues that simply transcoding\footnote{Unpacking a video into a sequence of images and recompressing it back again.} a video would revert a significant amount of MVs to their original values. This reversion technique is evaluated in \ref{rev-tech}.
 
-\subsection*{Outline of the Rest of the Document}
-\textbf{TODO: rewrite focusing on content after chapters are done}
+\subsection*{Outline of the rest of the document}
 \begin{itemize}
 \item Chapter 2 (Preparation) discusses relevant theoretical background on steganography, steganalysis and video encoding in more detail, and justifies the use of motion vectors as an embedding space. This is followed by the development plan for project's software deliverables. 
-\item Chapter 3 (Implementation) describes implementation specifics for the steganographic tool, steganalysis package and embedding algorithms, with some in-line evaluation of detectability.
-\item Chapter 4 (Evaluation) discusses remaining aspects of evaluation, such as speed, capacity, automatic classification and experiment on human subjects.
-\item Chapter 5 (Conclusions) summarises the work done, describes successes and shortcomings of the project and gives ideas for potential improvements.
+\item Chapter 3 (Implementation) reviews the implementation of the steganography library and video-processing applications. This is followed by an in-depth review of steganalysis methods and embedding algorithms, with some in-line detectability evaluation.
+\item Chapter 4 (Evaluation) discusses remaining aspects of detectability evaluation, including the use of automated steganalysis methods. Secondary properties, such as embedding capacity and speed are also covered.
+\item Chapter 5 (Conclusions) summarises the work done and presents ideas for potential improvements.
 \end{itemize}
  
 
@@ -221,7 +218,7 @@ Meanwhile, steganalysis exploited properties specific to motion vectors to creat
 
 \textit{This chapter presents the theory behind steganography and steganalysis in more detail, covers relevant video encoding principles, and makes the case for using motion vectors to do video steganography. This is followed by a discussion about the project's software deliverables, formal requirements, existing libraries and tools leveraged, risk analysis, workflow and starting point.}
 
-\section{Steganography Background}
+\section{Steganography background}
 
 This project develops a \emph{steganographic system}, so let us review terminology used in the field~\cite{infohiding-survey, bateman}:
 \begin{itemize}
@@ -233,7 +230,7 @@ This project develops a \emph{steganographic system}, so let us review terminolo
 \item \emph{Embedding capacity} --- the amount of information (in bits) a particular embedding scheme can hide within a certain cover. Typically it also depends on the payload as well, but this condition is relaxed for now.
 \end{itemize}
 
-\begin{definition}{Steganographic System~\cite[p.~53]{fridrich}}
+\begin{definition}{Steganographic system~\cite[p.~53]{fridrich}}
 
 Let $\mathcal{C}$ be the set of all cover objects. For a given $x \in C$, let $\mathcal{K}(x)$ denote the set of all stego-keys for $x$, and the set $\mathcal{M}(x)$ denote all messages that can be communicated in x. A steganographic system is then formally defined as a pair of embedding and extracting functions \texttt{Emb} and \texttt{Ext},
 \begin{align*}
@@ -267,7 +264,7 @@ Steganographic systems should avoid relying on so-called `security through obscu
 
 \item Seeding a PRNG to the same value for all parties. This is useful for schemes that spread the payload over the cover, for instance, by selecting a location for each bit of the payload at random.
 \end{itemize}
-\section{Steganalysis Background}
+\section{Steganalysis background}
 
 Steganalysis is the study of detecting messages produced by steganographic systems~\cite[p.~10]{fridrich}. A steganographic system is considered broken if a steganalyst is able to tell whether a given object contains a hidden payload with a probability better than a random guess.
 
@@ -279,11 +276,11 @@ Steganalytic techniques can be manual or automated, and can be further split int
 
 This project implements both targeted and blind steganalysis methods against motion vector steganography.
 
-\section{Video Steganography}
+\section{Video steganography}
 
 The project uses MPEG video files as covers. The MPEG format should be explored in more detail to see whether the use of motion vectors for data hiding is feasible.
 
-\subsection{Video Encoding Background}
+\subsection{Video encoding background}
 
 A video \emph{codec} (en\underline{co}der + \underline{dec}oder) is a program that takes a series of images (video frames) and compresses it into a single video file or vice versa \cite[sec.~3.1]{richardson2004h}. MPEG family of codecs is a popular choice for video compression.
 
@@ -304,7 +301,7 @@ A frame which will be encoded as a P-frame is partitioned into blocks of size 16
 \label{fig:mb-search}
 \end{figure} 
 
-\subsection{Motion Vectors as Embedding Space}
+\subsection{Motion vectors as embedding space}
 \label{mv-emb-space}
 
 Computing motion vectors is a tradeoff between accuracy and computation time, tuned using the search window size. As such, codecs typically use an approximation instead of a globally optimal MV, resulting in a non-minimal prediction error \cite[p.~257]{richardson2004h}. While the MVs are encoded losslessly, the accuracy error allows minor changes to go unnoticed, making them suitable for LSB steganography (see \ref{lsb-steg}).
@@ -323,7 +320,7 @@ where $W$ and $H$ are width and height of the macroblock grid, P-frames$(V)$ is 
 
 To see whether videos could generally hold a non-negligible amount of hidden data, one can estimate $\mathcal{C}_{V, M}$ by taking a product of the number of P-frames, the total number of MVs per frame and the average number of bits embedded per MV. For instance, an average HD video could reasonably have 6--15 P-frames per second\footnote{Depends on how often the encoder decides to use B-frames and I-frames. P-frames are better for video streaming as they do not require the successor frame during decoding.} with 3600 MVs each\footnote{If video's resolution is 1280x720 (HD), 16x16 macroblocks would partition the frame into a grid of size 80x45. This gives 3600 macroblocks in total.}. Assuming only a quarter of each frame would contain embedded data, I estimate the channel's capacity to be 5.4--13 Kbits/s. Since videos contain audio tracks and a higher number of pixels (or DCT coefficients) than images, a video file typically has higher embedding capacity than an audio file or an image.
 
-\section{Requirements Analysis}
+\section{Requirements analysis}
 
 The project has two main software deliverables:
 \begin{itemize}
@@ -333,7 +330,7 @@ The project has two main software deliverables:
 
 Below is a list of requirements for both deliverables, prioritised using \emph{MoSCoW} criteria~\cite{softid-notes}.
 
-\subsection{Steganographic Application}
+\subsection{Steganographic application}
 \label{req-steg-app}
 \begin{itemize}
 \item (M) Ability to access motion vectors of an MPEG video file.
@@ -344,7 +341,7 @@ Below is a list of requirements for both deliverables, prioritised using \emph{M
 \item (S) Integration with an existing video codec.
 \end{itemize}
 
-\subsection{Steganalysis Suite}
+\subsection{Steganalysis suite}
 \label{req-steg-suite}
 \begin{itemize}
 \item (M) Ability to extract and process motion vector data.
@@ -355,9 +352,9 @@ Below is a list of requirements for both deliverables, prioritised using \emph{M
 \item (S) Usefulness (verbosity, amount of information provided) to the steganalyst.
 \end{itemize}
 
-\section{Project Workflow}
+\section{Project workflow}
 
-\subsection{Technical Choices}
+\subsection{Technical choices}
 \label{tech-choices}
 
 The steganographic application requires modifying MPEG video files, which in turn requires parsing the format of a file, modifying motion vector values, and repackaging the data back into a playable video. Developing a codec does not relate to steganography and is potentially error-prone, so I leverage an existing set of codecs---\texttt{FFmpeg}\footnote{\url{https://www.ffmpeg.org/}}---to achieve this. As codecs are typically written in C or C++, it is a natural choice for this task to and makes the integration easier.
@@ -366,10 +363,10 @@ Performing encryption prior to embedding requires using a cryptography library. 
 
 The steganalysis suite was integrated into the Matlab scientific computation package for user's benefit, because it provides useful tools, such as statistical primitives, plotting capabilities and classifiers, without changing the environment. I chose Matlab  because of its widespread use and comprehensive functionality.
 
-\subsection{Risk Analysis}
+\subsection{Risk analysis}
 FFmpeg is a complex piece of software, mostly written in a style of C that sacrifices clarity for performance. A potential risk for the project was the difficulty of proper integration with FFmpeg and hence inability to access or reliably modify motion vectors. Complete failure to do so was unlikely, but it could have consumed a significant amount of development time. To mitigate this, some ``catch-up'' time was allocated in the project timetable.  
 
-\subsection{Development Choices}
+\subsection{Development choices}
 \begin{itemize}
 \item \emph{Git} was used for version control, allowing quick roll-back and managing multiple source trees using branches.
 \item \emph{Backups} were done by uploading the source tree and other relevant files to Dropbox. The git repository itself was hosted remotely on GitHub.
@@ -378,7 +375,7 @@ FFmpeg is a complex piece of software, mostly written in a style of C that sacri
 \item Software components have a \emph{modular design}, which enabled better maintainability and testability, and well-defined interfaces allowed changing internal implementation without breaking compatibility with other components.
 \end{itemize}
 
-\section{Starting Point}
+\section{Starting point}
 This project uses some cryptography concepts introduced in the Part IB \textit{Security I} course. I have had some C++ knowledge from past programming experience and the \textit{Programming in C and C++} course. 
 
 Prior to submitting the proposal, I have familiarised myself with the general concepts of steganography and LSB embedding though some introductory texts and relevant papers, and briefly looked at H.264 codec format.
@@ -400,7 +397,7 @@ This chapter summarised relevant theoretical and practical background necessary 
 
 \textit{This chapter covers the implementation details for the steganographic application and the steganalysis suite. I discuss the operation of the encoder and decoder applications, integration with the codec, structure and implementation of the embedding algorithms, and the details of some steganalytic attacks. Some in-line evaluation of algorithms is presented to motivate the design improvements.}
 
-\section{Steganographic Application}
+\section{Steganographic application}
 
 \subsection{Integration with FFmpeg}
 \label{integrate-ffmpeg}
@@ -415,7 +412,7 @@ Initially, I looked for a point in the macroblock search phase where motion vect
 
 However, this leaves prediction errors unmodified. To evaluate how much this affects the system, an experiment on human subjects was conducted to determine if this visual footprint is noticeable. This is further discussed in section \ref{exp-human-subj}.
 
-\subsection{Steganography Library}
+\subsection{Steganography library}
 
 \subsubsection{C API}
 
@@ -439,7 +436,7 @@ A singleton instance of an embedding algorithm is kept active after initialisati
 \label{fig:movest_alg_class_diag}
 \end{figure}
 
-\subsubsection{Class Hierarchy}
+\subsubsection{Class hierarchy}
 
 To encourage modularity and code reuse, the embedding algorithms were implemented as OOP classes. The class hierarchy is presented in Figure \ref{fig:movest_alg_class_diag}. \texttt{Algorithm} is the base class for all embedding algorithms, containing common functionality such as initialising the payload file or operating on every motion vector of a suitable type in turn. Most algorithms, however, extend \texttt{HideSeek} or its subclasses to benefit from the following more specific functionality:
 
@@ -453,7 +450,7 @@ To encourage modularity and code reuse, the embedding algorithms were implemente
 \label{encryption}
 Encrypting the payload hides the structure of the data by making it indistinguishable from random noise, making it hard to detect in already-noisy regions, as well as causing it to remain unreadable by an adversary even if steganography was broken. \texttt{movestlib} achieves this by implementing a file-like object for accessing the payload, and encrypting or decrypting the data on the fly (\texttt{MOVEST\_ENCRYPTION} flag). Encryption is done using AES in counter (CTR) mode with a 256-bit key. The key and the initialisation vector are derived from the user-supplied password by performing key stretching using the industry-standard PBKDF2-HMAC-SHA1 key derivation function. Since implementing cryptographic primitives yourself is potentially error-prone, the Crypto++ library was used to provide them. 
 
-\subsection{Encoder and Decoder Applications}
+\subsection{Encoder and decoder applications}
 \label{enc-dec-bin}
 The project provides video-processing applications for embedding and recovering the payload from a video file. The two are largely based on FFmpeg examples for transcoding (\texttt{transcoding.c}) and motion vector extraction (\texttt{extract\_mvs.c}), which already contain the code to trigger code paths in FFmpeg that I have modified. Figure \ref{fig:encoder-help} provides an example of options available for the embedding application (encoder).
 
@@ -489,19 +486,19 @@ Available algorithm options:
 \label{fig:encoder-help}
 \end{figure}
 
-\section{Steganalysis Techniques}
+\section{Steganalysis techniques}
 \label{steg-tech}
 
 The steganalysis techniques for this project were implemented in Matlab, where the large library of pre-existing statistical and data processing routines makes things considerably simpler.
 
-\subsection{Motion Vector Import}
+\subsection{Motion vector import}
 \label{mv-import}
 
 The decoder application can be configured to use a special algorithm \texttt{DumpMvs} which outputs motion vector components in a simple text format. Matlab can later import this data as 3D matrices (\texttt{loadmvs.m}), where the element at $(i, j, k)$ refers to a macroblock at $i$-th row, $j$-th column of the $k$-th frame. 
 
 The codec allows for some macroblocks to be omitted. These are called ``skip'' macroblocks, to which the Movest decoder assigns a special type during extraction. In this case, for the sake of completeness of the grid, FFmpeg reports the motion vector being $(0, 0)$, but a user can filter out such stray zeros by using type information (\texttt{typedmvs.m}).
 
-\subsection{LSB plane, 2D Plotting and Aggregation into Bytes}
+\subsection{LSB plane, 2D plotting and aggregation into bytes}
 
 This project implements Least Significant Bit (LSB) steganography, so the suite includes a function (\texttt{lsbplane.m}) to project least significant bits out of every motion vector component value. If the embedding algorithm sets the LSBs of motion vectors to exactly payload bits, LSBs can be immediately subjected to visual analysis to reveal any patterns in the data. This is best illustrated by an example.
 
@@ -518,7 +515,7 @@ Figure \ref{fig:unencrypted-enc} shows an example of a 2-valued heatmap (\texttt
     ans = hello world\ldots
 \end{alltt}
 
-\subsection{Histogram and $\chi^2$ (Chi-Squared) Attack}
+\subsection{Histogram and $\chi^2$ (Chi-Squared) attack}
 
 The distribution of motion vectors can be visualised using a histogram (\texttt{mvhist.m}). This can be a useful source of information for a steganalyst because peculiarities in the histogram can reveal that motion vectors have been modified. MV histograms typically have a sharp peak at 0 and exponentially decay on both sides. Since these histograms are affected by the direction of motion in the video, decay rates may vary, and we may see additional peaks or plateaus. (Figure \ref{fig:histogram-example}).
 
@@ -546,7 +543,7 @@ $$ p = 1 - \frac{1}{2^{\frac{n-1}{2}}\Gamma(\frac{n-1}{2})}\int_0^{\chi^2_{n-1}}
 
 This method can also estimate the size of the payload. From the expression for $\chi^2_{n-1}$, we see that it is sensitive to small changes: the value stays close to 0 when data contains the payload ($X_k - Z_k \approx 0$) and is big otherwise. We can iteratively build up the histogram and update $\chi^2_{n-1}$ as data for every frame comes in. We know that when the value starts increasing (and $p$-value decreases), the data no longer contains the payload, so we can put a bound on the payload size. 
 
-\subsection{Reversion Technique}
+\subsection{Reversion technique}
 \label{rev-tech-theory}
 Cao \emph{et al.}~\cite{cao2012video} proved that decoding then re-encoding (transcoding) a video tends to remove the changes caused by embedding the payload. That is, motion vectors tend to revert to their original values. So, if a video does not contain a payload, we expect differences between respective motion vectors of the original and transcoded video to be near zero.
 
@@ -570,7 +567,7 @@ The reversion hypothesis suggests the following approach for distinguishing betw
 \end{itemize}
 A classifier can be built to attempt to differentiate between these two classes of video. I decided to use a Support Vector Machine (SVM) with a linear kernel (as Figure \ref{fig:movest-reversion-sketch} suggests), trained using Matlab's \texttt{fitcsvm} routine. Evaluation of this method is presented in section \ref{rev-tech}.
 
-\section{Embedding Algorithms}
+\section{Embedding algorithms}
 \label{emb-alg}
 
 This section presents the 8 LSB steganography algorithms implemented by this project.
@@ -723,7 +720,7 @@ For small payload sizes, the algorithm does not produce equal even-odd pairs in 
 
 \emph{Outguess 0.1}~\cite{bateman} is essentially the same algorithm as Randomised Hide \& Seek, but it addresses the issue of embedding into ``still'' regions by choosing not to embed into components with value 0 or 1. This is done to avoid the visual analysis attack, which we previously looked at in MSteg design (Section \ref{msteg}). The footprint is further evaluated in the Evaluation chapter, section \ref{eval-var-emb-cap}.
 
-\subsection{Xu's Algorithm}
+\subsection{Xu's algorithm}
 \label{xu-alg}
 
 The project also implements an algorithm that was designed specifically for motion vectors. Xu \emph{et al.} \cite{xu2006steganography} argue that data should be embedded:
@@ -773,15 +770,15 @@ This chapter described the design and the implementation details of the steganog
 \textit{This chapter evaluates the software against the initial requirements and presents more steganalytic results. The detectability properties using Xu's algorithm, accuracy of the reversion technique classifier, and effectiveness of varying the embedding capacity are discussed. I also discuss secondary properties of steganographic systems, such as the embedding capacity and speed.
 }
 
-\section{Satisfaction of Requirements}
+\section{Satisfaction of requirements}
 
 Overall, the project was a success. All requirements described in sections \ref{req-steg-app} and \ref{req-steg-suite} were met. The following sections present a quick review of the software, having these requirements in mind.
 
-\subsection{Steganographic Application}
+\subsection{Steganographic application}
 
 The developed steganography software is able to reliably modify and extract motion vector data from MPEG video files. I avoided the need to implement my own video codec by successfully integrating with FFmpeg (see section \ref{integrate-ffmpeg}). The software consists of 3 deliverables: encoder and decoder applications for the user to perform embedding, and a steganography library that can be used separately though an API. The library implements 8 LSB embedding algorithms (see section \ref{emb-alg}). The payload can be encrypted with 256-bit AES--CTR encryption using a user-supplied password. 
 
-\subsection{Steganalysis Suite}
+\subsection{Steganalysis suite}
 
 The steganalysis suite provides, in MATLAB, facilities for extracting and processing motion vector data, as well as a variety of general attacks for detecting embedded payloads. The following functionality is available:
 
@@ -800,7 +797,7 @@ The steganalysis suite provides, in MATLAB, facilities for extracting and proces
 
 Implementation details are discussed in section \ref{steg-tech}, and the effectiveness of the attacks is demonstrated in sections \ref{emb-alg} and \ref{rem-detect-eval}. Documentation is provided on how to use the implemented methods and interpret the results. 
 
-\section{Detectability of Embedding}
+\section{Detectability of embedding}
 \label{rem-detect-eval}
 
 Perhaps the most important aspect to consider when evaluating a steganographic system is whether the embedding is detectable. Most of the detectability evaluation was done in the previous chapter to justify further algorithm design improvements, also allowing to evaluate the effectiveness of the implemented steganalysis techniques. This section covers remaining steganalysis.
@@ -859,7 +856,7 @@ Xu \emph{et al.} also suggest embedding the same chunk of payload data four time
 
 Xu's algorithm embeds payload bits in motion vectors by incrementing the targeted vector component. For motion vectors near the edge of the frame, such increments can cause the vector to point outside the frame, causing decoding errors and revealing that the video has been tampered with. Figure \ref{fig:vlc-corruption} shows the error that the codec reports when playing such a damaged video. \texttt{MVSteg}'s use of F4's decrementing motion vector scheme avoids this problem, which also makes it resistant to $\chi^2$ and histogram attacks (see sections \ref{steg-tech}, \ref{f4}).
 
-\subsection{Reversion Technique}
+\subsection{Reversion technique}
 \label{rev-tech}
 
 The reversion technique (see section \ref{rev-tech-theory}) considers differences between respective motion vectors of the original and the re-encoded (transcoded) video. Evaluating the effectiveness of this technique requires training a linear SVM classifier. In this situation, SVM does not require large datasets to give good results~\cite{cao2012video}, so I have obtained a dataset of 56 freely-available stock videos. Collected videos exhibit various degrees of motion, such as slow cloud movements or chaotic city timelapses. Half of those were chosen to become stego videos, so that the ratio between stego and non-stego videos is 50:50 (balanced dataset).
@@ -947,11 +944,11 @@ These data suggest that the reversion technique classifier starts being effectiv
 \section{Detectability by Humans (Study)}
 \label{exp-human-subj}
 
-\subsection{Study Hypothesis}
+\subsection{Study hypothesis}
 
 A study was conducted to test whether human participants are able to distinguish between a stego and a non-stego video when the prediction error is not modified. To test this, I measured how often participants could correctly select the stego video given three ostensibly identical videos. I hypothesise that humans are not able to tell the videos apart (null hypothesis).
 
-\subsection{Experimental Procedure}
+\subsection{Experimental procedure}
 
 In each of the 10 trials, the participant was given three ostensibly identical videos under 30 seconds in length, one of which with a hidden payload. They had to choose which video they thought was modified and write its letter into the experiment answer sheet. Using three videos, as opposed to two, eliminates a problematic situation when the participant sees that videos are different, but is unable to tell which one actually contains embedding\footnote{The original experiment description in the project proposal overlooked this issue and stated that 2 videos will be used.}.
 
@@ -1008,7 +1005,7 @@ Participant \#12 & B & C & A & A & B & B & B & A & B & B \\
 \textbf{TODO: Comment on potentially small n?}
 The data contains 108 answers ($n = \text{\# of participants} \times \text{\# of trials}$), so, according to the formula above, I expect $Y$ to be within the range $36 \pm 5$. The data has 32 correct answers, which is within that range, so it \emph{cannot} be concluded that humans \emph{are} able to identify implemented video steganography. This suggests that the visual footprint produced by not modifying prediction error is not detectable by humans.
 
-\section{Embedding Capacity and Speed}
+\section{Embedding capacity and speed}
 
 A steganographic system also has secondary characteristics worthy of evaluation: embedding capacity and speed. Capacity depends on the number of P-frames, macroblocks (defined by the resolution), and suitable motion vectors (see \ref{mv-emb-space}). The proportion of suitable motion vectors can vary significantly depending on the type of motion in a video, and on what algorithm is used. For instance, \texttt{MVSteg} performs worse on videos with little or slow motion because it only embeds into sufficiently long motion vectors (see \ref{xu-alg}).
 
@@ -1038,7 +1035,7 @@ A library for performing steganography and related video processing (such as acc
 
 With the benefit of hindsight, I would have implemented the FFmpeg integration prior to starting the project and used it as a starting point. This would have allowed focusing entirely on steganography, giving more time to explore useful extensions.
 
-\section{Future Directions}
+\section{Future directions}
 
 Many promising avenues for further improvement were not explored due to time constraints:
 \begin{itemize}
@@ -1047,7 +1044,7 @@ Many promising avenues for further improvement were not explored due to time con
 \item \textit{Explore MV-specific steganalysis further.} In addition to the reversion technique, described in \ref{rev-tech}, the project would benefit from more motion vector-specific steganalysis methods. A few potential candidates were mentioned in the Introduction chapter: Deng \emph{el al.}~\cite{deng2012digital} argues that neighbouring MVs often have the same motion vectors, making it easy to spot an abnormal motion vector, and Xu \emph{et al.}~\cite{xu2013video} proposed to build a set of vector algebra constraints between MVs across several frames for this purpose.
 \end{itemize}
 
-\subsection*{Closing Remarks}
+\subsection*{Closing remarks}
 
 It has been a fascinating opportunity to explore niche fields of steganography and steganalysis, investigate and compare their research advances and apply explored methods to video coding. The project has achieved its goals, contributing both theoretically and practically, as a review of LSB steganography adapted to motion vectors and as a collection of practical stego tools.
 
@@ -1058,8 +1055,8 @@ It has been a fascinating opportunity to explore niche fields of steganography a
 
 \appendix
 \cleardoublepage
-\addcontentsline{toc}{chapter}{Appendix A:\quad Project Proposal}
-\chapter*{Appendix A: Project Proposal}
+\addcontentsline{toc}{chapter}{Appendix A:\quad Project proposal}
+\chapter*{Appendix A: Project proposal}
 
 \includepdf[pages={-}]{proposal.pdf}
 
