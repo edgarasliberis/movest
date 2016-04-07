@@ -549,7 +549,8 @@ Cao \emph{et al.}~\cite{cao2012video} proved that decoding then re-encoding (tra
 
 \begin{wrapfigure}[13]{R}{6cm}
 \vspace{-15pt}
-\includegraphics[width=5.5cm]{img/movest_reversion_sketch.png}
+\centering
+\resizebox{5.5cm}{!}{\input{img/movest-reversion-sketch.tex}}
 \caption{Partitioning stego and non-stego videos.}
 \label{fig:movest-reversion-sketch}
 \end{wrapfigure}
@@ -735,7 +736,7 @@ The project also implements an algorithm that was designed specifically for moti
 \item 4 times per GOP\footnote{GOP (Group of Pictures) is a series frames between successive I-frames.} to ``resist video processing''; the starting and ending position of each segment should be recorded in an I-frame.
 \end{itemize}
 
-Some of the design decisions made by Xu's algorithm\footnote{The project proposal and progress report refer to this as Zhang's algorithm (2001). Xu's algorithm (2006) is a new iteration of the same technique.} are questionable, so I implemented my own take on this technique (\texttt{MVSteg}), with the following differences:
+Some of the design decisions made by Xu's algorithm\footnote{The project proposal and progress report refer to this as Zhang's algorithm (2001)~\cite{zhang2001video}. Xu's algorithm (2006)~\cite{xu2006steganography} is a new iteration of the same technique.} are questionable, so I implemented my own take on this technique (\texttt{MVSteg}), with the following differences:
 \begin{itemize}
 \item $\theta = 90^{\circ}$ is not a good decision boundary: if a motion vector has a large positive $y$ component, but a small positive $x$ component, modifying the larger one would be less noticeable. However, Xu's algorithm would still choose $x$ component, because $\theta$ is an acute angle. 
 
@@ -750,7 +751,7 @@ The two algorithms---the original and my modification---are compared against eac
 
 \section{Testing}
 
-In addition to manual testing, unit tests were written to provide automated regression and integration testing. I used Google Test framework, a mainstream testing solution for C++, to implement small and maintainable tests, which test components of the system independently though their public interfaces.
+In addition to manual testing, unit tests were written to provide automated regression and integration testing. I used Google Test framework\footnote{\url{https://github.com/google/googletest}}, a mainstream testing solution for C++, to implement small and maintainable tests, which test components of the system independently though their public interfaces.
 
 Tests cover:
 \begin{itemize}
@@ -795,7 +796,7 @@ The steganalysis suite provides, in MATLAB, facilities for extracting and proces
 \end{itemize}
 \end{multicols}
 
-Implementation details are discussed in section \ref{steg-tech}, and the effectiveness of the attacks is demonstrated in sections \ref{emb-alg} and \ref{rem-detect-eval}. Documentation is provided on how to use the implemented methods and interpret the results. 
+Implementation details are discussed in section \ref{steg-tech}, and the effectiveness of the attacks is demonstrated in sections \ref{emb-alg} and \ref{rem-detect-eval}. In-line method documentation is provided on how to use the implemented routines and interpret the results. 
 
 \section{Detectability of embedding}
 \label{rem-detect-eval}
@@ -807,7 +808,7 @@ Perhaps the most important aspect to consider when evaluating a steganographic s
 
 I discovered a number of apparent flaws in Xu's algorithm (see section \ref{xu-alg}), so I implemented an improved version of the algorithm, which I called \texttt{MVSteg}.
 
-One of improvements is the component selection policy. If the phase of a motion vector is acute, Xu's algorithm will embed its payload into the $x$ component, otherwise it uses the $y$ component, claiming that this results in less disturbance to the motion. However, for instance, in the presence of a motion vector with a large $y$ component and a small $x$ component (yielding an acute phase), a small marginal change in $x$ results in a large relative disturbance to the motion. \texttt{MVSteg} always modifies the largest component of the motion vector, making the relative change less significant.
+One of my own improvements is the component selection policy. If the phase of a motion vector is acute, the original Xu's algorithm will embed its payload into the $x$ component, otherwise it uses the $y$ component, claiming that this results in less disturbance to the motion. However, for instance, in the presence of a motion vector with a large $y$ component and a small $x$ component (yielding an acute phase), a small marginal change in $x$ results in a large relative disturbance to the motion. \texttt{MVSteg} always modifies the largest component of the motion vector, making the relative change less significant.
 
 Figure \ref{fig:xualg-mvsteg-visual} shows an example of some visual artefacts\footnote{Movest does not modify the prediction error, which makes detecting such artefacts easier. However, if it did, it would still be possible to spot this, because the prediction error would have been unusually large.} produced by Xu's algorithm which are not present when using \texttt{MVSteg}.
 
@@ -837,7 +838,7 @@ Xu \emph{et al.} also suggest embedding the same chunk of payload data four time
 \end{minipage}%
 \quad
 \begin{minipage}[t]{.45\textwidth}
-  \vspace{-5.2em}
+  \vspace{-5.14em}
   \begingroup
     \fontsize{11pt}{12pt}\selectfont
     \centering
@@ -859,7 +860,7 @@ Xu's algorithm embeds payload bits in motion vectors by incrementing the targete
 \subsection{Reversion technique}
 \label{rev-tech}
 
-The reversion technique (see section \ref{rev-tech-theory}) considers differences between respective motion vectors of the original and the re-encoded (transcoded) video. Evaluating the effectiveness of this technique requires training a linear SVM classifier. In this situation, SVM does not require large datasets to give good results~\cite{cao2012video}, so I have obtained a dataset of 56 freely-available stock videos. Collected videos exhibit various degrees of motion, such as slow cloud movements or chaotic city timelapses. Half of those were chosen to become stego videos, so that the ratio between stego and non-stego videos is 50:50 (balanced dataset).
+The reversion technique (see section \ref{rev-tech-theory}) considers differences between respective motion vectors of the original and the re-encoded (transcoded) video. Evaluating the effectiveness of this technique requires training a linear SVM classifier. In this situation, SVM does not require large datasets to give good results~\cite{cao2012video}, so I have obtained a dataset of 56 freely-available stock videos. The videos were selected to exhibit various degrees of motion, such as slow cloud movements or chaotic city timelapses. Half of those were chosen to become stego videos, so that the ratio between stego and non-stego videos is 50:50 (balanced dataset).
 
 For each embedding algorithm, the training and evaluation is done as follows:
 \begin{itemize}
@@ -874,7 +875,7 @@ For each embedding algorithm, the training and evaluation is done as follows:
 
 \subsubsection*{8-fold cross validation} 
 
-The data set is randomly partitioned into 8 bins of 7 videos each. For each bin, the other remaining 7 bins are used to train the classifier, which is then applied to the videos in the target bin and the accuracy is computed.\footnote{Using $k = 8$ (close to recommended $k = 10$) allows having a sufficiently large test set for every iteration.}. The average accuracy over all iterations is the result.
+The data set is randomly partitioned into 8 bins of 7 videos each. For each bin, the other remaining 7 bins are used to train the classifier, which is then applied to the videos in the target bin and the accuracy is computed.\footnote{Using $k = 8$ (close to recommended $k = 10$) allows having a sufficiently large test set for every iteration.} The average accuracy over all iterations is the result.
 
 Since the resulting accuracy measure is susceptible to unusually favourable random partitioning, the process is repeated 100 times to obtain a 95\% confidence interval for the mean accuracy.
 
@@ -903,7 +904,7 @@ MVSteg & $62.96\% \pm 0.57\%$ \\
 \label{tbl:rev-tech}
 \end{table}
 
-The results are surprisingly good, which means this technique is suitable for automated steganalysis. It appears that the accuracy result for each algorithm is similar to the proportion of motion vectors it modifies. 
+The results are surprisingly good, which means this technique is suitable for automated steganalysis. It appears that the accuracy result for each algorithm is similar to the proportion of motion vectors it modifies. The classifier shows over 90\% accuracy for the first four algorithms, which, unfortunately, means that their embedding is easily detectable when the full embedding capacity is used up. To mitigate this, one can either use Xu's algorithm or MVSteg, or embed less data, as discussed in the following section.
 
 \subsection{Varying embedding capacity}
 \label{eval-var-emb-cap}
@@ -939,7 +940,7 @@ To evaluate this approach, I tested the $\chi^2$ attack and the reversion techni
 \label{tbl:detect-outguess}
 \end{table}
 
-These data suggest that the reversion technique classifier starts being effective at 50--60\% embedding capacity and the $\chi^2$ attack is only effective from 90\%.
+The table also includes an entry for 0\% setting (no data embedded) to verify that attacks do not produce false positives, \emph{i.e.} non-stego videos classified as stego. These data suggest that the reversion technique classifier starts being effective at 50--60\% embedding capacity and the $\chi^2$ attack is only effective from 90\%.
 
 \section{Detectability by Humans (Study)}
 \label{exp-human-subj}
@@ -950,7 +951,7 @@ A study was conducted to test whether human participants are able to distinguish
 
 \subsection{Experimental procedure}
 
-In each of the 10 trials, the participant was given three ostensibly identical videos under 30 seconds in length, one of which with a hidden payload. They had to choose which video they thought was modified and write its letter into the experiment answer sheet. Using three videos, as opposed to two, eliminates a problematic situation when the participant sees that videos are different, but is unable to tell which one actually contains embedding\footnote{The original experiment description in the project proposal overlooked this issue and stated that 2 videos will be used.}.
+In each of the 10 trials, the participant was given three ostensibly identical videos under 30 seconds in length, one of which with a hidden payload. They had to choose which video they thought was modified and write its letter into the experiment answer sheet. Using three videos, as opposed to two, eliminates a problematic situation when the participant sees that videos are different, but is unable to tell which one actually contains embedding\footnote{The original experiment description in the project proposal overlooked this issue and stated that 2 videos will be used. I would like to thank the Computer Laboratory Ethics Committee for advising me on this matter.}.
 
 To increase chances of successful detection and more closely simulate a real-life steganalysis setting, the following measures were taken:
 \begin{itemize}
@@ -1002,14 +1003,13 @@ Participant \#12 & B & C & A & A & B & B & B & A & B & B \\
 \label{tbl:detect-exp-res}
 \end{table}
 
-\textbf{TODO: Comment on potentially small n?}
 The data contains 108 answers ($n = \text{\# of participants} \times \text{\# of trials}$), so, according to the formula above, I expect $Y$ to be within the range $36 \pm 5$. The data has 32 correct answers, which is within that range, so it \emph{cannot} be concluded that humans \emph{are} able to identify implemented video steganography. This suggests that the visual footprint produced by not modifying prediction error is not detectable by humans.
 
 \section{Embedding capacity and speed}
 
 A steganographic system also has secondary characteristics worthy of evaluation: embedding capacity and speed. Capacity depends on the number of P-frames, macroblocks (defined by the resolution), and suitable motion vectors (see \ref{mv-emb-space}). The proportion of suitable motion vectors can vary significantly depending on the type of motion in a video, and on what algorithm is used. For instance, \texttt{MVSteg} performs worse on videos with little or slow motion because it only embeds into sufficiently long motion vectors (see \ref{xu-alg}).
 
-To estimate the capacities a user might reasonably expect, I measured embedding capacity per second on a dataset of 53 HD ($1280 \times 720$) videos with varying degrees of motion, averaged over the first 15 seconds. Figure \ref{fig:capacities} presents a box plot of measured capacities for each embedding algorithm. Hide \& Seek achieves an impressive 20~KB/s median embedding capacity; MSteg's, F3's and F4's median result is 6--8~KB/s, and Xu's algorithm and MVSteg have the lowest values of 1~KB/s. 
+To estimate the capacities a user might reasonably expect, I measured embedding capacity per second on a dataset of 53 HD ($1280 \times 720$) videos with varying degrees of motion, averaged over a representative span of 15 seconds. Figure \ref{fig:capacities} presents a box plot of measured capacities for each embedding algorithm. Hide \& Seek achieves an impressive 20~KB/s median embedding capacity; MSteg's, F3's and F4's median result is 6--8~KB/s, and Xu's algorithm and MVSteg have the lowest values of 1~KB/s. 
 
 \begin{figure}[tbh]
 \centerline{\includegraphics{img/capacities.eps}}
@@ -1021,7 +1021,7 @@ Video encoding is the most computationally expensive part of the Movest encoder,
 
 \bigskip\bigskip
 \subsection*{Summary}
-This chapter evaluated the implementation with respect to initial requirements, detectability, capacity, and speed of steganographic systems. The following chapter summarises the undertaken work and suggests future work.
+This chapter evaluated the implementation with respect to initial requirements and showed that they were met; investigated the detectability, capacity, and speed properties of steganographic systems. The following chapter summarises the undertaken work and suggests future work.
 
 % Conclusions
 \cleardoublepage
