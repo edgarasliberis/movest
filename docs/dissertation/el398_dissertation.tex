@@ -781,7 +781,7 @@ The developed steganography software is able to reliably modify and extract moti
 
 \subsection{Steganalysis suite}
 
-The steganalysis suite provides, in MATLAB, facilities for extracting and processing motion vector data, as well as a variety of general attacks for detecting embedded payloads. The following functionality is available:
+The steganalysis suite provides, in Matlab, facilities for extracting and processing motion vector data, as well as a variety of general attacks for detecting embedded payloads. The following functionality is available:
 
 \begin{multicols}{2}
 \begin{itemize}
@@ -808,9 +808,9 @@ Perhaps the most important aspect to consider when evaluating a steganographic s
 
 I discovered a number of apparent flaws in Xu's algorithm (see section \ref{xu-alg}), so I implemented an improved version of the algorithm, which I called \texttt{MVSteg}.
 
-One of my own improvements is the component selection policy. If the phase of a motion vector is acute, the original Xu's algorithm will embed its payload into the $x$ component, otherwise it uses the $y$ component, claiming that this results in less disturbance to the motion. However, for instance, in the presence of a motion vector with a large $y$ component and a small $x$ component (yielding an acute phase), a small marginal change in $x$ results in a large relative disturbance to the motion. \texttt{MVSteg} always modifies the largest component of the motion vector, making the relative change less significant.
+One of my own improvements is the component selection policy. If the phase of a motion vector is acute, the original Xu's algorithm will embed its payload into the $x$ component, otherwise it uses the $y$ component, claiming that this results in less disturbance to the motion. However, for instance, in the presence of a motion vector with a large $y$ component and a small $x$ component (yielding an acute phase), a small marginal change in $x$ results in a large relative disturbance to the motion. MVSteg always modifies the largest component of the motion vector, making the relative change less significant.
 
-Figure \ref{fig:xualg-mvsteg-visual} shows an example of some visual artefacts\footnote{Movest does not modify the prediction error, which makes detecting such artefacts easier. However, if it did, it would still be possible to spot this, because the prediction error would have been unusually large.} produced by Xu's algorithm which are not present when using \texttt{MVSteg}.
+Figure \ref{fig:xualg-mvsteg-visual} shows an example of some visual artefacts\footnote{Movest does not modify the prediction error, which makes detecting such artefacts easier. However, if it did, it would still be possible to spot this, because the prediction error would have been unusually large.} produced by Xu's algorithm which are not present when using MVSteg.
 
 \begin{figure}[tbh]
 \centerline{
@@ -822,11 +822,11 @@ Figure \ref{fig:xualg-mvsteg-visual} shows an example of some visual artefacts\f
 \includegraphics[width=4cm]{img/mvsteg-visual.png}
 \end{subfigure}
 }
-\caption{A frame, showing a sky lantern, containing embedding by Xu's algorithm (left) and \texttt{MVSteg} (right).}
+\caption{A frame, showing a sky lantern, containing embedding by Xu's algorithm (left) and MVSteg (right).}
 \label{fig:xualg-mvsteg-visual}
 \end{figure}
 
-Xu \emph{et al.} also suggest embedding the same chunk of payload data four times at different locations to provide resilience against data corruption. To guide decoding, these locations are stored an I-frame using classical image steganography methods. Unfortunately, this creates a recurring pattern in the LSBs of the used motion vectors, providing an opportunity for attack. I simulated such embedding in the presence some bit corruptions in an attempt to find such repetition. Figure \ref{fig:4xembed} shows a successful result of finding a repeating pattern at four locations, with peaks corresponding to the positions where the pattern closely matches the recovered string\footnote{The sum of squared differences between a pattern and the recovered string is close to zero.}. \texttt{MVSteg} embeds data only once, and hence does not contain exploitable data repetition patterns.
+Xu \emph{et al.} also suggest embedding the same chunk of payload data four times at different locations to provide resilience against data corruption. To guide decoding, these locations are stored an I-frame using classical image steganography methods. Unfortunately, this creates a recurring pattern in the LSBs of the used motion vectors, providing an opportunity for attack. I simulated such embedding in the presence some bit corruptions in an attempt to find such repetition. Figure \ref{fig:4xembed} shows a successful result of finding a repeating pattern at four locations, with peaks corresponding to the positions where the pattern closely matches the recovered string\footnote{The sum of squared differences between a pattern and the recovered string is close to zero.}. MVSteg embeds data only once, and hence does not contain exploitable data repetition patterns.
 
 \begin{figure}[tbh]
 \centering
@@ -855,7 +855,7 @@ Xu \emph{et al.} also suggest embedding the same chunk of payload data four time
 \end{minipage}
 \end{figure}
 
-Xu's algorithm embeds payload bits in motion vectors by incrementing the targeted vector component. For motion vectors near the edge of the frame, such increments can cause the vector to point outside the frame, causing decoding errors and revealing that the video has been tampered with. Figure \ref{fig:vlc-corruption} shows the error that the codec reports when playing such a damaged video. \texttt{MVSteg}'s use of F4's decrementing motion vector scheme avoids this problem, which also makes it resistant to $\chi^2$ and histogram attacks (see sections \ref{steg-tech}, \ref{f4}). Given all these findings, I would advocate to use \texttt{MVSteg} instead of Xu's algorithm in practice.
+Xu's algorithm embeds payload bits in motion vectors by incrementing the targeted vector component. For motion vectors near the edge of the frame, such increments can cause the vector to point outside the frame, causing decoding errors and revealing that the video has been tampered with. Figure \ref{fig:vlc-corruption} shows the error that the codec reports when playing such a damaged video. MVSteg's use of F4's decrementing motion vector scheme avoids this problem, which also makes it resistant to $\chi^2$ and histogram attacks (see sections \ref{steg-tech}, \ref{f4}). Given all these findings, I would advocate to use MVSteg instead of Xu's algorithm in practice.
 
 \subsection{Reversion technique}
 \label{rev-tech}
@@ -940,7 +940,7 @@ To evaluate this approach, I tested the $\chi^2$ attack and the reversion techni
 \label{tbl:detect-outguess}
 \end{table}
 
-The table also includes an entry for 0\% setting (no data embedded) to verify that attacks do not produce false positives, \emph{i.e.} non-stego videos classified as stego. These data suggest that the reversion technique classifier starts being effective at 50--60\% embedding capacity and the $\chi^2$ attack is only effective from 90\%. Therefore it safe to use this algorithm, as long as the payload consumes less than a half of entire video's embedding capacity.
+The table also includes an entry for 0\% setting (no data embedded) to verify that attacks do not produce false positives, \emph{i.e.} non-stego videos classified as stego. These data suggest that the reversion technique classifier starts being effective at 50--60\% embedding capacity and the $\chi^2$ attack is only effective from 90\%. Therefore the embedding is undetectable using implemented steganalysis techniques, as long as the payload consumes less than a half of entire video's embedding capacity.
 
 \section{Detectability by Humans (Study)}
 \label{exp-human-subj}
@@ -1031,7 +1031,7 @@ This chapter evaluated the implementation with respect to initial requirements a
 
 Overall, the project achieved its aim of implementing and evaluating existing LSB steganography methods using motion vectors. Steganographic systems were evaluated based on embedding capacity, speed, and detectability. Detectability was evaluated using implemented steganalysis methods and by carrying out an experiment on human subjects.
 
-A library for performing steganography and related video processing (such as accessing and modifying motion vectors) was developed. The steganalysis suite, implemented using Matlab, provides facilities for extraction and analysis of motion vectors and offers classic and motion-vector-specific attacks against embedding algorithms.
+A library for performing steganography and related video processing (such as accessing and modifying motion vectors) applications were developed. The steganalysis suite, implemented using Matlab, provides facilities for extraction and analysis of motion vectors and offers classic and motion-vector-specific attacks against embedding algorithms.
 
 With the benefit of hindsight, I would have implemented the FFmpeg integration prior to starting the project and used it as a starting point. This would have allowed focusing entirely on steganography, giving more time to explore useful extensions.
 
