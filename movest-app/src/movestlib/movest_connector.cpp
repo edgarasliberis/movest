@@ -1,3 +1,4 @@
+#include <iostream>
 #include "movest_connector.h"
 #include "Algorithm.h"
 
@@ -22,7 +23,7 @@ void movest_decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_l
     algorithm->decode(mvs, mbtype_table, mv_sample_log2, mb_width, mb_height, mv_stride, mb_stride);
 }
 
-void movest_init_algorithm(const char *algname, void* alg_params) {
+void init_algorithm(const char *algname, void* alg_params) {
     if(algorithm != nullptr) {
         delete algorithm;
     }
@@ -56,12 +57,18 @@ void movest_init_algorithm(const char *algname, void* alg_params) {
     }
 }
 
-void movest_init_encoder(movest_params *params) {
+void movest_init_encoder(const char *algname, movest_params *params, void* alg_params) {
+    init_algorithm(algname, alg_params);
     algorithm->initAsEncoder(params);
 }
 
-void movest_init_decoder(movest_params *params) {
+void movest_init_decoder(const char *algname, movest_params *params, void* alg_params) {
+    init_algorithm(algname, alg_params);
     algorithm->initAsDecoder(params);
+}
+
+unsigned int movest_get_embedded_data_size(unsigned int data_size) {
+    return algorithm->computeEmbeddingSize(data_size);
 }
 
 movest_result movest_finalise() {

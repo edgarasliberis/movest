@@ -98,3 +98,7 @@ void CryptoFile::initCrypto(uint8_t key[KeyLength], uint8_t iv[BlockSize]) {
     this->enc = std::make_shared<CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption>(key, KeyLength, iv);
     this->dec = std::make_shared<CryptoPP::CTR_Mode<CryptoPP::AES>::Decryption>(key, KeyLength, iv);
 }
+
+unsigned int CryptoFile::encryptedFileSize(unsigned int initialSize, bool encryptionEnabled) {
+    return encryptionEnabled? initialSize : initialSize;
+}

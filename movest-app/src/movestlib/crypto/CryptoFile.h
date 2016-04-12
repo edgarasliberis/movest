@@ -26,6 +26,8 @@ public:
 
     CryptoFile() {};
 
+    static unsigned int encryptedFileSize(unsigned int initialSize, bool encryptionEnabled = true);
+
     /**
      * Constructs a file with encryption disabled.
      * @param path Path to a file.

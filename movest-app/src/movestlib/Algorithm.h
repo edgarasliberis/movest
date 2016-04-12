@@ -20,6 +20,7 @@ public:
 
     virtual void initAsEncoder(movest_params *params);
     virtual void initAsDecoder(movest_params *params);
+    virtual unsigned int computeEmbeddingSize(unsigned int dataSize);
     virtual movest_result finalise();
     virtual ~Algorithm() {};
 protected:

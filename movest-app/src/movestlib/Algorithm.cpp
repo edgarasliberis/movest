@@ -90,3 +90,7 @@ movest_result Algorithm::finalise() {
             uint(bitsProcessed / 8), error
     };
 }
+
+unsigned int Algorithm::computeEmbeddingSize(unsigned int dataSize) {
+    return CryptoFile::encryptedFileSize(dataSize, (bool)this->flags & MOVEST_ENABLE_ENCRYPTION);
+}
