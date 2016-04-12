@@ -307,12 +307,11 @@ int main(int argc, char **argv)
         uint32_t file_size;
     };
     struct alg_options alg_params = {capacity, file_size};
-    movest_init_algorithm(algorithm, &alg_params);
 
     movest_params p = {
             data_file, encrypt_flag ? MOVEST_ENABLE_ENCRYPTION : MOVEST_NO_PARAMS, password
     };
-    movest_init_decoder(&p);
+    movest_init_decoder(algorithm, &p, &alg_params);
 
     // Decode the video
     ret = decode_video(video_file);
