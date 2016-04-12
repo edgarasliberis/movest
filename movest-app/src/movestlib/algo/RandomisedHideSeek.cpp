@@ -25,11 +25,7 @@ void RandomisedHideSeek::initAsEncoder(movest_params *params) {
         initialize_ecc();
 
         fileSize = opt.fileSize != 0? opt.fileSize : datafile.remainingData();
-
-        // Total size of embedded data:
-        // fileSize + NPAR parity bytes for every (BLOCKSIZE - NPAR) bytes of the file
-        uint blocks = (fileSize / (BLOCKSIZE - NPAR)) + (fileSize % (BLOCKSIZE - NPAR) != 0);
-        dataSize = blocks * NPAR + fileSize;
+        dataSize = eccDataInflation(fileSize);
 
         initialiseMapping(dataSize);
 
@@ -52,11 +48,7 @@ void RandomisedHideSeek::initAsDecoder(movest_params *params) {
     if(!(flags & MOVEST_DUMMY_PASS)) {
         initialize_ecc();
         fileSize = opt.fileSize;
-
-        // Total size of embedded data:
-        // fileSize + NPAR parity bytes for every (BLOCKSIZE - NPAR) bytes of the file
-        uint blocks = (fileSize / (BLOCKSIZE - NPAR)) + (fileSize % (BLOCKSIZE - NPAR) != 0);
-        dataSize = blocks * NPAR + fileSize;
+        dataSize = eccDataInflation(fileSize);
 
         initialiseMapping(dataSize);
 
@@ -150,4 +142,16 @@ movest_result RandomisedHideSeek::finalise() {
     return movest_result {
             uint(bitsProcessed / 8), 0
     };
+}
+
+unsigned int RandomisedHideSeek::computeEmbeddingSize(unsigned int dataSize) {
+    uint fileSize = Algorithm::computeEmbeddingSize(dataSize);
+    return eccDataInflation(fileSize);
+}
+
+unsigned int RandomisedHideSeek::eccDataInflation(unsigned int size) {
+    // Total size of embedded data:
+    // size + NPAR parity bytes for every (BLOCKSIZE - NPAR) bytes of the file
+    uint blocks = (size / (BLOCKSIZE - NPAR)) + (size % (BLOCKSIZE - NPAR) != 0);
+    return blocks * NPAR + size;
 }

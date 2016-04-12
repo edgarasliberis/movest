@@ -27,6 +27,7 @@ public:
 
     void initAsEncoder(movest_params *params);
     void initAsDecoder(movest_params *params);
+    unsigned int computeEmbeddingSize(unsigned int dataSize);
     movest_result finalise();
 
 protected:
@@ -50,6 +51,7 @@ private:
     AlgOptions opt;
 
     void initialiseMapping(uint dataSize);
+    unsigned int eccDataInflation(unsigned int dataSize);
 };
 
 
