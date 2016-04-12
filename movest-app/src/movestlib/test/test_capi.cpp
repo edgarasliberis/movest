@@ -27,8 +27,7 @@ TEST(MovestAPI, InitLibraryAsEncoder) {
             "/dev/zero", MOVEST_NO_PARAMS, NULL
     };
     for(int i = 0; i < numAlgorithms; ++i) {
-        movest_init_algorithm(algorithms[i], algoptions);
-        movest_init_encoder(&p);
+        movest_init_encoder(algorithms[i], &p, algoptions);
     }
 }
 
@@ -40,8 +39,7 @@ TEST(MovestAPI, InitLibraryAsDecoder) {
             "/dev/zero", MOVEST_NO_PARAMS, NULL
     };
     for(int i = 0; i < numAlgorithms; ++i) {
-        movest_init_algorithm(algorithms[i], NULL);
-        movest_init_decoder(&p);
+        movest_init_decoder(algorithms[i], &p, NULL);
     }
 }
 
@@ -53,8 +51,7 @@ TEST(MovestAPI, EncodeSeq) {
     movest_params p = {
             "/dev/zero", MOVEST_NO_PARAMS, NULL
     };
-    movest_init_algorithm("hidenseek", NULL);
-    movest_init_encoder(&p);
+    movest_init_encoder("hidenseek", &p, NULL);
 
     int width = 6, height = 3;
     int16_t mvs[][2] = { {0, 1}, {2, 3}, {4, 5}, {5, 5}, {2, 2}, {1, 0},
@@ -91,8 +88,7 @@ TEST(MovestAPI, DecodeSeq) {
     movest_params p = {
             file, MOVEST_NO_PARAMS, NULL
     };
-    movest_init_algorithm("hidenseek", NULL);
-    movest_init_decoder(&p);
+    movest_init_decoder("hidenseek", &p, NULL);
 
     int width = 6, height = 3;
     int16_t mvs[2][18][2] = {{ {0, 1}, {2, 3}, {4, 5}, {5, 5}, {2, 2}, {1, 0},
