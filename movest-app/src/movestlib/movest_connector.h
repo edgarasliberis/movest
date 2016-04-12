@@ -42,9 +42,7 @@ typedef struct {
 } movest_result;
 
 /**
- * Set up the library to use a particular algorithm.
- * This is the first step of initialisation and must be followed by
- * @ref movest_init_encoder or @ref movest_init_decoder.
+ * Set up the library to use a particular algorithm for encoding.
  * Currently available options:
  *     - 'hidenseek'
  *     - 'dumpmvs' (dec) / 'dummypass' (enc)
@@ -57,21 +55,35 @@ typedef struct {
  *     - 'xualg'
  *
  * @param algname Name of the algorithm from the options above.
+ * @param params Parameter structure @ref movest_params
  * @param algParams Additional parameters for algorithm of your choice.
  */
-void movest_init_algorithm(const char *algname, void* alg_params);
+void movest_init_encoder(const char *algname, movest_params *params, void* alg_params);
 
 /**
- * Initialise the library for encoding.
- * Must be done after @ref movest_init_algorithm.
+ * Set up the library to use a particular algorithm for decoding.
+ * Currently available options:
+ *     - 'hidenseek'
+ *     - 'dumpmvs' (dec) / 'dummypass' (enc)
+ *     - 'f3'
+ *     - 'f4'
+ *     - 'msteg'
+ *     - 'mvsteg'
+ *     - 'outguess1'
+ *     - 'rand-hidenseek'
+ *     - 'xualg'
+ *
+ * @param algname Name of the algorithm from the options above.
+ * @param params Parameter structure @ref movest_params
+ * @param algParams Additional parameters for algorithm of your choice.
  */
-void movest_init_encoder(movest_params *params);
+void movest_init_decoder(const char *algname, movest_params *params, void* alg_params);
 
 /**
- * Initialise the library for decoding.
- * Must be done after @ref movest_init_algorithm.
+ * Query the initialised algorithm to see how much space will a file occupy.
+ * Must be done after @ref movest_init_encoder.
  */
-void movest_init_decoder(movest_params *params);
+unsigned int movest_get_embedded_data_size(unsigned int data_size);
 
 /**
  * Gather results of the embedding / extracting process (see @ref movest_result).
