@@ -15,11 +15,21 @@
 static Algorithm *algorithm;
 
 void movest_encode(int16_t (*mvs)[2], uint16_t *mb_type, int mb_width, int mb_height, int mv_stride) {
+    if(algorithm == nullptr) {
+        std::cerr << "movest_encode error: initialise algorithm first (movest_init_encoder)."
+                  << std::endl;
+        return;
+    }
     algorithm->encode(mvs, mb_type, mb_width, mb_height, mv_stride);
 }
 
 void movest_decode(int16_t (*mvs[2])[2], uint32_t *mbtype_table, int mv_sample_log2, int mb_width, int mb_height, int mv_stride,
                    int mb_stride) {
+    if(algorithm == nullptr) {
+        std::cerr << "movest_decode error: initialise algorithm first (movest_init_decoder)."
+                  << std::endl;
+        return;
+    }
     algorithm->decode(mvs, mbtype_table, mv_sample_log2, mb_width, mb_height, mv_stride, mb_stride);
 }
 
@@ -68,6 +78,11 @@ void movest_init_decoder(const char *algname, movest_params *params, void* alg_p
 }
 
 unsigned int movest_get_embedded_data_size(unsigned int data_size) {
+    if(algorithm == nullptr) {
+        std::cerr << "movest_get_embedded_data_size error: initialise algorithm first (movest_init_encoder)."
+                  << std::endl;
+        exit(1);
+    }
     return algorithm->computeEmbeddingSize(data_size);
 }
 

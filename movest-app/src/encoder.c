@@ -586,7 +586,7 @@ int run_embedding(char *inputFile, char *outputFile) {
     if (ret < 0)
         av_log(NULL, AV_LOG_ERROR, "Error occurred: %s\n", av_err2str(ret));
 
-    return ret ? 1 : 0;
+    return (ret < 0)? 1 : 0;
 }
 
 bool is_supported_algorithm(const char *algname) {
@@ -730,14 +730,12 @@ int main(int argc, char **argv)
         movest_init_encoder(algorithm, &p, NULL);
         av_log(NULL, AV_LOG_INFO, "Analysing the video for embedding capacity...\n");
 
+        unsigned int data_size = movest_get_embedded_data_size((unsigned int)(datafileinfo.st_size));
         int ret = run_embedding(input_file, output_file);
         if(ret != 0) return ret;
 
         movest_result result = movest_finalise();
-        unsigned int blockSize = 255 - 16; // ECC block size - parity bytes
-        unsigned int numBlocks = (unsigned int)(datafileinfo.st_size + (blockSize - 1)) / blockSize;
-        unsigned int dataSize = (unsigned int)datafileinfo.st_size + numBlocks * 16;
-        bool fits = dataSize < result.bytes_processed;
+        bool fits = data_size < result.bytes_processed;
         av_log(NULL, AV_LOG_INFO, "Analysed. Embedding capacity is %d byte(s).\n", result.bytes_processed);
         if(!fits) {
             av_log(NULL, AV_LOG_INFO, "File can't be embedded fully, video's capacity is %d byte(s) short"
@@ -767,6 +765,15 @@ int main(int argc, char **argv)
 
     movest_result res = movest_finalise();
     av_log(NULL, AV_LOG_INFO, "Bytes processed: %d\n", res.bytes_processed);
+    if(res.error_code == 1) {
+        av_log(NULL, AV_LOG_INFO, "Embedding likely failed: file too big. "
+                                  "Only files up to about %d bytes fit.", res.bytes_processed);
+    }
+    if(!singlePass) { //
+        av_log(NULL, AV_LOG_INFO, "Tell the decoding party to specify:\n"
+                                  " * File size: %d\n * Embedding capacity: %d\n\n",
+               algparams.file_size, algparams.byte_capacity);
+    }
     av_log(NULL, AV_LOG_INFO, "Finished.");
     return res.error_code;
 }
