@@ -141,11 +141,11 @@ by {\tt detex -n diss.tex | tr -cd '0-9A-Za-z $\tt\backslash$n' | wc -w}
 
 \section*{Original Aims of the Project}
 
-The aim of this project is to implement and evaluate various approaches to motion vector steganography. Both motion-vector-specific approaches and the application of other steganographic methods to motion vectors are considered. To achieve this, an end-user tool should be developed to offer several steganographic methods. The algorithms will be evaluated based on criteria such as embedding capacity, speed, and detectability. A suite of steganalysis tools will be created.  
+The aim of this project is to implement and evaluate various approaches to motion vector steganography. Both motion vector-specific approaches and the application of other steganographic methods to motion vectors are considered. To achieve this, an end-user tool should be developed to offer several steganographic methods. The algorithms will be evaluated based on criteria such as embedding capacity, speed, and detectability. A suite of steganalysis tools will be created.  
 
 \section*{Work Completed}
 
-Applications for embedding and extracting data from motion vectors were developed, providing several popular LSB steganography algorithms. Several steganalysis methods were implemented to extract and analyse motion vectors, offering classic and motion-vector-specific attacks against embedding schemes. The algorithms were compared against each other evaluating detectability, capacity and other aspects, and a human study was conducted to evaluate detectability.
+Applications for embedding and extracting data from motion vectors were developed, providing several popular LSB steganography algorithms. Several steganalysis methods were implemented to extract and analyse motion vectors, offering classic and motion vector-specific attacks against embedding schemes. The algorithms were compared against each other evaluating detectability, capacity and other aspects, and a human study was conducted to evaluate detectability.
 
 \section*{Special Difficulties}
 
@@ -178,9 +178,9 @@ I, Edgaras Liberis of Homerton College, being a candidate for Part II of the Com
 \section{Motivation}
 \label{motivation}
 
-\emph{Steganography} is the art of concealing information within ostensibly innocent carrier data \cite[p.~3]{fridrich}, usually with the intention of creating a covert channel. Its applications include bypassing government censorship, avoiding law enforcement or military intelligence, and other situations in which detection of the communication may be harmful to the communicating parties (such as by revealing their location~\cite{infohiding-survey}). 
+\emph{Steganography} is the art of concealing information within ostensibly innocent carrier data~\cite[p.~3]{fridrich}, usually with the intention of creating a covert channel. Its applications include bypassing government censorship, avoiding law enforcement or military intelligence, and other situations in which detection of the communication may be harmful to the communicating parties (such as by revealing their location~\cite{infohiding-survey}). 
 
-In recent years, steganography research has explored the use of mainstream digital media formats as the carrier data for hidden messages. These formats often exhibit a significant degree of redundancy which provides opportunities for payload concealment \cite[p.~2]{fridrich}. Since multimedia formats have become so widespread online, their use is now unremarkable and unlikely to raise suspicion.
+In recent years, steganography research has explored the use of mainstream digital media formats as the carrier data for hidden messages. These formats often exhibit a significant degree of redundancy which provides opportunities for payload concealment~\cite[p.~2]{fridrich}. Since multimedia formats have become so widespread online, their use is now unremarkable and unlikely to raise suspicion.
 
 By hiding data in regions of a file that are highly tolerant to small modifications or noise, the likelihood of detection can be significantly reduced. This concept led to the development of the common \emph{least-significant-bit (LSB) embedding}~\cite{bateman}\label{lsb-steg} technique, which uses the least significant bit of each data element (such as the colour channels in an image pixel) to store the payload.
 
@@ -1034,7 +1034,7 @@ This chapter evaluated the implementation with respect to initial requirements a
 
 Overall, the project achieved its aim of implementing and evaluating existing LSB steganography methods using motion vectors. Steganographic systems were evaluated based on embedding capacity, speed, and detectability. Detectability was evaluated using implemented steganalysis methods and by carrying out an experiment on human subjects.
 
-A library for performing steganography and related video processing (such as accessing and modifying motion vectors) applications were developed. The steganalysis suite, implemented using Matlab, provides facilities for extraction and analysis of motion vectors and offers classic and motion-vector-specific attacks against embedding algorithms.
+A library for performing steganography and related video processing (such as accessing and modifying motion vectors) applications were developed. The steganalysis suite, implemented using Matlab, provides facilities for extraction and analysis of motion vectors and offers classic and motion vector-specific attacks against embedding algorithms.
 
 With the benefit of hindsight, I would have implemented the FFmpeg integration prior to starting the project and used it as a starting point. This would have allowed focusing entirely on steganography, giving more time to explore useful extensions.
 
