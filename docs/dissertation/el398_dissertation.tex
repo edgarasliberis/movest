@@ -251,11 +251,11 @@ In other words, a steganographic system (also referred to as an \emph{embedding 
 
 A steganographic system aims to protect the payload from being detected by an adversary. Therefore, before discussing system's security properties, one should make reasonable assumptions about adversary's capabilities. Steganography considers three types of adversaries~\cite{craver1998public}:
 \begin{itemize}
-\item \emph{Passive warden} -- an adversary who can only spy on the communication.
+\item \emph{Passive warden\footnote{The term "warden" stems from earlier work that considered communicating prisoners, with the warden passing messages between cells~\cite{craver1998public}.}} -- an adversary who can only spy on the communication.
 \item \emph{Active warden} -- an adversary who can perform reasonable modifications to the stego-object, such as cropping the edges of an image.
 \item \emph{Malicious warden} -- an adversary who can significantly modify the payload or try to impersonate either party.
 \end{itemize}
-The term "warden" stems from earlier work that considered communicating prisoners, with the warden passing messages between cells~\cite{craver1998public}. This project is only concerned with passive wardens, so stego-videos are not expected to withstand resizing, transcoding, \emph{etc.}
+This project is only concerned with passive wardens, so stego-videos are not expected to withstand resizing, transcoding, \emph{etc.}
 
 Steganographic systems should avoid relying on so-called `security through obscurity', as it is just a matter of time before an adversary figures out how the system works. Effective systems satisfy \emph{Kerckhoffs' principle}\footnote{Which states that one should assume the system is known to the enemy, so ``security must lie only in the choice of key"~\cite{infohiding-survey}.} and employ a \emph{stego-key} which is assumed to be already shared between all parties. Schemes implemented in the project use it for two purposes:
 
@@ -279,21 +279,33 @@ This project implements both targeted and blind steganalysis methods against mot
 
 \section{Video steganography}
 
-The project uses MPEG video files as covers. The MPEG format should be explored in more detail to see whether the use of motion vectors for data hiding is feasible.
+The project uses the widely-used MPEG video files as covers. The MPEG format should be explored in more detail to see whether the use of motion vectors for data hiding is feasible.
 
 \subsection{Video encoding background}
 
-A video \emph{codec} (en\underline{co}der + \underline{dec}oder) is a program that takes a series of images (video frames) and compresses it into a single video file or vice versa \cite[sec.~3.1]{richardson2004h}. MPEG family of codecs is a popular choice for video compression.
+A video \emph{codec} (en\underline{co}der + \underline{dec}oder) is a program that takes a series of images (video frames) and compresses it into a single video file or vice versa \cite[sec.~3.1]{richardson2004h}.
 
-An MPEG video stream is represented by a series of interleaved frames: \emph{intra-frames}, which are encoded independently, and \emph{inter-frames}, which are encoded as differences from other frames. Inter-frames are further classified into \emph{P-} and \emph{B-frames}: P-frames encode an image by only looking at the predecessor frame, whereas B-frames consider both predecessor and successor frames (Figure~\ref{fig:ipb-seq})~\cite{crowcroft1999internetworking}. To simplify the implementation, from now on I will only consider P-frames, although, in principle, all methods should apply equally well to both types.
+An MPEG video stream consists of two types of frames:
+\begin{itemize}
+\item \emph{intra-frames} (I-frames) --- encoded independently,
+\item \emph{inter-frames} --- stored as a difference from other frames.
+\end{itemize}
+
+Inter-frames are further divided into two types~\cite{crowcroft1999internetworking} (Figure~\ref{fig:ipb-seq}):
+\begin{itemize}
+\item P-frames --- use only the previous frame as the baseline for difference measurement,
+\item B-frames --- use both the preceding and following frame for difference measurements. 
+\end{itemize}
+
+While the stenography methods involved in this project should be equally applicable to both types of inter-frame, in the interests of simplicity I will only be considering P-frames.
 
 \begin{figure}[tbh]
 \centerline{\includegraphics[width=0.7\textwidth, height=0.7\textheight, keepaspectratio]{img/IPB_images_sequence.png}}
-\caption{An example of interleaved intra- (I-), B- and P-frames representing a video stream. The encoder may choose a different sequence of frame types. Reproduced from~\cite{interframe-wiki}.}
+\caption{An example of interleaved I-, B- and P-frames representing a video stream. The encoder may choose a different sequence of frame types. Reproduced from~\cite{interframe-wiki}.}
 \label{fig:ipb-seq}
 \end{figure}
 
-During encoding, an inter-frame is partitioned into blocks of size 16-by-16 pixels\footnote{H.264 (the latest MPEG codec) allows higher granularity for fine details by allowing some blocks to be 8x8, 8x16 or 16x8.}. These blocks are called \emph{macroblocks}, and for each macroblock the encoder searches for its most similar match in a predecessor frame (within a bounded search window) \cite[p.~256]{richardson2004h}. The difference in pixels between the matched block and the original is called the \emph{prediction error}, and the displacement between the two is called the \emph{motion vector} (Figure~\ref{fig:mb-search}). For simplicity, we say that a block of pixels has moved since the predecessor frame by the amount specified by its motion vector and, in addition to motion, pixels themselves have changed according to the prediction error.
+During encoding, a P-frame is partitioned into a grid of "\emph{macroblocks}" of 16x16 pixels\footnote{H.264 (the latest MPEG codec) allows higher granularity for fine details by allowing some blocks to be 8x8, 8x16 or 16x8.}. For each macroblock, the encoder searches for its most similar match in the predecessor frame within a bounded region (search window)~\cite[p.~256]{richardson2004h}. The difference in pixels between the matched block and the original is called the \emph{prediction error}, and the displacement between the two is called the \emph{motion vector} (Figure~\ref{fig:mb-search}). We can say that a block of pixels has moved since the predecessor frame by the amount specified by its motion vector and, in addition to motion, pixels themselves have changed according to the prediction error.
 
 \begin{figure}[tbh]
 \centerline{\includegraphics[width=0.7\textwidth,height=0.7\textheight,keepaspectratio]
@@ -305,9 +317,9 @@ During encoding, an inter-frame is partitioned into blocks of size 16-by-16 pixe
 \subsection{Motion vectors as embedding space}
 \label{mv-emb-space}
 
-This project considers the least significant bit (LSB) steganography---in the binary representation of a value the LSB typically corresponds to the highest granularity level, so changing it is less likely to be noticed~\cite{bateman}.
+This project considers the least significant bit (LSB) steganography: a technique that exploits on the fact that in the binary representation of a value the LSB typically corresponds to the highest granularity level, so changes to the LSB are less likely to produce a noticeable difference in the output~\cite{bateman}.
 
-Computing motion vectors is a tradeoff between accuracy and computation time, tuned using the search window size. As such, codecs typically use an approximation instead of a globally optimal MV, resulting in a non-minimal prediction error \cite[p.~257]{richardson2004h}. While the MVs are encoded losslessly, the accuracy error allows minor changes to go unnoticed, making them suitable for LSB steganography.
+Computing motion vectors is a tradeoff between accuracy and computation time, tuned using the search window size. This means that codecs typically don't find a globally optimal motion vector, resulting in a non-minimal prediction error~\cite[p.~257]{richardson2004h}. Since this means a non-minimal prediction error is not unusual, applying LSB steganography to a motion vector (which would lead to a small prediction error change to preserve output integrity) is less likely to be noticed.
 
 To estimate the embedding capacity, we generalise how all implemented embedding schemes should operate on motion vectors. Suppose an embedding scheme processes every motion vector in a grid individually for every frame and has an associated selection function $f$ which provides a number of bits that can be embedded into a particular motion vector. Later on, this function will allow to conveniently define a MV selection criteria for different embedding schemes.
 
@@ -321,7 +333,7 @@ where $W$ and $H$ are width and height of the macroblock grid, P-frames$(V)$ is 
 
 \end{definition}
 
-To see whether videos could generally hold a non-negligible amount of hidden data, one can estimate $\mathcal{C}_{V, M}$ by taking a product of the number of P-frames, the total number of MVs per frame and the average number of bits embedded per MV. For instance, an average HD video could reasonably have 6--15 P-frames per second\footnote{Depends on how often the encoder decides to use B-frames and I-frames. P-frames are better for video streaming as they do not require the successor frame during decoding.} with 3600 MVs each\footnote{If video's resolution is 1280x720 (HD), 16x16 macroblocks would partition the frame into a grid of size 80x45. This gives 3600 macroblocks in total.}. Assuming only a quarter of each frame would contain embedded data, I estimate the channel's capacity to be 5.4--13 Kbits/s. Since videos contain audio tracks and a higher number of pixels (or DCT coefficients) than images, a video file is expect to have a higher embedding capacity than an audio file or an image.
+To see whether videos could hold a non-negligible amount of hidden data, one can estimate $\mathcal{C}_{V, M}$ by taking a product of the number of P-frames, the total number of MVs per frame and the average number of bits embedded per MV. For instance, an average HD video could reasonably have 6--15 P-frames per second\footnote{Depends on how often the encoder decides to use B-frames and I-frames. P-frames are better for video streaming as they do not require the successor frame during decoding.} with 3600 MVs each\footnote{If video's resolution is 1280x720 (HD), 16x16 macroblocks would partition the frame into a grid of size 80x45. This gives 3600 macroblocks in total.}. Assuming only a quarter of each frame would contain embedded data, I estimate the channel's capacity to be 5.4--13 Kbits/s, which is enough to hold large payloads. 
 
 \section{Requirements analysis}
 
@@ -364,26 +376,26 @@ The steganographic application requires modifying MPEG video files, which in tur
 
 Performing encryption prior to embedding requires using a cryptography library. I chose \emph{Crypto++}, a popular C++ cryptography library.
 
-The steganalysis suite was integrated into the Matlab scientific computation package for user's benefit, because it provides useful tools, such as statistical primitives, plotting capabilities and classifiers, without changing the environment. I chose Matlab  because of its widespread use and comprehensive functionality.
+The steganalysis suite was integrated into the Matlab scientific computation package for user's benefit, because it provides useful tools, such as statistical primitives, plotting capabilities and classifiers, without changing the environment. I chose Matlab because of its widespread use and comprehensive functionality.
 
 \subsection{Risk analysis}
-FFmpeg is a complex piece of software, mostly written in a style of C that sacrifices clarity for performance. A potential risk for the project was the difficulty of proper integration with FFmpeg and hence inability to access or reliably modify motion vectors. Complete failure to do so was unlikely, but it could have consumed a significant amount of development time. To mitigate this, some ``catch-up'' time was allocated in the project timetable.  
+FFmpeg is a complex piece of software, mostly written in a style of C that sacrifices clarity for performance. A potential risk for the project was the difficulty of proper integration with FFmpeg and hence inability to access or reliably modify motion vectors. Complete failure to do so was unlikely, but it could have consumed a significant amount of development time. To mitigate this, some ``catch-up'' time was allocated in the project timetable.   
 
 \subsection{Development choices}
 \begin{itemize}
 \item \emph{Git} was used for version control, allowing quick roll-back and managing multiple source trees using branches.
 \item \emph{Backups} were done by uploading the source tree and other relevant files to Dropbox. The git repository itself was hosted remotely on GitHub.
-\item \emph{Testing} was done both manually and using unit tests to verify that software performs as intended. As a good practice, compiler warnings were treated as errors. Unit tests were implemented using Google Test framework and also served as a regression test suite.
-\item \emph{Interative (spiral) development model} was used, which allowed continuously adding and testing new embedding schemes and steganalysis methods.
-\item Software components have a \emph{modular design}, which enabled better maintainability and testability, and well-defined interfaces allowed changing internal implementation without breaking compatibility with other components.
+\item \emph{Testing} was done both manually and using unit tests to verify that software performs as intended. As a good practice, compiler warnings were treated as errors. Unit tests were implemented using Google Test framework.
+\item \emph{The iterative (spiral) development model} was used, which allowed continuously adding and testing new embedding schemes and steganalysis methods.
+\item I aimed for \emph{modular design} of software components thoughout the development, which enabled better maintainability and testability, and well-defined interfaces allowed changing internal implementation without breaking compatibility with other components.
 \end{itemize}
 
 \section{Starting point}
-This project uses some cryptography concepts introduced in the Part IB \textit{Security I} course. I have had some C++ knowledge from past programming experience and the \textit{Programming in C and C++} course. 
+This project uses some cryptography concepts introduced in the Part IB \textit{Security I} course. I have some C++ knowledge from past programming experience and the \textit{Programming in C and C++} course. 
 
-Prior to submitting the proposal, I have familiarised myself with the general concepts of steganography and LSB embedding though some introductory texts and relevant papers, and looked at H.264 codec format.
+Prior to submitting the proposal, I familiarised myself with the basic concepts of steganography and LSB embedding though some introductory texts and relevant papers, and looked at the H.264 codec format.
 
-During the development of this project I made use of some material covered in the following Part II courses:
+During the development of this project I made use of material covered in the following Part II courses:
 \begin{itemize}
 \item \textit{Information Theory} --- channel capacity, error correcting codes;
 \item \textit{\LaTeX~and Matlab} --- typesetting and basics of Matlab;
@@ -392,7 +404,7 @@ During the development of this project I made use of some material covered in th
 
 \bigskip\bigskip
 \subsubsection*{Summary}
-This chapter summarised relevant theoretical and practical background necessary to start the implementation. The next chapter will cover the design and features of the system, implemented steganographic algorithms and steganalysis methods, together with some in-line evaluation.
+This chapter summarised the theoretical and practical background necessary to start the implementation. The next chapter will cover the design and features of the system, implemented steganographic algorithms and steganalysis methods, together with some in-line evaluation.
 
 % Implementation
 \cleardoublepage
@@ -405,21 +417,21 @@ This chapter summarised relevant theoretical and practical background necessary 
 \subsection{Integration with FFmpeg}
 \label{integrate-ffmpeg}
 
-The project requires modifying MPEG files, so, as discussed in section \ref{tech-choices}, FFmpeg is used to provide this functionality. Finding a suitable way to integrate with FFmpeg was one of the biggest challenges that the project faced early on. FFmpeg is split into several libraries, each with a dedicated purpose such as stream multiplexing, resampling, or supporting I/O devices. The most suitable library for my purposes with was \texttt{libavcodec} which implements various audio and video codecs. Due to its popularity, I decided to focus on H.264, which FFmpeg offloads to a separate library: \texttt{libx264}. While \texttt{libavcodec} exposes an API for running the codecs it provides, it provides no way to manipulate motion vectors. As such, \texttt{libavcodec} needed modifying to either introduce an additional API or to have it call my steganographic routines itself.
+As discussed in section \ref{tech-choices}, FFmpeg is used to modify MPEG videos. Finding a suitable way to integrate with FFmpeg was one of the biggest early challenges encountered early on. FFmpeg comprises several smaller libraries, each responsible for tasks such as stream multiplexing, resampling, or supporting I/O devices. The most suitable library for my purposes with was \texttt{libavcodec} which implements various audio and video codecs. Due to its popularity, I decided to focus on H.264, which FFmpeg offloads to a separate library: \texttt{libx264}. Although \texttt{libavcodec} exposes an API for interacting with its codecs, this API provides no way to manipulate motion vectors. As such, \texttt{libavcodec} needed modifying to either introduce an additional API or to have it call my steganographic routines itself.
 
-Initially, I looked for a point in the macroblock search phase where motion vectors would already be available, but the prediction error would not have been computed yet. This would allow modification of MVs without any visual footprint because prediction error would have brought the pixels to their required values regardless of the motion vector's value. However, since both FFmpeg and \texttt{libx264} exhibit complex data flow, and are written in optimised C, analysis proved more difficult than anticipated, producing a 4 week delay compared to the original timeline. To address this, the plan was changed to:
+Initially, I looked for a point in the macroblock search phase where motion vectors would already be available, but the prediction error would not have been computed yet. This would allow modification of MVs without the need to also update the prediction error to preserve the video output. Unfortunately, since both FFmpeg and \texttt{libx264} exhibit complex data flow, and are written in optimised C, analysis proved more difficult than anticipated, delaying the project by four weeks compared to the initial timeline. The plan was then changed to:
 \begin{itemize}
 \item Use a codec contained within \texttt{libavcodec}, obviating the need to touch \texttt{libx264}. I chose MPEG-4 Part 2 (\texttt{xvid}), H.264's popular predecessor.
 \item Focus on modifying motion vectors, because it is essential to the project. The macroblock search is deep within the encoding pipeline, making it less amenable to modification. Instead, I chose to modify motion vectors before they are written to the output file.
 \end{itemize}
 
-However, this leaves prediction errors unmodified. To evaluate how much this affects the system, an experiment on human subjects was conducted to determine if this visual footprint is noticeable. This is further discussed in section \ref{exp-human-subj}.
+Unfortunately, changing the motion vectors so late in the process means the prediction error has been calculated for the original motion vector, not the modified one. This means the steganography will (very slightly) alter the result of decoding the video. An experiment on human subjects was conducted to determine if this visual footprint is noticeable. This is further discussed in section \ref{exp-human-subj}.
 
 \subsection{Steganography library}
 
 \subsubsection{C API}
 
-To achieve a modular design and decouple from FFmpeg, the implemented steganographic algorithms were separated into a standalone library \texttt{movestlib}\footnote{\texttt{movest} (\underline{mo}tion \underline{ve}ctor \underline {st}eganography) is the codename for this project.}. The library is implemented in C++, exposing a C API for integration with FFmpeg, and encoder and decoder applications (Figure \ref{fig:movest-c-api}). The exact operation of these methods is described in section \ref{enc-dec-bin} using these applications as examples.
+To achieve a modular design and decouple from FFmpeg, the implemented steganographic algorithms were separated into a standalone library \texttt{movestlib}\footnote{\texttt{movest} (\underline{mo}tion \underline{ve}ctor \underline {st}eganography) is the codename for this project.}. The library is implemented in C++, exposing a C API for integration with the encoder and decoder applications, and FFmpeg (Figure \ref{fig:movest-c-api}). To simplify the integration, FFmpeg calls library methods directly. The exact operation of these methods is described in section \ref{enc-dec-bin} using the encoder and decoder as examples.
 
 \begin{figure}[tbh]
 \centering
@@ -441,7 +453,7 @@ A singleton instance of an embedding algorithm is kept active after initialisati
 
 \subsubsection{Class hierarchy}
 
-To encourage modularity and code reuse, the embedding algorithms were implemented as OOP classes. The class hierarchy is presented in Figure \ref{fig:movest_alg_class_diag}. \texttt{Algorithm} is the base class for all embedding algorithms, containing common functionality such as initialising the payload file or operating on every motion vector of a suitable type in turn. Most algorithms, however, extend \texttt{HideSeek} or its subclasses to benefit from the following more specific functionality:
+To encourage modularity and code reuse, the embedding algorithms were implemented as OOP classes. The class hierarchy is presented in Figure \ref{fig:movest_alg_class_diag}. \texttt{Algorithm} is the base class for all embedding algorithms, containing common functionality such as initialising the payload file or operating on every motion vector of a suitable type. Most algorithms, however, extend \texttt{HideSeek} or its subclasses to benefit from the following more specific functionality:
 
 \begin{itemize}
 \item Operating on a per-component basis. Motion vectors are stored as $x$ and $y$ components and many algorithms treat them independently (\texttt{RandomisedHideSeek, OutGuess1}).
@@ -451,13 +463,13 @@ To encourage modularity and code reuse, the embedding algorithms were implemente
 
 \subsubsection{Encryption}
 \label{encryption}
-Encrypting the payload hides the structure of the data by making it indistinguishable from random noise, making it hard to detect in already-noisy regions, as well as causing it to remain unreadable by an adversary even if steganography was broken. \texttt{movestlib} achieves this by implementing a file-like object for accessing the payload, and encrypting or decrypting the data on the fly (\texttt{MOVEST\_ENCRYPTION} flag). Encryption is done using AES in counter (CTR) mode with a 256-bit key. The key and the initialisation vector are derived from the user-supplied password by performing key stretching using the industry-standard PBKDF2-HMAC-SHA1 key derivation function. Since implementing cryptographic primitives yourself is potentially error-prone, the Crypto++ library was used to provide them. 
+Encrypting the payload hides the structure of the data by making it indistinguishable from random noise. This makes it hard to detect in already-noisy regions of the cover, as well as causing it to remain unreadable by an adversary even if the steganography was broken. \texttt{movestlib} achieves this by implementing a proxy object for accessing the payload, and encrypting or decrypting the data on the fly (\texttt{MOVEST\_ENCRYPTION} flag). Encryption is done using AES in counter (CTR) mode with a 256-bit key, using the Crypto++ library (since implementing your own cryptography primitives is time consuming and error prone). The key and the initialisation vector are derived from the user-supplied password by performing key stretching using the industry-standard PBKDF2-HMAC-SHA1.
 
 \subsection{Encoder and decoder applications}
 \label{enc-dec-bin}
-The project provides video-processing applications for embedding and recovering the payload from a video file. The two are largely based on FFmpeg examples for transcoding (\texttt{transcoding.c}) and motion vector extraction (\texttt{extract\_mvs.c}), which already contain the code to trigger code paths in FFmpeg that I have modified. Figure \ref{fig:encoder-help} provides an example of options available for the embedding application (encoder).
+The project provides video-processing applications for embedding and recovering the payload from a video file. They are largely based on FFmpeg examples for transcoding (\texttt{transcoding.c}) and motion vector extraction (\texttt{extract\_mvs.c}), which already contain the code to trigger code paths in FFmpeg that I have modified. Figure \ref{fig:encoder-help} provides an example of options available for the embedding application (encoder).
 
-Before letting FFmpeg process the video, applications parse user input to initialise \texttt{movestlib} with required data, such as the embedding algorithm (\texttt{movest\_init\_algorithm}), the payload file path, and the encryption password (\texttt{movest\_init\_encoder/decoder}). FFmpeg treats sequences of frames as streams, meaning frames are written to the output file sequentially and it is not possible to access a previous or future frame during the embedding process. Algorithms that require estimating certain parameters, such as the embedding capacity of a video, have to make all these decisions in advance. To facilitate this, the encoder performs a dry run (\texttt{MOVEST\_DUMMY\_PASS} flag) which does not modify the motions vectors, in order to collect useful data.
+Before letting FFmpeg process the video, applications parse user input to initialise \texttt{movestlib} with required data, such as the embedding algorithm (\texttt{movest\_init\_algorithm}), the payload file path, and the encryption password (\texttt{movest\_init\_encoder/decoder}). Some of the steganography algorithms need to determine global properties---such as the embedding capacity---of the video in order to operate on it. Since FFmpeg processes the video as a stream, historical frames are not available, and making it behave otherwise would involve storing the entire video stream in memory. So, the encoder performs a dry run (\texttt{MOVEST\_DUMMY\_PASS} flag) to compute global video properties, before running a second pass to perform the actual embedding.
 
 \begin{figure}[tbh]
 \vspace{1em}
@@ -497,13 +509,13 @@ The steganalysis techniques for this project were implemented in Matlab, where t
 \subsection{Motion vector import}
 \label{mv-import}
 
-The decoder application can be configured to use a special algorithm \texttt{DumpMvs} which outputs motion vector components in a simple text format. Matlab can later import this data as 3D matrices (\texttt{loadmvs.m}), where the element at $(i, j, k)$ refers to a macroblock at $i$-th row, $j$-th column of the $k$-th frame. 
+The Movest decoder can be configured to use a special algorithm \texttt{DumpMvs} which outputs motion vector components in a human-readable text format that can later be imported to Matlab as a 3D matrix (\texttt{loadmvs.m}) in which the element at $(i, j, k)$ refers to a macroblock at $i$-th row, $j$-th column of the $k$-th frame. 
 
-The codec allows for some macroblocks to be omitted. These are called ``skip'' macroblocks, to which the Movest decoder assigns a special type during extraction. In this case, for the sake of completeness of the grid, FFmpeg reports the motion vector being $(0, 0)$, but a user can filter out such stray zeros by using type information (\texttt{typedmvs.m}).
+FFmpeg may choose to omit some macroblocks to save space by marking them as ``skipped'', causing the decoder to infer the motion from neighbouring blocks~\cite{tourapis2004direct}. For the sake of completeness of the macroblock grid, FFmpeg reports an MV of $(0, 0)$ for a skip macroblock. The Movest decoder stores metadata for such macroblocks allowing them to be ignored during later processing (\texttt{typedmvs.m}).
 
 \subsection{LSB plane, 2D plotting and aggregation into bytes}
 
-This project implements Least Significant Bit (LSB) steganography, so the suite includes a function (\texttt{lsbplane.m}) to project least significant bits out of every motion vector component value. If the embedding algorithm sets the LSBs of motion vectors to exactly payload bits, LSBs can be immediately subjected to visual analysis to reveal any patterns in the data. This is best illustrated by an example.
+This project implements the Least Significant Bit (LSB) steganography, so the suite includes a function (\texttt{lsbplane.m}) to project least significant bits out of every motion vector component value. If the embedding algorithm sets the LSBs of motion vectors to exactly payload bits, LSBs can be immediately subjected to visual analysis to reveal any patterns in the data. This is best illustrated by an example.
 
 \begin{figure}[tbh]
 \centerline{\includegraphics{img/unencrypted-enc.eps}}
@@ -706,7 +718,7 @@ All of the previous algorithms share a common property: they embed the payload d
 
 \emph{Randomised Hide \& Seek}~\cite{bateman} is a modification of Hide \& Seek algorithm which uses a PRNG to scatter payload bits uniformly across all motion vector components in the video. A simple way to implement this is by choosing an MV component for every payload bit at random, navigating to the chosen frame and embedding data into the chosen component. However, the stream-oriented nature of FFmpeg makes it impossible to switch between frames in this way. To work around this problem, I chose to build a map which assigns every payload bit to a particular (unique) motion vector component ahead of time. This requires knowing the maximum capacity, which is obtained by performing a ``dry run'' beforehand. 
 
-Committing to use a particular motion vector caused an interesting implementation issue. As mentioned in \ref{mv-import}, FFmpeg may choose to omit some macroblocks to save space by marking them as ``skipped'', causing the decoder to infer the motion from neighbouring blocks~\cite{tourapis2004direct}. Changing motion vectors in one P-frame affects which macroblocks are skipped in the following frame. This issue arises when the macroblock pointed to by the mapping gets skipped. I considered three options to mitigate this issue:
+Committing to use a particular motion vector caused an interesting implementation issue. As explained in \ref{mv-import}, FFmpeg can omit some macroblocks by marking them as ``skipped''. Changing motion vectors in one P-frame affects which macroblocks are skipped in the following frame. This issue arises when the macroblock pointed to by the mapping gets skipped. I considered three options to mitigate this issue:
 \begin{itemize}
 \item Further analyse FFmpeg to be able to reliably predict when ``skipping'' happens. This, however, would imply spending a significant amount of time on a side issue.
 \item Dynamically rebuild the map as data gets embedded. This is a reasonable solution, but will make the algorithm significantly more complex.
