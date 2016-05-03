@@ -26,11 +26,11 @@ ExternalProject_Add(ffmpeg_proj DEPENDS movestlib
             mkdir -p ${FFMPEG_DIR}/lib &&
             cp ${MOVESTLIBSRC_DIR}/movest_connector.h ${FFMPEG_DIR}/include/movest &&
             cp ${MOVESTLIB_DIR}/libmovestlib.so ${FFMPEG_DIR}/lib &&
-            <SOURCE_DIR>/configure
+            env LD_PRELOAD=${MOVESTLIB_DIR}/libmovestlib.so <SOURCE_DIR>/configure
             --prefix=<BINARY_DIR>
             --extra-cflags=-I<BINARY_DIR>/include
             --extra-ldflags=-L<BINARY_DIR>/lib
-            --extra-libs=-lmovestlib
+            --extra-libs=-lmovestlib\ -lpthread
             --enable-gpl
             --enable-nonfree
             --enable-libfdk-aac
