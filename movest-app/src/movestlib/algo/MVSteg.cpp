@@ -28,7 +28,7 @@ void MVSteg::embedIntoMv(int16_t *mvX, int16_t *mvY) {
     if(stopEmbedding) return;
 
     int bit = symb[index / 8] >> (index % 8);
-    bool success = doEmbedding(mvX, mvY, bit);
+    bool success = doEmbedding(mvX, mvY, bit & 1);
     if(!success) return;
 
     index++;

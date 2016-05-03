@@ -23,7 +23,7 @@ void HideSeek::embedIntoMv(int16_t *mvX, int16_t *mvY) {
 
 void HideSeek::processMvComponentEmbed(int16_t *mv) {
     if(stopEmbedding) return;
-    bool success = embedIntoMvComponent(mv, symb[index / 8] >> (index % 8));
+    bool success = embedIntoMvComponent(mv, (symb[index / 8] >> (index % 8)) & 1);
     if(success) {
         ++index;
         ++bitsProcessed;
