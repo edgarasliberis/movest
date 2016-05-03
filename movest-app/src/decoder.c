@@ -223,14 +223,14 @@ int main(int argc, char **argv)
                     av_log(NULL, AV_LOG_ERROR, "-c/--capacity requires a positive integer as an argument.\n");
                     return 1;
                 }
-                capacity = (uint32_t) atoi(optarg); // TODO: fix
+                capacity = (uint32_t) atoi(optarg);
                 break;
             case 'f':
                 if(!optarg || atoi(optarg) <= 0) {
                     av_log(NULL, AV_LOG_ERROR, "-f/--file-size output file size in bytes as an argument.\n");
                     return 1;
                 }
-                file_size = (uint32_t) atoi(optarg); // TODO: fix
+                file_size = (uint32_t) atoi(optarg);
                 break;
             case 'h':
                 av_log(NULL, AV_LOG_INFO, "MOVEST Decoder, (c) 2016\n"
@@ -281,10 +281,10 @@ int main(int argc, char **argv)
     av_log(NULL, AV_LOG_INFO, "Output file: %s\n", data_file);
     av_log(NULL, AV_LOG_INFO, "Algorithm: %s\n", algorithm);
     av_log(NULL, AV_LOG_INFO, "Crypto: %s\n", encrypt_flag ? "ON" : "OFF");
-    if(strcmp(algorithm, "rand-hideseek") == 0 || strcmp(algorithm, "outguess1") == 0) {
+    if(strcmp(algorithm, "rand-hidenseek") == 0 || strcmp(algorithm, "outguess1") == 0) {
         if(!password) {
-            av_log(NULL, AV_LOG_ERROR, "You must provide a password for this algorithm. Use -p/--password. \n");
-            return 1;
+            av_log(NULL, AV_LOG_INFO, "Password is required by the algorithm. Using default.\n");
+            password = "MovestDefaultPassword";
         }
         if(capacity == 0) {
             av_log(NULL, AV_LOG_ERROR, "You must provide capacity parameter that encoder used. Use -c/--capacity. \n");
