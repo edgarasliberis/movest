@@ -85,6 +85,9 @@
   {\bfseries\hfill\contentspage}% <filler-page-format>
   []
 
+\usepackage[labelfont=bf,width=0.9\textwidth]{caption}
+\usepackage{emptypage}
+
 %% Some useful macros
 \newcommand{\arr}{\textrightarrow\ }
 \newcommand{\textsb}[1]{\textsf{\textbf{#1}}}
@@ -180,7 +183,7 @@ I, Edgaras Liberis of Homerton College, being a candidate for Part II of the Com
 
 \emph{Steganography} is the art of concealing information within ostensibly innocent carrier data~\cite[p.~3]{fridrich}, usually with the intention of creating a covert channel. Its applications include bypassing government censorship, avoiding law enforcement or military intelligence, and other situations in which detection of the communication may be harmful to the communicating parties (such as by revealing their location~\cite{infohiding-survey}). 
 
-In recent years, steganography research has explored the use of mainstream digital media formats as the carrier data for hidden messages. These formats often exhibit a significant degree of redundancy which provides opportunities for payload concealment~\cite[p.~2]{fridrich}. Since multimedia formats have become so widespread online, their use is now unremarkable and unlikely to raise suspicion.
+Steganography research has explored the use of mainstream digital media formats as the carrier data for hidden messages. These formats often exhibit a significant degree of redundancy which provides opportunities for payload concealment~\cite[p.~2]{fridrich}. Since multimedia formats have become so widespread online, their use is now unremarkable and unlikely to raise suspicion.
 
 By hiding data in regions of a file that are highly tolerant to small modifications or noise, the likelihood of detection can be significantly reduced. This concept led to the development of the common \emph{least-significant-bit (LSB) embedding}~\cite{bateman}\label{lsb-steg} technique, which uses the least significant bit of each data element (such as the colour channels in an image pixel) to store the payload.
 
@@ -196,11 +199,11 @@ Traditionally, image steganography has received more research attention than vid
 Bateman reviews the evolution of LSB-based embedding algorithms~\cite{bateman}. Simple strategies such as changing the intensity of every pixel are destroyed by the lossiness of image compression when an image is recompressed. One approach for solving this was to modify JPEG DCT coefficients\footnote{
 One of the main compression techniques that JPEG uses is \emph{Discrete Cosine Transform (DCT)}, which is similar to the Fourier Transform. A relatively small number of coefficients is enough to reconstruct an image with sufficient quality. Those coefficients are insensitive to small changes, making them suitable for data embedding.} instead: since these are stored directly in the compressed file, they are not subject to the same lossiness as the pixel values themselves~\cite{jpegdctcoding}. Other approaches improve on this by preserving statistical properties that ``clean'' images would possess~\cite{bateman, f5} (further discussed in \ref{emb-alg}). Similarly to this project, Williams~\cite{scott-fs} applies these image steganography techniques to videos by considering uncompressed videos as series of JPEG-encoded frames.
 
-Other researchers explored motion vector-specific steganography. Xu \emph{et al.}~\cite{xu2006steganography} use the phase of an MV ($\tan^{-1}(\frac{y}{x})$) to determine which of the $x$ or $y$ component will carry a single bit of payload data (see section \ref{xu-alg}). An interesting, non-LSB approach is proposed by Fang \emph{et al.}~\cite{fang2006data}: find an alternative motion vector whose phase will be in a particular quadrant. This restriction to one out of four quadrants conveys 2 bits of information per MV.
+Other researchers explored motion vector-specific steganography. Xu \emph{et al.}~\cite{xu2006steganography} use the phase of a motion vector ($\tan^{-1}(\frac{y}{x})$) to determine which of the $x$ or $y$ component will carry a single bit of payload data (see section \ref{xu-alg}). An interesting, non-LSB approach is proposed by Fang \emph{et al.}~\cite{fang2006data}: find an alternative motion vector whose phase will be in a particular quadrant. This restriction to one out of four quadrants conveys 2 bits of information per motion vector (MV).
 
 One of the main deliverables of this project is a simple tool for doing MV-based steganography. Popular existing steganography tools, such as MSU StegoVideo\footnote{\url{http://www.compression.ru/video/stego_video/index_en.html}} or OpenPuff\footnote{\url{http://embeddedsw.net/OpenPuff_Steganography_Home.html}} do not implement MV steganography, so they will not be discussed further. The only implementation of MV steganography that I was able to find is James Ridgway's \emph{Steganosaurus}~\cite{steganosaurus}. It modifies the first (top left) motion vector of every frame, severely limiting embedding capacity and increasing the ease of detection (as the location of the modified MV is known).
 
-Many novel steganalysis methods exploited motion vector-specific properties to detect the secret payload. A common strategy in these methods is to develop a system to extract certain statistical features from videos and use them to train a classifier. Xu \emph{et al.}~\cite{xu2013video} propose building a set of vector algebra constraints between MVs across several frames for this purpose. Deng \emph{el al.}~\cite{deng2012digital} observes that neighbouring MVs often have the same motion vectors, so an abnormal MV can be spotted. Surprisingly, Cao \emph{et al.}~\cite{cao2012video} argues that simply transcoding\footnote{Unpacking a video into a sequence of images and recompressing it back again.} reverts a significant fraction of the MVs to their original values, exposing the hidden payload (see section \ref{rev-tech}).
+Many novel steganalysis methods exploited motion vector-specific properties to detect the secret payload. A common strategy in these methods is to develop a system to extract certain statistical features from videos and use them to train a classifier. Xu \emph{et al.}~\cite{xu2013video} propose building a set of vector algebra constraints between MVs across several frames for this purpose. Deng \emph{el al.}~\cite{deng2012digital} observes that neighbouring areas often have the same motion vectors, so an abnormal MV can be spotted. Surprisingly, Cao \emph{et al.}~\cite{cao2012video} argues that simply transcoding\footnote{Unpacking a video into a sequence of images and recompressing it back again.} reverts a significant fraction of the MVs to their original values, exposing the hidden payload (see section \ref{rev-tech}).
 
 \subsection*{Outline of the rest of the document}
 \begin{itemize}
@@ -214,7 +217,7 @@ Many novel steganalysis methods exploited motion vector-specific properties to d
 \cleardoublepage
 \chapter{Preparation}
 
-\textit{This chapter presents the theory behind steganography and steganalysis in more detail, covers relevant video encoding principles, and makes the case for using motion vectors to do video steganography. This is followed by a discussion about the project's software deliverables, formal requirements, existing libraries and tools leveraged, risk analysis, workflow and starting point.}
+\textit{This chapter presents the theory behind steganography and steganalysis in more detail, covers relevant video encoding principles, and makes the case for using motion vectors to do video steganography. This is followed by a discussion of software deliverables, formal requirements, existing libraries and tools leveraged, risk analysis, workflow and starting point.}
 
 \section{Steganography background}
 
@@ -298,7 +301,7 @@ While the stenography methods involved in this project should be equally applica
 
 \begin{figure}[tbh]
 \centerline{\includegraphics[width=0.7\textwidth, height=0.7\textheight, keepaspectratio]{img/IPB_images_sequence.png}}
-\caption{An example of interleaved I-, B- and P-frames representing a video stream. The encoder may choose a different sequence of frame types. Reproduced from~\cite{interframe-wiki}.}
+\caption{An example of interleaved I-, B- and P-frames representing a video stream. The encoder may choose a different sequence of frame types. Figure reproduced from ``Inter frame'', Wikipedia~\cite{interframe-wiki}.}
 \label{fig:ipb-seq}
 \end{figure}
 
@@ -348,7 +351,7 @@ Below is a list of requirements for both deliverables, prioritised using \emph{M
 \item (M) Ability to access motion vectors of an MPEG video file.
 \item (M) Ability to reliably embed data within motion vectors.
 \item (M) Multiple LSB embedding techniques.
-\item (M) User-friendly binaries to perform embedding and extraction.
+\item (M) User-friendly (CLI) binaries to perform embedding and extraction.
 \item (S) Encryption of the secret message prior to embedding.
 \item (S) Integration with an existing video codec.
 \end{itemize}
@@ -371,7 +374,7 @@ Below is a list of requirements for both deliverables, prioritised using \emph{M
 
 The steganographic application requires modifying MPEG video files, which in turn requires parsing the format of a file, modifying motion vector values, and repackaging the data back into a playable video. Developing a codec does not relate to steganography and is potentially error-prone, so I leverage an existing set of codecs---\texttt{FFmpeg}\footnote{\url{https://www.ffmpeg.org/}}---to achieve this. As codecs are typically written in C or C++, it is a natural choice for this task to and makes the integration easier.
 
-Performing encryption prior to embedding requires using a cryptography library. I chose \emph{Crypto++}, a popular C++ cryptography library.
+Performing encryption prior to embedding requires using a cryptographic library. I chose \emph{Crypto++}, a popular C++ cryptography library.
 
 The steganalysis suite was integrated into the \emph{Matlab} scientific computation package for user's benefit, because it provides useful tools, such as statistical primitives, plotting capabilities and classifiers, without changing the environment. I chose Matlab because of its widespread use and comprehensive functionality.
 
@@ -441,6 +444,7 @@ A singleton instance of an embedding algorithm is kept active after initialisati
 
 \begin{figure}[!htbp]
 \centering
+\captionsetup{width=\textwidth}
 \includegraphics[width=\textwidth]{img/movest_alg_class_diag.pdf}
 \caption{UML diagram of embedding algorithms implemented in \texttt{movestlib}. (Some unimportant fields, methods and method parameters omitted for brevity.)}
 \label{fig:movest_alg_class_diag}
@@ -458,7 +462,7 @@ To encourage modularity and code reuse, the embedding algorithms were implemente
 
 \subsubsection{Encryption}
 \label{encryption}
-Encrypting the payload hides the structure of the data by making it indistinguishable from random noise. This makes it hard to detect in already-noisy regions of the cover, as well as causing it to remain unreadable by an adversary even if the steganography was broken. \texttt{movestlib} achieves this by implementing a proxy object for accessing the payload, and encrypting or decrypting the data on the fly (\texttt{MOVEST\_ENCRYPTION} flag). Encryption is done using AES in counter (CTR) mode with a 256-bit key, using the Crypto++ library (since implementing your own cryptography primitives is time consuming and error prone). The key and the initialisation vector are derived from the user-supplied password by performing key stretching using the industry-standard PBKDF2-HMAC-SHA1.
+Encrypting the payload hides the structure of the data by making it indistinguishable from random noise. This makes it hard to detect in already-noisy regions of the cover, as well as causing it to remain unreadable by an adversary even if the steganography was broken. \texttt{movestlib} achieves this by implementing a proxy object for accessing the payload, and encrypting or decrypting the data on the fly (\texttt{MOVEST\_ENCRYPTION} flag). Encryption is done using AES in counter (CTR) mode with a 256-bit key, using the Crypto++ library (since implementing your own cryptography primitives is time consuming and error prone). The key and the initialisation vector are derived from the user-supplied password using the industry-standard PBKDF2-HMAC-SHA1 key derivation function~\cite{kaliski2000rfc}.
 
 \subsection{Encoder and decoder applications}
 \label{enc-dec-bin}
@@ -548,7 +552,7 @@ We can use the \emph{$\chi^2$ (chi-square) test} to check the hypothesis that th
 
 $$ \chi^2_{n-1} \approx \sum^{n}_{k=0} \frac{(\text{observed}_k - \text{expected}_k)^2}{\text{expected}_k}= \sum^{255}_{k=-255} \frac{(X_k - Z_k)^2}{Z_k} $$ 
 
-from which we can obtain the $p$-value of data supporting the null hypothesis. $1 - p$ is interpreted as the probability that the cover contains the payload:
+from which we can obtain the $p$-value of data supporting the null hypothesis. $1 - p$ is interpreted as the probability that the cover contains the payload~\cite{westfeld1999attacks}:
 
 $$ \mathbb{P}\text{(stego-video)} = 1 - \frac{1}{2^{\frac{n-1}{2}}\Gamma(\frac{n-1}{2})}\int_0^{\chi^2_{n-1}}t^{\frac{n-1}{2}−1}e^{-t/2}dt $$  
 
@@ -613,6 +617,7 @@ Figure \ref{fig:msteg-visual} shows that MSteg performs better when subjected to
 \centering
 \begin{minipage}[t]{.4\textwidth}
   \centering
+  \captionsetup{width=\textwidth}
   \includegraphics[scale=0.8]{img/msteg-visual.eps}
   \caption{LSB plane of the frame subjected to MSteg embedding.}
   \label{fig:msteg-visual}
@@ -620,6 +625,7 @@ Figure \ref{fig:msteg-visual} shows that MSteg performs better when subjected to
 \quad\quad
 \begin{minipage}[t]{.45\textwidth}
   \centering
+  \captionsetup{width=\textwidth}
   \includegraphics[scale=0.84]{img/chisq-attack.eps}
   \caption{An example of probability of embedding computed by the $\chi^2$ attack when embedding was done at 58\% of capacity.}
   \label{fig:chisq-attack}
@@ -718,7 +724,7 @@ Committing to use a particular motion vector creates a new problem. As explained
 \item Use an error correcting code to reconstruct the missing bits. This saves considerable effort, and adds some robustness against tampering, but also increases the payload size due to inclusion of the correction bits.
 \end{itemize}
 
-I went with the third option. I chose the widely-used Reed-Solomon~\cite{clarke2002reed} error correcting code, implemented by the \texttt{rscode}\footnote{\url{http://rscode.sourceforge.net/}} library, which operates at a byte-level granularity. Measurements showed that bit errors occur every 400--700 bytes. My default configuration generously specifies 16 error correction (parity) bytes per 239 bytes of data\footnote{The library limits the size of a data block plus a number of parity bytes to 255.}, but it can be adjusted if required. This arrangement is extremely unlikely to fail,\footnote{Assuming that the rate at which errors occur has a normal distribution with mean 550 and variance 150 (in line with the estimate above of 1 error every 400--700 bytes), the probability of a failure is 0.0000065. The user can verify that the data can be extracted correctly before transmitting the video.} as it allows correcting up to any 8 incorrect bytes per 239 bytes of payload data.
+I went with the third option. I chose the widely-used Reed-Solomon~\cite{clarke2002reed} error correcting code, implemented by the \texttt{rscode}\footnote{\url{http://rscode.sourceforge.net/}} library, which operates at a byte-level granularity. Measurements showed that bit errors occur every 400--700 bytes. My default configuration generously specifies 16 error correction (parity) bytes per 239 bytes of data\footnote{The library limits the size of a data block plus a number of parity bytes to 255.}, but it can be adjusted if required. This arrangement is extremely unlikely to fail,\footnote{Assuming that the rate at which errors occur has a normal distribution with mean 550 and variance 150 (in line with the estimate above of 1 error every 400--700 bytes), the probability of a failure is $6.5 \cdot 10^{-6}$. The user can verify that the data can be extracted correctly before transmitting the video.} as it allows correcting up to any 8 incorrect bytes per 239 bytes of payload data.
 
 Extracting the data using this algorithm requires the receiving party's PRNG to output the same sequence of values as the sender's. This is achieved by seeding both sender's and receiver's PRNGs to the same 128-bit value, derived from the user-specified encryption password (in the same way as the encryption key, see \ref{encryption}). Due to the way key derivation functions work, it is impossible to recover the password or the encryption key given only the seed. The receiving party also has to know a bound for the embedding capacity of a video and the embedded file size, but these can be pre-agreed.
 
@@ -759,11 +765,11 @@ The two algorithms---the original and my modification---are compared in the Eval
 
 \section{Testing}
 
-In addition to manual testing, unit tests were written to test the implementation. I used the popular Google Test framework\footnote{\url{https://github.com/google/googletest}} to implement small and maintainable tests for my C/C++ code. Components of the system are tested independently via their public interfaces.
+In addition to manual testing, unit tests were written to test the implementation. I used the popular Google Test framework~\cite{googletest} to implement small and maintainable tests for my C/C++ code. Components of the system are tested independently via their public interfaces.
 
 Tests cover:
 \begin{itemize}
-\item Encrypted file access --- ensures that data is correctly encrypted and decrypted during reads and writes, when enabled. Tests use the NIST-recommended AES-CTR test vectors\footnote{\url{http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf}, Appendix F, Sect. 5.5}.
+\item Encrypted file access --- ensures that data is correctly encrypted and decrypted during reads and writes, when enabled. Tests use the NIST-recommended AES-CTR test vectors~\cite[Appendix F, Sect. 5.5]{dworkin2001nist}.
 \item Embedding algorithms --- ensure algorithms correctly modify and extract data from motion vectors, including typical edge cases for each algorithm.
 \item C API (automated integration test) --- ensure the whole steganography library can be successfully used though the API. Tests initialise the library, simulate FFmpeg calls and verify the results.
 \end{itemize}
@@ -797,7 +803,7 @@ The steganalysis suite provides, in Matlab, facilities for extracting and proces
 \item \texttt{lsbplane}, \texttt{plot2d} --- extraction and visualisation of the LSB plane;
 \item \texttt{aggregateIntoBytes}, \texttt{seqbytes} --- groups extracted bits into bytes;
 \item \texttt{mvhist} --- pre-adjusted histogram to view motion vector data (like in Figure \ref{fig:histogram-example});
-\item \texttt{chiSquareAttack} --- compute the embedding probability in the first 1-100\% of the data;
+\item \texttt{chiSquareAttack} --- compute the embedding probability in the first 1--100\% of the data;\\
 \item \texttt{patternSearch} --- find the most likely locations of the pattern in the data;
 \item \texttt{known-attacks/} --- examples attacks on implemented algorithms;
 \item \texttt{*svmtraining} --- reversion technique SVM training scripts;
@@ -841,6 +847,7 @@ Xu \emph{et al.} also suggest embedding the same chunk of payload data four time
 \centering
 \begin{minipage}[t]{.45\textwidth}
   \centering
+  \captionsetup{width=\textwidth}
   \includegraphics[scale=0.9]{img/4xembed.eps}
   \caption{Positions of repeated embedding. Lower bar corresponds to an inexact match.}
   \label{fig:4xembed}
@@ -848,6 +855,7 @@ Xu \emph{et al.} also suggest embedding the same chunk of payload data four time
 \quad
 \begin{minipage}[t]{.45\textwidth}
   \vspace{-5.14em}
+  \captionsetup{width=\textwidth}
   \begingroup
     \fontsize{11pt}{12pt}\selectfont
     \centering
@@ -873,7 +881,7 @@ The reversion technique (see section \ref{rev-tech-theory}) considers difference
 
 For each embedding algorithm, the training and evaluation is done as follows:
 \begin{itemize}
-\item To generate the initial dataset of videos, Movest's encoder is used to embed random data into the 28 stego videos at their full capacity. The remaining 28 non-stego videos are also passed though the encoder without embedding data.
+\item To generate the initial dataset of videos, Movest's encoder is used to embed random data into the 28 stego-videos at their full capacity. The remaining 28 non-stego videos are also passed though the encoder without embedding data.
 \item To obtain transcoded videos, all previously created videos are passed through the encoder again, letting FFmpeg recompute motion vectors.
 \item Motion vectors are extracted from both sets of videos.
 \item Motion vector data is imported into Matlab and frequencies of SAD values are computed using the steganalysis suite's \texttt{computeSadFreqs.m} function.
