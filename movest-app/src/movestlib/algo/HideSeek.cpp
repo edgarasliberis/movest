@@ -76,7 +76,7 @@ void HideSeek::writeRecoveredData() {
 }
 
 movest_result HideSeek::finalise() {
-    if(index > 0 && index / 8 > 0) {
+    if(!encoder && index > 0 && index / 8 > 0) {
         datafile.write(symb, index / 8);
     }
     return Algorithm::finalise();
