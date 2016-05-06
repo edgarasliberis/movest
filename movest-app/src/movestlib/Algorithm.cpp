@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cryptopp/sha.h>
 #include <cryptopp/pwdbased.h>
+#include <cryptopp/osrng.h>
 
 #include "Algorithm.h"
 #include "movest_connector.h"
@@ -16,6 +17,12 @@
 void Algorithm::initAsEncoder(movest_params *params) {
     this->encoder = true;
     this->initialiseAlgorithm(params);
+    if(params->datafile != nullptr && (this->flags & MOVEST_ENABLE_ENCRYPTION)) {
+        CryptoPP::AutoSeededRandomPool rnd;
+        uint8_t iv[CryptoFile::BlockSize];
+        rnd.GenerateBlock(iv, sizeof(iv));
+        datafile.setIv(&iv[0]);
+    }
 }
 
 void Algorithm::initAsDecoder(movest_params *params) {
@@ -36,8 +43,8 @@ void Algorithm::initialiseAlgorithm(movest_params *params) {
     // Set up encryption
     if(params->datafile != nullptr) {
         if(this->flags & MOVEST_ENABLE_ENCRYPTION) {
-            std::vector<uint8_t> bytes = deriveBytes(CryptoFile::KeyLength + CryptoFile::BlockSize, CRYPTO_SALT);
-            datafile = CryptoFile(params->datafile, &bytes[0], &bytes[CryptoFile::KeyLength], iosFlags);
+            std::vector<uint8_t> bytes = deriveBytes((size_t) CryptoFile::KeyLength, CRYPTO_SALT);
+            datafile = CryptoFile(params->datafile, &bytes[0], iosFlags);
         } else {
             datafile = CryptoFile(params->datafile, iosFlags);
         }
