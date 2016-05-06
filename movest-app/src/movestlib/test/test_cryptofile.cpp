@@ -68,13 +68,18 @@ uint8_t ciphertext[] = {0x14, 0x5A, 0xD0, 0x1D, 0xBF, 0x82, 0x4E, 0xC7,
 TEST(CryptoFileTest, ReadAESCTREncryption)
 {
     // CryptoFile will take ownership
-    std::stringstream *stream = new std::stringstream(std::string(reinterpret_cast<char*>(plaintext)));
-    uint8_t buff[sizeof(ciphertext)];
-    CryptoFile cfile(stream, key, iv);
+    std::stringstream *stream =
+            new std::stringstream(std::string(reinterpret_cast<char*>(plaintext), sizeof(plaintext)));
+    uint8_t buff[sizeof(iv) + sizeof(ciphertext)];
+    CryptoFile cfile(stream, key);
+    cfile.setIv(iv);
     cfile.read(buff, sizeof(buff));
 
-    for(uint i = 0; i < sizeof(buff); i++)
-        EXPECT_EQ(ciphertext[i], buff[i]);
+    for(uint i = 0; i < sizeof(iv); i++)
+        EXPECT_EQ(iv[i], buff[i]);
+
+    for(uint i = 0; i < sizeof(ciphertext); i++)
+        EXPECT_EQ(ciphertext[i], buff[i+sizeof(iv)]);
 }
 
 /**
@@ -84,7 +89,9 @@ TEST(CryptoFileTest, WriteAESCTRDecryption)
 {
     // CryptoFile will take ownership
     std::stringstream *stream = new std::stringstream();
-    CryptoFile cfile(stream, key, iv);
+    CryptoFile cfile(stream, key);
+
+    cfile.write(iv, sizeof(iv));
     cfile.write(ciphertext, sizeof(ciphertext));
     std::string written = stream->str();
 

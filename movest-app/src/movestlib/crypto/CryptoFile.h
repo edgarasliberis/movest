@@ -8,6 +8,7 @@
 #include <fstream>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
+#include "Buffer.h"
 
 /**
  * A file-like object to encrypt and decrypt data on the fly, if necessary.
@@ -43,7 +44,7 @@ public:
      * @param iv An initialisation vector.
      * @param mode File open mode, e.g std::ios::in
      */
-    CryptoFile(const std::string &path, uint8_t key[KeyLength], uint8_t iv[BlockSize], std::ios::openmode mode);
+    CryptoFile(const std::string &path, uint8_t key[KeyLength], std::ios::openmode mode);
 
     /**
      * Constructs a wrapper around a stream with encryption disabled.
@@ -58,7 +59,7 @@ public:
      * @param key An encryption key.
      * @param iv An initialisation vector.
      */
-    CryptoFile(std::iostream *stream, uint8_t key[KeyLength], uint8_t iv[BlockSize]);
+    CryptoFile(std::iostream *stream, uint8_t key[KeyLength]);
 
     /**
      * Reads data from the file into a buffer.
@@ -80,7 +81,7 @@ public:
     /**
      * Number of bytes available for reading.
      */
-    uint remainingData();
+    ulong remainingData();
 
     /**
      * Flush the underlying data stream to the file.
@@ -102,12 +103,17 @@ public:
      */
     std::iostream& exposeStream();
 
+    void setIv(uint8_t iv[BlockSize]);
+
 private:
-    void initCrypto(uint8_t key[KeyLength], uint8_t iv[BlockSize]);
+    void writeOutBuffer();
+    void initCrypto();
+    uint8_t key[KeyLength], iv[BlockSize];
     std::shared_ptr<CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption> enc;
     std::shared_ptr<CryptoPP::CTR_Mode<CryptoPP::AES>::Decryption> dec;
-    bool encrypt, fileStream = false, opened = false;
+    bool encrypt, hasIv = false, opened = false;
     std::shared_ptr<std::iostream> stream;
+    Buffer<uint8_t> buffer;
 };
 
 #endif //MOVEST_CRYPTOFILE_H
