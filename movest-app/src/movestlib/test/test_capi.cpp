@@ -47,7 +47,7 @@ TEST(MovestAPI, InitLibraryAsDecoder) {
  * Full encoding path.
  */
 TEST(MovestAPI, EncodeSeq) {
-    // Will embed all zeros, but ModificationTest already tests every embedding algorithm, so it's important
+    // Will embed all zeros, but ModificationTest already tests every embedding algorithm, so it's not important
     movest_params p = {
             "/dev/zero", MOVEST_NO_PARAMS, NULL
     };
@@ -115,4 +115,7 @@ TEST(MovestAPI, DecodeSeq) {
     EXPECT_EQ(expected[1], received[1]);
     EXPECT_EQ(expected[2], received[2]);
     EXPECT_EQ(expected[3], received[3]);
+
+    fd.close();
+    free(file);
 }
