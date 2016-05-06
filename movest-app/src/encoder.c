@@ -767,13 +767,13 @@ int main(int argc, char **argv)
     av_log(NULL, AV_LOG_INFO, "Bytes processed: %d\n", res.bytes_processed);
     if(res.error_code == 1) {
         av_log(NULL, AV_LOG_INFO, "Embedding likely failed: file too big. "
-                                  "Only files up to about %d bytes fit.", res.bytes_processed);
+                                  "Only files up to about %d bytes fit.\n", res.bytes_processed);
     }
     if(!singlePass) { //
         av_log(NULL, AV_LOG_INFO, "Tell the decoding party to specify:\n"
                                   " * File size: %d\n * Embedding capacity: %d\n\n",
                algparams.file_size, algparams.byte_capacity);
     }
-    av_log(NULL, AV_LOG_INFO, "Finished.");
+    av_log(NULL, AV_LOG_INFO, "Finished.\n");
     return res.error_code;
 }
