@@ -46,8 +46,8 @@ private:
     };
 
     uint fileSize, dataSize;
-    unsigned char *data;
-    Pair *bitToMvMapping;
+    std::vector<uint8_t> data;
+    std::vector<Pair> bitToMvMapping;
     AlgOptions opt;
 
     void initialiseMapping(uint dataSize);

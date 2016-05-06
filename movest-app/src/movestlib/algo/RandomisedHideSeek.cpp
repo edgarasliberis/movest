@@ -24,19 +24,19 @@ void RandomisedHideSeek::initAsEncoder(movest_params *params) {
     if(!(flags & MOVEST_DUMMY_PASS)) {
         initialize_ecc();
 
-        fileSize = opt.fileSize != 0? opt.fileSize : datafile.remainingData();
+        fileSize = opt.fileSize != 0? opt.fileSize : (uint)datafile.remainingData();
         dataSize = eccDataInflation(fileSize);
 
         initialiseMapping(dataSize);
 
         // Fill the data buffer with blocks of file data & parity bytes
-        data = new unsigned char[dataSize];
+        data.resize(dataSize);
         unsigned char fileData[BLOCKSIZE - NPAR];
         uint currentPos = 0, fileRead = 0;
         while(fileRead < fileSize && currentPos < dataSize) {
             uint toRead = std::min(fileSize - fileRead, (uint)BLOCKSIZE - NPAR);
             int read = (int)datafile.read(&fileData[0], toRead);
-            encode_data(fileData, read, data + currentPos);
+            encode_data(fileData, read, &data[currentPos]);
             fileRead += read;
             currentPos += read + NPAR;
         }
@@ -52,7 +52,7 @@ void RandomisedHideSeek::initAsDecoder(movest_params *params) {
 
         initialiseMapping(dataSize);
 
-        data = new unsigned char[dataSize]();
+        data.resize(dataSize, 0);
     }
 }
 
@@ -67,9 +67,9 @@ void RandomisedHideSeek::initialiseMapping(uint dataSize) {
     std::default_random_engine rng(seed);
 
     ulong bitCapacity = ((ulong) capacity) * 8;
-    std::uniform_int_distribution<ulong> dist(0, bitCapacity);
+    std::uniform_int_distribution<ulong> dist(0, bitCapacity-1);
     ulong bitDataSize = ((ulong) dataSize) * 8;
-    bitToMvMapping = new Pair[bitDataSize];
+    bitToMvMapping.resize(bitDataSize);
 
     std::vector<bool> used(bitCapacity, false);
 
@@ -84,7 +84,7 @@ void RandomisedHideSeek::initialiseMapping(uint dataSize) {
     }
 
     // Sort the mapping in increasing order of MVs, for sequential embedding
-    std::sort(bitToMvMapping, bitToMvMapping + bitDataSize);
+    std::sort(bitToMvMapping.begin(), bitToMvMapping.end());
 }
 
 void RandomisedHideSeek::processMvComponentEmbed(int16_t *mv) {
@@ -126,17 +126,15 @@ movest_result RandomisedHideSeek::finalise() {
             uint currentPos = 0;
             while(currentPos < dataSize) {
                 uint blockSize = std::min((uint)BLOCKSIZE, dataSize - currentPos);
-                decode_data(data + currentPos, blockSize);
+                decode_data(&data[currentPos], blockSize);
                 if (check_syndrome() != 0) {
-                    correct_errors_erasures(data + currentPos, blockSize, 0, NULL);
+                    correct_errors_erasures(&data[currentPos], blockSize, 0, NULL);
                 }
-                datafile.write(&data[0] + currentPos, blockSize - NPAR);
+                datafile.write(&data[currentPos], blockSize - NPAR);
                 currentPos += blockSize;
             }
             datafile.close();
         }
-        delete[] data;
-        delete[] bitToMvMapping;
     }
 
     return movest_result {
